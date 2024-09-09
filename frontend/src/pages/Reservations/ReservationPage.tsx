@@ -1,59 +1,35 @@
 
 
 
-// Lucide React Icons Import
-import {
-    ChevronLeft,
-    Copy,
-} from "lucide-react"
-
-
+// Imports
 
 // shadcn Components Import
-
-// shadcn Badge Import
-import { Badge } from "@/components/ui/badge"
-
-// shadcn Button Import 
-import { Button } from "@/components/ui/button"
-
-// shadcn Card Import
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-
-// shadcn Input Import
-import { Input } from "@/components/ui/input"
-
-// shadcn Separator Import
-import { Separator } from "@/components/ui/separator"
-
-// shadcn Label Import
-import { Label } from "@/components/ui/label"
-
-// shadcn Textarea Import
-import { Textarea } from "@/components/ui/textarea"
-
-
-
-// Custom Component Imports
 
 
 
 // Utility Imports
-
-// Link Imports
-import { Link, useParams } from "react-router-dom"
+// React Imports
 import { useEffect, useState } from "react"
-import { useReservationsContext } from "@/hooks/useReservationsContext"
-import { AdminReservationDetails } from "@/pages/Admin/Reservations/AdminReservationDetails.tsx"
-import ReservationDetails from "./ReservationDetails"
+
+// React Router Dom Imports
+import { 
+    useParams 
+} from "react-router-dom"
+
+
+
+// Custom Components Import
+// Layout Wrapper Import
 import LayoutWrapper from "@/components/layout/LayoutWrapper"
+
+// Reservation Details Import
+import ReservationDetails from "./ReservationDetails"
+
+
+
+// Hooks Import
+// Reservations Hook Import
+import { useReservationsContext } from "@/hooks/useReservationsContext"
 
 
 
@@ -65,21 +41,27 @@ export function ReservationPage() {
 
 
 
-
-    useEffect(() => {
-        document.title = "Reservations | GCTMS "
-    }, []);
+    
 
     const { reservations, dispatch } = useReservationsContext()
     const [ amenityReservations, setAmenityReservations ] = useState()
     const [ users, setUsers ] = useState();
+
     // Amenity States
     const [amenityList, setAmenityList] = useState()
 
 
 
+    // Use Effects
+    // Use Effect for Page Name
+    useEffect(() => {
+        document.title = "Reservations | GCTMS "
+    }, []);
+
+    // Huge Use Effect for Fetching Data
     useEffect(() => {
 
+        // Fetching a specific reservation
         const fetchReservations = async () => {
 
             const response = await fetch('http://localhost:4000/api/reservations/details/' + id)
@@ -105,7 +87,7 @@ export function ReservationPage() {
 
 
 
-
+        // 
         const fetchAmenityReservations = async () => {
 
             const response = await fetch('http://localhost:4000/api/reservations/details/' + id)

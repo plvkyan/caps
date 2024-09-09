@@ -1,9 +1,6 @@
 
 
 
-
-
-
 export const APPROVED = {
     _id: 1,
     value: "Approved",
@@ -22,8 +19,24 @@ export const PENDING = {
     label: "Pending",
 };
 
+export const EXPIRED = {
+    id: 4,
+    value: "Expired",
+    label: "Expired",
+};
+
+export const COMPLETED = {
+    id: 5,
+    value: "Completed",
+    label: "Completed",
+};
+
+
+
 export const RESERVATION_STATUS = [
     APPROVED,
     REJECTED,
     PENDING,
+    EXPIRED,
+    COMPLETED,
 ];

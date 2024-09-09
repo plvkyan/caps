@@ -56,8 +56,6 @@ const checkOverdue = async (req, res, next) => {
 
             for (let i = 0; i < bill.billReceivers.length; i++) {
 
-                console.log(i);
-
                 if (bill.billReceivers[i].billStatus != "Paid") {
                         
                     return bill.billReceivers[i].receiverBlkLt;
@@ -67,8 +65,6 @@ const checkOverdue = async (req, res, next) => {
             }
 
         });
-
-        console.log(delinquentUsers);
 
         const outstandingUsers = initUsers.filter((user) => {
 

@@ -1,10 +1,11 @@
 
 
 
+// Imports
+
 // Lucide React Icons Import
 import {
     ChevronLeft,
-    Copy,
     MoreVertical,
 } from "lucide-react"
 
@@ -97,7 +98,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 
 // Hook Imports
-
 // User Hook
 import { useAuthContext } from "@/hooks/useAuthContext"
 
@@ -108,6 +108,7 @@ import { useReservationsContext } from "@/hooks/useReservationsContext"
 
 
 
+//
 const formSchema = zod
     .object({
         reservationComment: zod.string().optional(),
@@ -399,6 +400,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
     }
 
+    //
     const boom = () => {
 
         const path = "/reservations";
@@ -408,31 +410,35 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
     }
 
+    //
     let badgeColor;
     let badgeMessage;
     let filteredUser
 
-
+    //
     filteredUser = users.filter((user) => {
+
+        if (user.blkLt === reservations.blkLt) {
+            console.log(user.blkLt);    
+        }
 
         return user.blkLt === reservations.blkLt;
     })
 
-
-
-    console.log(filteredUser);
-
+    //
     if (filteredUser[0].memberStatus === "Outstanding") {
 
         badgeColor = "default" as any;
         badgeMessage = "Outstanding";
     }
 
+    //
     if (filteredUser[0].memberStatus === "Delinquent") {
         badgeColor = "warning" as any;
         badgeMessage = "Delinquent";
     }
 
+    //
     if (filteredUser[0].stat === "Archived") {
         badgeColor = "outline" as any;
         badgeMessage = "Archived";
@@ -440,22 +446,26 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
 
 
+
+
     return (
 
         <>
+            {/* Toaster for reservation confirmation */}
             <Toaster />
 
-            {/* Delete Dialog */}
+            {/* Delete dialog for deleting the reservation */}
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
 
                 <AlertDialogContent>
 
                     <AlertDialogHeader>
 
+                        {/* Deletion message */}
                         <AlertDialogTitle> Are you sure you want to delete this reservation? </AlertDialogTitle>
 
                         <AlertDialogDescription>
-                            This action cannot be undone. This reservation will no longer be accessible by anyone.
+                            This action cannot be undone. This reservation will permanently deleted and be no longer be accessible by anyone.
                         </AlertDialogDescription>
 
                     </AlertDialogHeader>
@@ -464,8 +474,10 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                     <AlertDialogFooter>
 
-
+                        {/* Delete dialog cancel button */}
                         <AlertDialogCancel> Cancel </AlertDialogCancel>
+                        
+                        {/* Delete dialog delete button */}
                         <Button
                             variant={"destructive"}
                             onClick={deleteReservation}
@@ -480,11 +492,11 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
             </AlertDialog>
 
 
-
+            {/* Container of the entire reservation detail page */}
             <div className="flex items-center gap-4">
 
 
-
+                {/* Return button */}
                 <Button onClick={boom} variant="outline" size="icon" className="h-7 w-7">
 
                     <span> <ChevronLeft className="h-4 w-4" /> </span>
@@ -492,13 +504,14 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                 </Button>
 
+                {/* Reservation title/Amenity name */}
                 <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
                     {reservations.amenityName}
                 </h1>
 
-
+                {/* Reservation status if pending */}
                 {
-                    (reservations.reservationStatus == "Pending" && user.position === "Admin") &&
+                    (reservations.reservationStatus == "Pending") &&
                     (
                         <Badge variant="warning" className="ml-auto sm:ml-0">
                             Pending
@@ -506,8 +519,9 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                     )
                 }
 
+                {/* Reservation status if approved */}
                 {
-                    (reservations.reservationStatus == "Approved" && user.position === "Admin") &&
+                    (reservations.reservationStatus == "Approved") &&
                     (
                         <Badge variant="default" className="ml-auto sm:ml-0">
                             Approved
@@ -515,11 +529,22 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                     )
                 }
 
+                {/* Reservation status if rejected */}
                 {
-                    (reservations.reservationStatus == "Rejected" && user.position === "Admin") &&
+                    (reservations.reservationStatus == "Rejected") &&
                     (
                         <Badge variant="destructive" className="ml-auto sm:ml-0">
                             Rejected
+                        </Badge>
+                    )
+                }
+
+                {/* Reservation status if expired */}
+                {
+                    (reservations.reservationStatus == "Expired") &&
+                    (
+                        <Badge variant="outline" className="ml-auto sm:ml-0">
+                            Expired
                         </Badge>
                     )
                 }
@@ -528,8 +553,9 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                 <div className="hidden items-center gap-2 md:ml-auto md:flex">
 
+                    {/* Dropdown button for archiving and deleting */}
                     <DropdownMenu>
-
+                        
                         <DropdownMenuTrigger asChild>
 
                             {
@@ -544,9 +570,10 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                         </DropdownMenuTrigger>
 
 
-
+                        {/* Dropdown menu for archiving/unarchiving */}
                         <DropdownMenuContent align="end">
 
+                            {/* Archive button when unarchived */}
                             {
                                 (reservations.stat == "Unarchived" && user.position === "Admin") &&
                                 (
@@ -554,6 +581,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                 )
                             }
 
+                            {/* Unarchive button when archived */}
                             {
                                 (reservations.stat == "Archived" && user.position === "Admin") &&
                                 (
@@ -561,6 +589,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                 )
                             }
 
+                            {/* Delete button */}
                             <DropdownMenuSeparator />
 
                             {
@@ -574,8 +603,9 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                     </DropdownMenu>
 
+                    {/* Approve and reject button when reservation is pending */}
                     {
-                        (reservations.reservationStatus != "Approved" && reservations.reservationStatus != "Rejected" && user.position === "Admin") &&
+                        (reservations.reservationStatus != "Approved" && reservations.reservationStatus != "Rejected" && reservations.reservationStatus != "Expired" && user.position === "Admin") &&
                         (
                             <>
                                 <Button type="submit" form="reservationForm" onClick={setReject} variant="outline" size="sm">
@@ -586,11 +616,22 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                         )
                     }
 
+                    {/* Reopen button when reservation is approved or rejected */}
                     {
-                        (reservations.reservationStatus == "Approved" || reservations.reservationStatus == "Rejected" && user.position === "Admin") &&
+                        (reservations.reservationStatus == "Approved" || reservations.reservationStatus == "Rejected" && reservations.reservationStatus != "Expired" && user.position === "Admin") &&
                         (
                             <>
                                 <Button onClick={setReopen} variant="outline" size="sm"> Reopen </Button>
+                            </>
+                        )
+                    }
+
+                    {/* Reopen button when reservation is approved or rejected */}
+                    {
+                        (reservations.reservationStatus == "Expired" && user.position === "Admin") &&
+                        (
+                            <>
+                                <Button disabled onClick={setReopen} variant="outline" size="sm"> Expired </Button>
                             </>
                         )
                     }
