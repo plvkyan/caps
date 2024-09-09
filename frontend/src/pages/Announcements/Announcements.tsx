@@ -1,6 +1,8 @@
 
 
 
+// Imports
+
 // shadcn components
 // shadcn Avatar Component Import
 // import {
@@ -50,8 +52,11 @@ const Announcements = () => {
     // Authentication context
     const { user } = useAuthContext()
 
+    // Announcements Context
     const { announcements, dispatch } = useAnnouncementsContext()
 
+
+    
     // Use Effects
     // Use effect for page name
     useEffect(() => {
@@ -112,8 +117,6 @@ const Announcements = () => {
 
                     }
 
-
-
                     {
                         announcements && announcements.map
                             (announcement =>
@@ -130,6 +133,8 @@ const Announcements = () => {
                             <div className="text-center my-20"> No announcements found. </div>
                         )
                     }
+
+
 
                 </div>
 

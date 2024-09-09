@@ -1,3 +1,8 @@
+
+
+
+// Imports
+
 // Lucide Icons Import
 import {
     Archive,
@@ -7,11 +12,14 @@ import {
     Megaphone,
     Package2,
     Settings,
-    Users
+    Users,
+    Warehouse
 } from "lucide-react";
 
 
+
 // Utility Imports
+// React Router Imports
 import {
     Link,
     useMatch,
@@ -20,7 +28,8 @@ import {
 
 
 
-// Hooks
+// Hook Imports
+// Authentication Hook Import
 import { useAuthContext } from "@/hooks/useAuthContext";
 
 
@@ -106,7 +115,7 @@ export default function Navbar() {
                         <section className="flex flex-col border-b pt-5 pb-4 px-3 gap-1">
 
                             <div className="text-sub/55 text-xs px-3 pb-1"> ASSOCIATION </div>
-
+                            
                             <CustomLink
                                 to="/announcements"
                                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-card-foreground"

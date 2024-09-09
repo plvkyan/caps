@@ -1,6 +1,8 @@
 
 
 
+// Imports
+
 // shadcn Components Imports
 // Tabs shadcn Import
 import {
@@ -85,7 +87,7 @@ const Archives = () => {
                 
                 
                 <TabsContent value="announcements"> <ArchivedAnnouncements /> </TabsContent>
-                <TabsContent value="bills"> <ArchivedBills /> </TabsContent>
+                {/* <TabsContent value="bills"> <ArchivedBills /> </TabsContent> */}
                 <TabsContent value="reservations"> <ArchivedReservations /> </TabsContent>
                 <TabsContent value="users"> <ArchivedUsers /> </TabsContent> 
                 

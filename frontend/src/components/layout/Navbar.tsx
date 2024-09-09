@@ -1,22 +1,93 @@
 // @ts-nocheck
 
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Archive, Menu, Home, DollarSign, CalendarFold, Megaphone, Users, CircleUser, Search, Settings, LayoutDashboard, LogOut } from "lucide-react";
+
+
+// Imports
+
+// shadcn Components Imports
+// shadcn Alert Dialog Imports
+import { 
+    AlertDialog, 
+    AlertDialogCancel, 
+    AlertDialogContent, 
+    AlertDialogDescription, 
+    AlertDialogFooter, 
+    AlertDialogHeader, 
+    AlertDialogTitle 
+} from "@/components/ui/alert-dialog"
+
+// shadcn Button Import
 import { Button } from "@/components/ui/button";
+
+// shadcn Drop Down Menu Imports
+import { 
+    DropdownMenu, 
+    DropdownMenuTrigger, 
+    DropdownMenuContent, 
+    DropdownMenuLabel, 
+    DropdownMenuSeparator, 
+    DropdownMenuItem 
+} from "@/components/ui/dropdown-menu";
+
+// shadcn Input Import
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Link, useLocation, useMatch, useResolvedPath } from "react-router-dom";
 
-import { useContext } from "react";
+// shadcn Sheet Imports
+import { 
+    Sheet, 
+    SheetContent, 
+    SheetTrigger 
+} from "@/components/ui/sheet";
+
+
+
+// Custom Component Imports
+// Theme Toggle Import
 import { ModeToggle } from "@/components/custom/mode-toggle";
-import React from "react"
 
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-
-import { useLogout } from "@/hooks/useLogout"
-import { useAuthContext } from "@/hooks/useAuthContext"
+// User Dropdown Import
 import { UserDropdown } from "@/components/custom/UserDropDown";
 
+
+
+// Lucide Icons Imports 
+import { 
+    Archive, 
+    CalendarFold, 
+    CircleUser, 
+    DollarSign, 
+    Home, 
+    LayoutDashboard, 
+    LogOut, 
+    Megaphone, 
+    Menu, 
+    Search, 
+    Settings, 
+    Users, 
+    Warehouse,
+} from "lucide-react";
+
+
+
+// Hook Imports
+// Authentication Hook Import
+import { useAuthContext } from "@/hooks/useAuthContext"
+
+// Logout Hook Import
+import { useLogout } from "@/hooks/useLogout"
+
+
+
+// Utility Imports
+// React Router Imports
+import { Link, useLocation, useMatch, useResolvedPath } from "react-router-dom";
+
+// React Imports
+// React Context Import
+import { useContext } from "react";
+
+// React Import
+import React from "react"
 
 
 
@@ -24,12 +95,21 @@ import { UserDropdown } from "@/components/custom/UserDropDown";
 
 export default function Navbar() {
 
+
+
+    // Hooks
+    // Logout Hook
     const { logout } = useLogout()
 
+    // Authentication Hook
     const { user } = useAuthContext()
 
+    // States
+    // Delete Dialog State
     const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
 
+    // Functions
+    // Handle Click Function
     const handleClick = () => {
 
         logout()
@@ -38,6 +118,10 @@ export default function Navbar() {
 
     }
 
+
+
+
+    
     return (
 
 
@@ -140,6 +224,8 @@ export default function Navbar() {
                                             <Archive className="h-4 w-4"/>
                                             Archive
                                         </CustomLink>
+
+                                        
 
                                     </>
                                 )

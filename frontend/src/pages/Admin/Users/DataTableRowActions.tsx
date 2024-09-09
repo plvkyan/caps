@@ -71,7 +71,7 @@ const DataTableRowActions = <TData,> ( { row, onArchive, onEdit, onDelete }: Dat
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)} > Copy payment ID </DropdownMenuItem>
+            {/* <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)} > Copy payment ID </DropdownMenuItem> */}
             <DropdownMenuItem onClick={() => onEdit(row.original)}> Edit Payment </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onArchive(row.original)}> Archive Payment </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDelete(row.original)}> Archive Payment </DropdownMenuItem>

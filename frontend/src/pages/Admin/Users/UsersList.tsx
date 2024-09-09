@@ -1,3 +1,8 @@
+
+
+
+// Imports
+
 import { useEffect, useState } from "react";
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
@@ -8,13 +13,6 @@ import { UserType } from "@/types/user-type";
 import Sidebar from "@/components/layout/Sidebar";
 import Navbar from "@/components/layout/Navbar";
 import { useUsersContext } from "@/hooks/useUsersContext";
-
-
-
-
-
-
-
 
 
 

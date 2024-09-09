@@ -1,130 +1,58 @@
 
 
+// Imports
 
-// shadcn components
-
+// shadcn Component Imports
 // shadcn Avatar
-import {
-    Avatar,
-    AvatarImage,
-    AvatarFallback
-} from "@/components/ui/avatar";
-
-// shadcn Breadcrumbs
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
-} from "@/components/ui/breadcrumb";
-
-// shadcn Cards
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
-    CardFooter
-} from "@/components/ui/card";
-
-// shadcn Dropdown Menu
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuItem
-} from "@/components/ui/dropdown-menu";
-
-// shadcn Badge
-import { Badge } from "@/components/ui/badge";
-
-// shadcn Button
-import { Button } from "@/components/ui/button";
-
-// shadcn Input
-import { Input } from "@/components/ui/input";
-
-// shadcn Label
-import { Label } from "@/components/ui/label";
-
-// shadcn Text Area
-import { Textarea } from "@/components/ui/textarea";
+// import {
+//     Avatar,
+//     AvatarImage,
+//     AvatarFallback
+// } from "@/components/ui/avatar";
 
 
 
-// Lucide Icons
-import {
-    MoreHorizontal,
-    SquarePen
-} from "lucide-react";
-
-
-
-// Custom Components
-
-// Navbar Componenet
-import Navbar from "@/components/layout/Navbar";
-
-// Sidebar Component
-import Sidebar from "@/components/layout/Sidebar";
-
+// Custom Components Import
 // Announcement Component
-// import Announcement from "@/pages/Admin/Announcements/Announcement"
-
-// Announcement Form Component
-import AnnouncementForm from "@/pages/Admin/Announcements/AnnouncementForm";
-
-// Multiple Selector Creatable Component
-import MultipleSelectorCreatable from "@/components/custom/MultipleSelectorCreatable";
+import AnnouncementDetails from "@/pages/Announcements/AnnouncementDetails"
 
 
-
-// Utility
+// Utility Imports
+// React Imports
 import {
     useEffect,
-    useState
 } from "react";
 
 
 
-// Hooks
+// Hook Imports
+// Announcements Hook Import
 import { useAnnouncementsContext } from "@/hooks/useAnnouncementsContext";
+
+// Authentication Hook Import
 import { useAuthContext } from "@/hooks/useAuthContext";
 
-
-
-// Interface
-// interface announcement {
-//     blkLt: string,
-//     id: number,
-//     content: String,
-//     badges: Array<String>,
-//     archived: boolean
-// }
 
 
 
 
 const ArchivedAnnouncements = () => {
 
-    const { user } = useAuthContext()
 
-    // const [announcements, setAnnouncements] = useState<Array<announcement>>([]);
+
+    // Contexts
+    // Announcements Context
     const { announcements, dispatch } = useAnnouncementsContext()
-    const [data, setData] = useState();
 
 
 
-    // Page Name
+    // Use Effects
+    // Page Name Use Effect
     useEffect(() => {
-        document.title = "Announcements | GCTMS "
+        document.title = "Archived Announcements | GCTMS "
     }, []);
 
+    // Use effect for GETTING announcements
     useEffect(() => {
 
         const fetchAnnouncements = async () => {
@@ -148,9 +76,12 @@ const ArchivedAnnouncements = () => {
 
 
 
+
     return (
 
         <>
+
+
 
             <main className="flex bg-light-bg min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-black-bg p-4 md:gap-8 md:p-10">
 
@@ -162,11 +93,17 @@ const ArchivedAnnouncements = () => {
 
                     <div className="grid gap-6">
 
-                        {announcements && announcements.map(announcement => (
-                            <announcement key={announcement._id} announcement={announcement} />
-                        ))}
+                        {
+                            announcements && announcements.map
+                                (announcement =>
+                                    (
+                                        <AnnouncementDetails key={announcement._id} announcement={announcement} />
+                                    )
+                                )
+                        }
 
-                        {(announcements != null && announcements.length < 1) &&
+                        {
+                            (announcements != null && announcements.length < 1) &&
                             (
 
                                 <div className="text-center my-20"> No archived announcements found. </div>
@@ -174,9 +111,10 @@ const ArchivedAnnouncements = () => {
                         }
 
                     </div>
-                </div>
-            </main>
 
+                </div>
+
+            </main>
 
 
 

@@ -1,8 +1,11 @@
 
 
 
+// Imports
+
+// 
 import { columns } from "@/pages/Bills/BillsColumns"
-import { BillsDataTable, DataTable } from "@/pages/Bills/BillsDataTable"
+import { BillsDataTable } from "@/pages/Bills/BillsDataTable"
 
 
 
@@ -40,7 +43,7 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 
-export default function Bills() {
+export default function BillsList() {
 
 
 

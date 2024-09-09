@@ -38,7 +38,7 @@ export const Hero = () => {
 
                 <div className="space-y-4 md:space-y-0 md:space-x-4">
 
-                    <Button className="w-full md:w-1/3"> <a href="/login"> Log In </a> </Button>
+                    <a href="/login"> <Button className="w-full md:w-1/3"> Log In </Button> </a>
 
                     <a
                         rel="noreferrer noopener"

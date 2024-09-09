@@ -1,25 +1,44 @@
-import { useEffect, useState } from "react";
-// Custom Components Import
 
-// Columns Import
+
+
+// Imports
+
+// Custom Components Import
+// Reservations Columns Component Import
 import { columns } from "@/pages/Admin/Reservations/AdminReservationColumn"
 
-// Data Table Import
-import { DataTable } from "@/pages/Admin/Reservations/AdminReservationDataTable"
-import { UserType } from "@/types/user-type";
+// Reservations Data Table Import
+import { ReservationsTable } from "@/pages/Reservations/ReservationsTable"
 
-import Sidebar from "@/components/layout/Sidebar";
-import Navbar from "@/components/layout/Navbar";
-import { useUsersContext } from "@/hooks/useUsersContext";
+
+
+// Hooks Import
+// Reservations Hook Import
 import { useReservationsContext } from "@/hooks/useReservationsContext";
+
+
+
+// Data and Types Import
+// Reservation Type Import
 import { ReservationType } from "@/types/reservation-type";
 
 
 
+// Utility Imports
+// React Imports
+import { 
+    useEffect, 
+    useState 
+} from "react";
 
 
 
+// Leftover Codes
 
+// import { UserType } from "@/types/user-type";
+// import Sidebar from "@/components/layout/Sidebar";
+// import Navbar from "@/components/layout/Navbar";
+// import { useUsersContext } from "@/hooks/useUsersContext";
 
 
 
@@ -33,7 +52,6 @@ export default function ArchivedUsers() {
 
     const { reservations, dispatch } = useReservationsContext()
     const [data, setData] = useState<ReservationType[]>([]);
-
 
 
 
@@ -59,9 +77,6 @@ export default function ArchivedUsers() {
 
 
 
-
-
-
     useEffect(() => {
 
         setData(reservations)
@@ -78,7 +93,6 @@ export default function ArchivedUsers() {
 
 
 
-
             <main className="flex flex-1 flex-col gap-4 bg-light-bg  lg:gap-4">
 
 
@@ -91,13 +105,14 @@ export default function ArchivedUsers() {
                             <h1 className="text-3xl font-semibold"> Reservations </h1>
                         </div>
 
-                        <DataTable columns={columns} data={data} />
+                        <ReservationsTable columns={columns} data={data} />
 
                     </main>
 
                 </div>
 
             </main>
+
 
 
         </>
