@@ -1,3 +1,9 @@
+
+
+
+// Imports
+
+// Lucide React Icons Imports
 import {
     CircleUser,
     Home,
@@ -7,6 +13,8 @@ import {
 
 
 
+// shadcn Component Imports
+// shadcn Alert Dialog Imports
 import { 
     AlertDialog, 
     AlertDialogCancel, 
@@ -17,8 +25,13 @@ import {
     AlertDialogTitle
 } from "../ui/alert-dialog";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+// shadcn Badge Imports
+import { Badge } from "../ui/badge";
 
+// shadcn Button Imports
+import { Button } from "@/components/ui/button";
+
+// shadcn Dropdown Menu Imports
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -28,17 +41,23 @@ import {
     DropdownMenuTrigger
 } from "../ui/dropdown-menu"
 
+
+
+// Utility Imports
+// React Router Dom Import
 import { Link } from "react-router-dom"
+
+// React Imports
+import React from "react";
 
 
 
 // Hooks
+// Authentication Hook Import
 import { useAuthContext } from "@/hooks/useAuthContext";
+
+// Logout Hook Import
 import { useLogout } from "@/hooks/useLogout";
-import React from "react";
-import { Badge } from "../ui/badge";
-
-
 
 
 
@@ -57,6 +76,8 @@ export const UserDropdown = () => {
         logout()
 
     }
+
+    
 
     let badgeColor = "default" as any;
     let badgeMessage = "Outstanding";

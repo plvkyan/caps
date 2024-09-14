@@ -69,7 +69,7 @@ const getUserBills = async (req, res) => {
     const bills = unarchivedBills.filter(function (bill) {   
 
         for (let i = 0; i < bill.billReceivers.length; i++) {
-            if (bill.billReceivers[0].receiverBlkLt == blkLt) {
+            if (bill.billReceivers[i].receiverBlkLt == blkLt) {
                 return true;
             }
         }

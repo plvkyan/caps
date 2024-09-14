@@ -35,8 +35,9 @@ const loginUser = async (req, res) => {
         const role = user.role
         const position = user.position
         const memberStatus = user.memberStatus;
+        const stat = user.stat;
 
-        res.status(200).json({  blkLt, password, token, role, position, memberStatus })
+        res.status(200).json({  blkLt, password, token, role, position, memberStatus, stat })
 
     } catch (error) {
 

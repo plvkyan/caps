@@ -50,8 +50,6 @@ const checkOverdue = async (req, res, next) => {
 
 
 
-
-
         const delinquentUsers = monthOverdueBills.map((bill) => {
 
             for (let i = 0; i < bill.billReceivers.length; i++) {
@@ -93,6 +91,31 @@ const checkOverdue = async (req, res, next) => {
 
         });
 
+
+
+        // const threeMonthsOverdueBills = initBills.filter(function (bill) {
+        //     return bill.billReceivers.billDue <= new Date(new Date().setMonth(bill.billReceivers.billDue.getMonth() + 3));
+        // })
+
+        // const archivedUsers = threeMonthsOverdueBills.map((bill) => {
+
+        //     for (let i = 0; i < bill.billReceivers.length; i++) {
+
+        //         if (bill.billReceivers[i].billStatus != "Paid") {
+                        
+        //             return bill.billReceivers[i].receiverBlkLt;
+                    
+        //         }
+
+        //     }
+
+        // });
+
+        // const archiveFunction = archivedUsers.map( async (user) => {
+
+        //     await User.updateOne({ blkLt: user }, {memberStatus: "Delinquent", stat: "Archived"});
+
+        // })
 
 
         // for (let i = 0; i < delinquentUsers.length; i++) {

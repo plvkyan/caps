@@ -13,7 +13,7 @@ import {
     Package2,
     Settings,
     Users,
-    Warehouse
+    Warehouse,
 } from "lucide-react";
 
 
@@ -115,6 +115,19 @@ export default function Navbar() {
                         <section className="flex flex-col border-b pt-5 pb-4 px-3 gap-1">
 
                             <div className="text-sub/55 text-xs px-3 pb-1"> ASSOCIATION </div>
+
+                            {
+                                user.position === "Admin" &&
+                                (
+                                    <CustomLink
+                                        to="/amenities"
+                                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-card-foreground"
+                                    >
+                                        <Warehouse className="h-4 w-4" />
+                                        Amenities
+                                    </CustomLink>
+                                )
+                            }
                             
                             <CustomLink
                                 to="/announcements"
