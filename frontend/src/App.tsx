@@ -33,12 +33,24 @@ import { useAuthContext } from "@/hooks/useAuthContext.tsx"
 
 
 // Page Imports
+
+// Amenity-related Imports
+// Amenity List Page Import
+import AmenitiesList from './pages/Amenities/AmenitiesList.tsx';
+
+// Amenity Equipment Form Page Import
+import AmenityEquipmentForm from './pages/Amenities/AmenityEquipmentForm.tsx';
+
+// Amenity Facility Form Page Import
+import AmenityFacilityForm from './pages/Amenities/AmenityFacilityForm.tsx';
+
 // Announcements Page Import
 import Announcements from '@/pages/Announcements/Announcements.tsx';
 
 // Archives Page Import
 import Archives from './pages/Archives/Archives.tsx';
 
+// Bill-related Imports
 // Bill Details Page Import
 import { BillPage } from './pages/Bills/BillPage.tsx';
 
@@ -54,6 +66,10 @@ import Success from '@/pages/PaymentSuccess.tsx';
 // Dashboard Page Import
 import { Dashboard } from '@/pages/Dashboard.tsx';
 
+// Error-related Imports
+// Error Archived Account Page Import
+import ErrorArchivedAccount from './pages/ErrorArchivedAccount.tsx';
+
 // Error 404 Not Found Page Import
 import Error404 from './pages/Error404.tsx';
 
@@ -63,17 +79,16 @@ import Home from './pages/Home/Home.tsx';
 // Login Page Import
 import Login from './pages/Login/Login.tsx';
 
+// Reservation-related Imports
 // Reservation Details Page Import
 import { ReservationPage } from './pages/Reservations/ReservationPage.tsx';
 
 // Reservations List Page Import
 import Reservations from './pages/Reservations/Reservations.tsx';
 
+// User-related Imports
 // Users List Page Import
 import AdminUsers from './pages/Admin/Users/UsersList.tsx';
-import AmenitiesList from './pages/Amenities/AmenitiesList.tsx';
-import ErrorArchivedAccount from './pages/ErrorArchivedAccount.tsx';
-import AmenityForm from './pages/Amenities/AmenityForm.tsx';
 
 
 
@@ -244,8 +259,14 @@ function App() {
                                     </Route>
 
                                     <Route
-                                        path="/amenities/form"
-                                        element={<AmenityForm />}
+                                        path="/amenities/equipment/form"
+                                        element={<AmenityEquipmentForm />}
+                                    >
+                                    </Route>
+
+                                    <Route
+                                        path="/amenities/facility/form"
+                                        element={<AmenityFacilityForm />}
                                     >
                                     </Route>
 

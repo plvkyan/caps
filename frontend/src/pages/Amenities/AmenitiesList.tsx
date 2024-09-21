@@ -70,11 +70,41 @@ import LayoutWrapper from "@/components/layout/LayoutWrapper";
 
 
 
+// Utility Imports
+// React Router Dom Imports
+import { 
+    useNavigate
+ } from "react-router-dom";
+
+
+
 
 
 const AmenitiesList = () => {
 
 
+
+    // React Router Dom Navigate
+    const navigate = useNavigate();
+
+
+
+    // Functions
+    // Function to navigate to the equipment form page
+    const equipmentFormRoute = () => {
+
+        const path = '/amenities/equipment/form';
+        navigate(path);
+
+    }
+
+    // Function to navigate to the facility form page
+    const facilityFormRoute = () => {
+
+        const path = '/amenities/facility/form';
+        navigate(path);
+
+    }
 
 
 
@@ -492,7 +522,7 @@ const AmenitiesList = () => {
                                 </CardDescription>
                             </div>
 
-                            <Button className="flex gap-2">
+                            <Button className="flex gap-2"  onClick={facilityFormRoute}>
                                 <CirclePlus className="h-5 w-5" />
                                 Add Facility
                             </Button>
@@ -726,7 +756,7 @@ const AmenitiesList = () => {
                                 </CardDescription>
                             </div>
 
-                            <Button className="flex gap-2">
+                            <Button className="flex gap-2" onClick={equipmentFormRoute}>
                                 <CirclePlus className="h-5 w-5" />
                                 Add Equipment
                             </Button>
