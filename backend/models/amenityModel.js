@@ -12,6 +12,7 @@ const Schema = mongoose.Schema
 
 
 
+
 // Functions
 const amenitySchema = new Schema({
 
@@ -27,6 +28,10 @@ const amenitySchema = new Schema({
         type: String,
         required: false
     },
+    amenityDescription: {
+        type: String,
+        required: false
+    },
     amenityQuantity: {
         type: Number,
         required: false
@@ -37,6 +42,10 @@ const amenitySchema = new Schema({
     },
     amenityQuantityMax: {
         type: Number,
+        required: false
+    },
+    amenityReminder: {
+        type: String,
         required: false
     },
     stat: {

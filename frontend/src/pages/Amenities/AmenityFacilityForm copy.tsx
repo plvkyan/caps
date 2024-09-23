@@ -335,7 +335,45 @@ const AmenityFacilityForm = () => {
 
 
                         <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
+                            <Card x-chunk="dashboard-07-chunk-3">
+                                <CardHeader>
+                                    <CardTitle> Facility Status </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid gap-6">
 
+
+                                        <div className="grid gap-3">
+
+                                            <FormField
+                                                control={form.control}
+                                                name="stat"
+                                                render={({ field }) => {
+                                                    return (
+                                                        <FormItem>
+                                                            <FormLabel className="hidden"> Facility Status </FormLabel>
+                                                            <FormControl>
+                                                                <Label htmlFor="status"> Status </Label>
+                                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                                    <SelectTrigger id="stat" aria-label="Select status">
+                                                                        <SelectValue placeholder="Select status" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="Unarchived"> Unarchived </SelectItem>
+                                                                        <SelectItem value="Archived"> Archived </SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+
+                                        </div>
+
+                                    </div>
+                                </CardContent>
+                            </Card>
                             <Card
                                 className="overflow-hidden" x-chunk="dashboard-07-chunk-4"
                             >
@@ -369,49 +407,6 @@ const AmenityFacilityForm = () => {
                                     </div>
                                 </CardContent>
                             </Card>
-
-                            <Card x-chunk="dashboard-07-chunk-3">
-                                <CardHeader>
-                                    <CardTitle> Facility Status </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid gap-6">
-
-
-                                        <div className="grid gap-3">
-
-                                            <Label htmlFor="status"> Status </Label>
-
-                                            <FormField
-                                                control={form.control}
-                                                name="stat"
-                                                render={({ field }) => {
-                                                    return (
-                                                        <FormItem>
-                                                            <FormLabel className="hidden"> Facility Status </FormLabel>
-                                                            <FormControl>
-                                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                                    <SelectTrigger id="stat" aria-label="Select status">
-                                                                        <SelectValue placeholder="Select status" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="Unarchived"> Unarchived </SelectItem>
-                                                                        <SelectItem value="Archived"> Archived </SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )
-                                                }}
-                                            />
-
-                                        </div>
-
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-
                             {/* <Card x-chunk="dashboard-07-chunk-5">
                         <CardHeader>
                             <CardTitle>Archive Product</CardTitle>
@@ -428,7 +423,12 @@ const AmenityFacilityForm = () => {
                     </Card> */}
                         </div>
                     </div>
-
+                    <div className="flex items-center justify-center gap-2 md:hidden">
+                        <Button variant="outline" size="sm">
+                            Discard
+                        </Button>
+                        <Button size="sm">Save Product</Button>
+                    </div>
 
                 </form>
 

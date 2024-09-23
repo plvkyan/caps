@@ -5,10 +5,11 @@ const express = require('express')
 const router = express.Router()
 
 const { 
-
+   
+   createAmenity,
+   deleteAmenity,
    getAmenities,
    getSpecificAmenity,
-   createAmenity,
    updateAmenity,
 
 } = require('../controllers/amenityController')
@@ -24,7 +25,8 @@ const requireAuth = require('../middlewares/requireAuth')
 // router.use(requireAuth)
 
 
-
+// DELETE an amenity
+router.delete('/:amenityName', deleteAmenity);
 
 // GET all unarchived amenities
 router.get('/', getAmenities);

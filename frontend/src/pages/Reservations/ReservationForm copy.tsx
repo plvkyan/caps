@@ -1,7 +1,9 @@
 
 
 
-// Imports
+
+
+
 // Lucide React Icons Import
 import {
     CalendarIcon,
@@ -112,8 +114,6 @@ import { Matcher } from "react-day-picker"
 
 
 
-
-
 // Hooks
 // AuthContext Hooks for Users
 import { useAuthContext } from "@/hooks/useAuthContext"
@@ -139,11 +139,9 @@ const formSchema = zod
         amenityName: zod.string().optional(),
         amenityType: zod.enum(["Facility", "Equipment"]),
         reservationDate: zod.date(),
-        reservationQuantity: zod.coerce.number().min(1, {
-            message: "You can't reserve less than 1 amenity."
-        }),
-        reservationReason: zod.string().optional(),
+        reservationQuantity: zod.coerce.number().min(1).max(20).optional(),
         reservationStatus: zod.string().optional(),
+        reservationReason: zod.string().optional(),
         stat: zod.string().optional()
     })
 
@@ -158,24 +156,24 @@ export const ReservationForm = ({ amenityList }) => {
     // Use AuthContext to get user data
     const { user } = useAuthContext();
 
-    // Dispatch for updating reservations
-    const { dispatch } = useReservationsContext()
-
-    // React Router Dom Navigate
-    const navigate = useNavigate();
-
-
-
-    // States
-    // State to check for existing reservation dates
-    const [existingReservations, setExistingReservations] = useState<Date[]>([]);
-
     // Get current date and add 7 days
     let date = new Date();
     date.setDate(date.getDate() + 7);
 
+    // Dispatch for updating reservations
+    const { dispatch } = useReservationsContext()
+
+    // Dispatch for updating amenity quantity
+    const [reservationCount, setReservationCount] = useState()
+
     // For toast confirmation
     const { toast } = useToast()
+
+    // State to check for existing reservation dates
+    const [existingReservations, setExistingReservations] = useState<Date[]>([]);
+
+    // State for amenity count 
+    const [amenityCount, setAmenityCount] = useState<[]>([]);
 
 
 
@@ -190,7 +188,7 @@ export const ReservationForm = ({ amenityList }) => {
             toast({
 
                 title: "Reservation placed",
-                description: newReservation.amenityName + " reserved at: " + format(newReservation.reservationDate, "PPP") + ". Please wait for approval.",
+                description: newReservation.amenityName + " reserved at: " + format(newReservation.reservationDate, "PPP"),
 
             })
 
@@ -228,7 +226,7 @@ export const ReservationForm = ({ amenityList }) => {
     const reservationReason = form.watch("reservationReason");
 
 
-    // For reseting the form
+    // For resting the form
     const { reset } = form;
 
     // Checking if the form is successfully submitted
@@ -266,11 +264,11 @@ export const ReservationForm = ({ amenityList }) => {
 
                     const reservationzxc = json.map(item => item.reservationDate);
                     reservationzxc.sort((a, b) => (new Date(a) as any) - (new Date(b) as any))
-
-                    const reservations = reservationzxc.filter(function (reservation) {
+                    
+                    const reservations = reservationzxc.filter( function (reservation) {
                         console.log(reservation)
                         return format(reservation, "yyyy/MM/dd") > format(new Date(), "yyyy/MM/dd");
-                    })
+                    } )
 
                     setExistingReservations(json.map(item => item.reservationDate))
 
@@ -290,12 +288,12 @@ export const ReservationForm = ({ amenityList }) => {
                                 console.log(earliestDate.getDate())
                                 console.log(datern.getDate())
 
-
-
+                        
+                                
                                 if ((earliestDate.getDate() === datern.getDate()) || (earliestDate.getDate() > datern.getDate())) {
                                     earliestDate.setDate(earliestDate.getDate() + 1);
                                     console.log("Day Added.")
-                                } else {
+                                }  else {
                                     form.setValue("reservationDate", earliestDate);
                                     console.log("Date set.")
                                     break;
@@ -327,11 +325,135 @@ export const ReservationForm = ({ amenityList }) => {
 
 
 
+    useEffect(() => {
+
+        const fetchSpecificAmenity = async () => {
+
+            const response = await fetch('http://localhost:4000/api/amenities/' + amenityName)
+
+            const json = await response.json()
+
+            if (response.ok) {
+
+                setAmenityCount(json);
+
+            }
+
+        }
+
+        fetchSpecificAmenity()
+
+    }, [form.watch("amenityName")])
+
+
+
+    useEffect(() => {
+
+        const reduceSpecificAmenity = async () => {
+
+            const response = await fetch('http://localhost:4000/api/amenities/' + form.getValues("amenityName"))
+
+            const json = await response.json()
+
+            if (response.ok) {
+
+                setReservationCount(reservationQuantity as any);
+
+                let tempMax = json[0].amenityQuantityMax;
+
+                if (json[0].amenityQuantityMax > json[0].amenityQuantity) {
+                    tempMax = json[0].amenityQuantity;
+                }
+
+                if ((reservationQuantity as any) > tempMax) {
+                    form.setValue("reservationQuantity", tempMax);
+                }
+
+                if ((reservationQuantity as any) < json[0].amenityQuantityMin) {
+                    form.setValue("reservationQuantity", json[0].amenityQuantityMin);
+                }
+
+                json[0].amenityQuantity = json[0].amenityQuantity - (reservationQuantity as any);
+
+                setAmenityCount(json);
+
+            }
+
+        }
+
+        reduceSpecificAmenity()
+
+    }, [reservationQuantity as any])
+
+
+    // const handleQuantityChange = (e) => {
+
+    //     setAmenityCount(prevCount => prevCount - (reservationQuantity as any))
+    //     console.log("amenityCount is updated to" + amenityCount)
+
+    // }
+
+
+
+
+
+    // useEffect(() => {
+
+    //     const reduceSpecificAmenity = async () => {
+
+    //         const response = await fetch('http://localhost:4000/api/amenities/' + form.getValues("amenityName"))
+
+    //         const json = await response.json()
+
+    //         if (response.ok) {
+
+    //             setReservationCount(reservationQuantity as any);
+
+    //             if ((reservationCount as any) > json[0].amenityQuantityMax) {
+    //                 form.setValue("reservationQuantity", json[0].amenityQuantityMax);
+    //             }
+
+    //             if ((reservationCount as any) < json[0].amenityQuantityMin) {
+    //                 form.setValue("reservationQuantity", json[0].amenityQuantityMin);
+    //             }
+
+    //             if (json[0].amenityQuantityMin <= 0) {
+
+    //             }
+
+    //             json[0].amenityQuantity = json[0].amenityQuantity - (reservationQuantity as any);
+
+    //             setAmenityCount(json);
+
+    //         }
+
+    //     }
+
+    //     reduceSpecificAmenity()
+
+    // }, [form.getValues("reservationQuantity") as any])
+
 
 
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
 
-    
+        if (values.amenityName == "Basketball Court Main Road") {
+            values.amenityAddress = "Blk 24 Lt 1 Cedar Drive"
+        }
+
+        if (values.amenityName == "Basketball Court Side") {
+            values.amenityAddress = "Blk 14 Lt 12 Greyoak"
+        }
+
+        if (values.amenityName == "Grand Cedar Pavillion") {
+            values.amenityAddress = "Blk 25 Lt 1 Cedar Drive"
+        }
+
+        if (values.amenityType === "Facility") {
+
+            values.reservationQuantity = 0;
+
+        }
 
         const response = await fetch('http://localhost:4000/api/reservations', {
             method: 'POST',
@@ -359,15 +481,41 @@ export const ReservationForm = ({ amenityList }) => {
             console.log('New reservation created:', json);
         }
 
+        // arr = amenityCount.find( a => a.amenityName === values.amenityName)
+        // console.log(arr)
+
+        // const res = await fetch('https://localhost:4000/api/amenities/' + equipment, {
+        //     method: 'PATCH',
+        //     body: JSON.stringify(
+        //         {
+        //             amenityQuantity: amenityCount[0].amenityQuantity
+        //         }
+        //      ),
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // })
+
+        // const sheesh = await response.json()
+
+        // // Conditional statement if announcement creation is successful
+        // if (res.ok) {
+
+        //     console.log(amenityCount)
+
+        //     console.log('New reservation placed:', sheesh);
+
+        // }
+
+        // if (!res.ok) {
+
+        //     console.log(amenityCount)
+
+        //     console.log(sheesh)
+        // }
+
     }
 
-    // Function to navigate back to the reservations list page
-    const returnRoute = () => {
-
-        const path = '/reservations';
-        navigate(path);
-
-    }
 
 
 
@@ -393,14 +541,9 @@ export const ReservationForm = ({ amenityList }) => {
                         <div className="flex items-center gap-4">
 
 
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={returnRoute}
-                            >
+                            <Button variant="outline" size="icon" className="h-7 w-7">
 
-                                <ChevronLeft className="h-4 w-4" />
+                                <Link to="/reservations"> <ChevronLeft className="h-4 w-4" /> </Link>
                                 <span className="sr-only"> Back </span>
 
                             </Button>
@@ -522,45 +665,302 @@ export const ReservationForm = ({ amenityList }) => {
 
 
 
-                                            {/* Facility FormField */}
+                                            {/* Second FormField */}
                                             {amenityType === "Facility" && (
+                                                <FormField
+                                                    control={form.control}
+                                                    name="amenityName"
+                                                    render={({ field }) => (
+
+                                                        <FormItem>
+
+                                                            <div className="flex gap-6 items-center justify-between py-3">
+
+
+
+                                                                <FormLabel className="w-[23%]"> Amenity Name </FormLabel>
+
+                                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+
+                                                                    <FormControl className="">
+                                                                        <SelectTrigger>
+                                                                            <SelectValue placeholder="Select the facility." />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+
+                                                                    <SelectContent>
+
+                                                                        { amenityList && 
+                                                                            amenityList.map((amenity) => {
+                                                                                return <SelectItem value={amenity.amenityName}> {amenity.amenityName} </SelectItem>
+                                                                            })}
+                                                                        
+                                                                        <SelectItem value="Basketball Court Main Road"> Basketball Court Main Road </SelectItem>
+                                                                        <SelectItem value="Basketball Court Side"> Basketball Court Side </SelectItem>
+                                                                        <SelectItem value="Grand Cedar Pavillion"> Grand Cedar Pavillion </SelectItem>
+                                                                    </SelectContent>
+
+                                                                </Select>
+
+
+                                                            </div>
+
+                                                            <div className="grid grid-cols-4 items-center gap-4">
+
+                                                                <div className=""> </div>
+
+                                                                <div className="col-span-3">
+
+                                                                    <FormMessage />
+
+                                                                </div>
+
+                                                            </div>
+
+
+                                                        </FormItem>
+
+                                                    )}
+                                                />
+                                            )}
+
+
+
+
+
+                                            {/* Third FormField */}
+                                            {amenityType === "Equipment" && (
+                                                <FormField
+                                                    control={form.control}
+                                                    name="amenityName"
+                                                    render={({ field }) => (
+
+                                                        <FormItem>
+
+                                                            <div className="flex gap-6 items-center justify-between py-3">
+
+
+
+                                                                <FormLabel className="w-[23%]"> Amenity Name </FormLabel>
+
+                                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+
+                                                                    <FormControl className="">
+                                                                        <SelectTrigger>
+                                                                            <SelectValue placeholder="Select the equipment." />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+
+                                                                    <SelectContent>
+                                                                        <SelectItem value="Chairs"> Chairs </SelectItem>
+                                                                        <SelectItem value="Tables"> Tables </SelectItem>
+                                                                        <SelectItem value="Tents"> Tents </SelectItem>
+                                                                    </SelectContent>
+
+                                                                </Select>
+
+
+                                                            </div>
+
+                                                            <div className="grid grid-cols-4 items-center gap-4">
+
+                                                                <div className=""></div>
+
+                                                                <div className="col-span-3">
+
+                                                                    <FormMessage />
+
+                                                                </div>
+
+                                                            </div>
+
+
+                                                        </FormItem>
+
+                                                    )}
+                                                />
+                                            )}
+
+
+
+
+
+                                            {/* Fourth FormField */}
+                                            {amenityType === "Facility" && amenityName === "Basketball Court Main Road" && (
+                                                <FormField
+                                                    control={form.control}
+                                                    name="amenityAddress"
+                                                    render={({ field }) => (
+
+                                                        <FormItem>
+
+                                                            <div className="flex gap-6 items-center justify-between">
+
+
+
+                                                                <FormLabel className="w-[23%]"> Amenity Address </FormLabel>
+
+                                                                <Input
+                                                                    id="amenityAddress"
+                                                                    placeholder=""
+                                                                    type="text"
+                                                                    value={"Blk 24 Lt 1 Cedar Drive"}
+                                                                    required
+                                                                    disabled
+                                                                />
+
+                                                            </div>
+
+                                                            <div className="grid grid-cols-4 items-center gap-4">
+
+                                                                <div className=""></div>
+
+                                                                <div className="col-span-3">
+
+                                                                    <FormMessage />
+
+                                                                </div>
+
+                                                            </div>
+
+
+                                                        </FormItem>
+
+                                                    )}
+                                                />
+                                            )}
+
+
+
+
+                                            {/* Fifth FormField */}
+                                            {amenityType === "Facility" && amenityName === "Basketball Court Side" && (
+                                                <FormField
+                                                    control={form.control}
+                                                    name="amenityAddress"
+                                                    render={({ field }) => (
+
+                                                        <FormItem>
+
+                                                            <div className="flex gap-6 items-center justify-between">
+
+
+
+                                                                <FormLabel className="w-[23%]"> Amenity Address </FormLabel>
+
+                                                                <Input
+                                                                    id="amenityAddress"
+                                                                    placeholder=""
+                                                                    type="text"
+                                                                    value={"Blk 14 Lt 12 Greyoak"}
+                                                                    required
+                                                                    disabled
+                                                                />
+
+                                                            </div>
+
+                                                            <div className="grid grid-cols-4 items-center gap-4">
+
+                                                                <div className=""></div>
+
+                                                                <div className="col-span-3">
+
+                                                                    <FormMessage />
+
+                                                                </div>
+
+                                                            </div>
+
+
+                                                        </FormItem>
+
+                                                    )}
+                                                />
+                                            )}
+
+
+
+
+
+                                            {/* Sixth FormField */}
+                                            {amenityType === "Facility" && amenityName === "Grand Cedar Pavillion" && (
+                                                <FormField
+                                                    control={form.control}
+                                                    name="amenityAddress"
+                                                    render={({ field }) => (
+
+                                                        <FormItem>
+
+                                                            <div className="flex gap-6 items-center justify-between">
+
+
+
+                                                                <FormLabel className="w-[23%]"> Amenity Address </FormLabel>
+
+                                                                <Input
+                                                                    id="amenityAddress"
+                                                                    placeholder=""
+                                                                    type="text"
+                                                                    value={"Blk 25 Lt 1 Cedar Drive"}
+                                                                    required
+                                                                    disabled
+                                                                />
+
+                                                            </div>
+
+                                                            <div className="grid grid-cols-4 items-center gap-4">
+
+                                                                <div className=""></div>
+
+                                                                <div className="col-span-3">
+
+                                                                    <FormMessage />
+
+                                                                </div>
+
+                                                            </div>
+
+
+                                                        </FormItem>
+
+                                                    )}
+                                                />
+                                            )}
+
+
+
+
+
+                                            {/* Seventh FormField */}
+                                            {(amenityType === "Equipment" && amenityName === "Chairs") && (
 
                                                 <>
 
+
+
                                                     <FormField
                                                         control={form.control}
-                                                        name="amenityName"
+                                                        name="reservationQuantity"
                                                         render={({ field }) => (
 
                                                             <FormItem>
 
-                                                                <div className="flex gap-6 items-center justify-between py-3">
+                                                                <div className="flex gap-6 items-center justify-between">
 
-                                                                    <FormLabel className="w-[23%]"> Amenity Name </FormLabel>
 
-                                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
 
-                                                                        <FormControl className="">
-                                                                            <SelectTrigger>
-                                                                                <SelectValue placeholder="Select the facility." />
-                                                                            </SelectTrigger>
-                                                                        </FormControl>
+                                                                    <FormLabel className="w-[23%]"> Amenity Quantity </FormLabel>
 
-                                                                        <SelectContent>
-
-                                                                            {amenityList && amenityList.map((amenity) => {
-
-                                                                                if (amenity.amenityType === "Facility") {
-                                                                                    return (
-                                                                                        <SelectItem key={amenity._id} value={amenity.amenityName}> {amenity.amenityName} </SelectItem>
-                                                                                    )
-                                                                                }
-
-                                                                            })}
-
-                                                                        </SelectContent>
-
-                                                                    </Select>
+                                                                    <Input
+                                                                        id="reservationQuantity"
+                                                                        placeholder=""
+                                                                        type="number"
+                                                                        min={1}
+                                                                        max={20}
+                                                                        required
+                                                                        {...field}
+                                                                        disabled={amenityCount[0].amenityQuantity <= 0 ? true : false}
+                                                                    />
 
                                                                 </div>
 
@@ -582,113 +982,53 @@ export const ReservationForm = ({ amenityList }) => {
                                                         )}
                                                     />
 
-                                                    {form.getValues("amenityName") != "" && (
 
-                                                        <FormField
-                                                            control={form.control}
-                                                            name="amenityAddress"
-                                                            render={({ field }) => (
+                                                    {form.getValues("amenityName") != "" &&
+                                                        (
+                                                            <FormDescription className="text-sm text-end">
 
-                                                                <FormItem>
+                                                                {amenityName} left: {amenityCount[0].amenityQuantity}
 
-                                                                    <div className="flex gap-6 items-center justify-between">
-
-
-
-                                                                        <FormLabel className="w-[23%]"> Amenity Address </FormLabel>
-
-                                                                        {amenityList && amenityList.map((amenity) => {
-
-                                                                            if (amenity.amenityName === form.getValues("amenityName")) {
-
-                                                                                return (
-                                                                                    <Input
-                                                                                        id="amenityAddress"
-                                                                                        placeholder=""
-                                                                                        type="text"
-                                                                                        value={amenity.amenityAddress}
-                                                                                        required
-                                                                                        disabled
-                                                                                    />
-                                                                                )
-
-                                                                            }
-                                                                        })}
-
-                                                                    </div>
-
-                                                                    <div className="grid grid-cols-4 items-center gap-4">
-
-                                                                        <div className=""> </div>
-
-                                                                        <div className="col-span-3">
-
-                                                                            <FormMessage />
-
-                                                                        </div>
-
-                                                                    </div>
-
-
-                                                                </FormItem>
-
-                                                            )}
-                                                        />
-                                                    )
+                                                            </FormDescription>
+                                                        )
                                                     }
-
 
                                                 </>
 
-
-                                            )}
-
-
+                                            )
+                                            }
 
 
 
-                                            {/* Equipment FormField */}
-                                            {amenityType === "Equipment" && (
+                                            {(amenityType === "Equipment" && amenityName === "Tables") && (
 
                                                 <>
 
+
+
                                                     <FormField
                                                         control={form.control}
-                                                        name="amenityName"
+                                                        name="reservationQuantity"
                                                         render={({ field }) => (
 
                                                             <FormItem>
 
-                                                                <div className="flex gap-6 items-center justify-between py-3">
+                                                                <div className="flex gap-6 items-center justify-between">
 
 
 
-                                                                    <FormLabel className="w-[23%]"> Amenity Name </FormLabel>
+                                                                    <FormLabel className="w-[23%]"> Amenity Quantity </FormLabel>
 
-                                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-
-                                                                        <FormControl className="">
-                                                                            <SelectTrigger>
-                                                                                <SelectValue placeholder="Select the equipment." />
-                                                                            </SelectTrigger>
-                                                                        </FormControl>
-
-                                                                        <SelectContent>
-
-                                                                            {amenityList && amenityList.map((amenity) => {
-
-                                                                                if (amenity.amenityType === "Equipment") {
-                                                                                    return (
-                                                                                        <SelectItem key={amenity._id} value={amenity.amenityName}> {amenity.amenityName} </SelectItem>
-                                                                                    )
-                                                                                }
-
-                                                                            })}
-
-                                                                        </SelectContent>
-
-                                                                    </Select>
-
+                                                                    <Input
+                                                                        id="reservationQuantity"
+                                                                        placeholder=""
+                                                                        type="number"
+                                                                        min={1}
+                                                                        max={2}
+                                                                        required
+                                                                        {...field}
+                                                                        disabled={amenityCount[0].amenityQuantity <= 0 ? true : false}
+                                                                    />
 
                                                                 </div>
 
@@ -710,80 +1050,83 @@ export const ReservationForm = ({ amenityList }) => {
                                                         )}
                                                     />
 
-                                                    {form.getValues("amenityName") != "" && (
 
-                                                        <FormField
-                                                            control={form.control}
-                                                            name="reservationQuantity"
-                                                            render={({ field }) => (
+                                                    {form.getValues("amenityName") != "" &&
+                                                        (
+                                                            <FormDescription className="text-sm text-end">
 
-                                                                <FormItem>
+                                                                {amenityName} left: {amenityCount[0].amenityQuantity}
 
-                                                                    <div className="flex gap-6 items-center justify-between">
-
-
-
-                                                                        <FormLabel className="w-[23%]"> Amenity Quantity </FormLabel>
-
-                                                                        {amenityList && amenityList.map((amenity) => {
-
-                                                                            if (amenity.amenityName === form.getValues("amenityName")) {
-
-                                                                                return (
-                                                                                    <Input
-                                                                                        id="reservationQuantity"
-                                                                                        placeholder=""
-                                                                                        type="number"
-                                                                                        min={amenity.amenityQuantityMin}
-                                                                                        max={amenity.amenityQuantityMax}
-                                                                                        required
-                                                                                        {...field}
-                                                                                        disabled={amenity.amenityQuantity <= 0 ? true : false}
-                                                                                    />
-                                                                                )
-
-                                                                            }
-                                                                        }
-                                                                        )
-                                                                        }
-
-                                                                    </div>
-
-                                                                    <div className="grid grid-cols-4 items-center gap-4">
-
-                                                                        <div className=""> </div>
-
-                                                                        <div className="col-span-3 text-right mb-2">
-
-                                                                            <FormMessage />
-
-                                                                        </div>
-
-                                                                    </div>
-
-
-                                                                </FormItem>
-                                                            )}
-                                                        />
-
-                                                    )}
-
-
-
-                                                    {amenityList && amenityList.map((amenity) => {
-
-                                                        if (amenity.amenityName === form.getValues("amenityName")) {
-
-                                                            return (
-                                                                <FormDescription className="text-sm text-end">
-                                                                    {amenity.amenityQuantity} {amenity.amenityName.toLowerCase()}{ amenity.amenityQuantity <= 1 ? "" : "s" } available for reservation.
-                                                                    You can only reserve {amenity.amenityQuantityMax} {amenity.amenityName.toLowerCase()}{ amenity.amenityQuantityMax <= 1 ? "" : "s" } at a time.
-                                                                </FormDescription>
-                                                            )
-
-                                                        }
+                                                            </FormDescription>
+                                                        )
                                                     }
-                                                    )
+
+                                                </>
+
+                                            )
+                                            }
+
+
+
+                                            {(amenityType === "Equipment" && amenityName === "Tents") && (
+
+                                                <>
+
+
+
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="reservationQuantity"
+                                                        render={({ field }) => (
+
+                                                            <FormItem>
+
+                                                                <div className="flex gap-6 items-center justify-between">
+
+
+
+                                                                    <FormLabel className="w-[23%]"> Amenity Quantity </FormLabel>
+
+                                                                    <Input
+                                                                        id="reservationQuantity"
+                                                                        placeholder=""
+                                                                        type="number"
+                                                                        min={1}
+                                                                        max={3}
+                                                                        required
+                                                                        {...field}
+                                                                        disabled={amenityCount[0].amenityQuantity <= 0 ? true : false}
+                                                                    />
+
+                                                                </div>
+
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+
+                                                                    <div className=""></div>
+
+                                                                    <div className="col-span-3">
+
+                                                                        <FormMessage />
+
+                                                                    </div>
+
+                                                                </div>
+
+
+                                                            </FormItem>
+
+                                                        )}
+                                                    />
+
+
+                                                    {form.getValues("amenityName") != "" &&
+                                                        (
+                                                            <FormDescription className="text-sm text-end">
+
+                                                                {amenityName} left: {amenityCount[0].amenityQuantity}
+
+                                                            </FormDescription>
+                                                        )
                                                     }
 
                                                 </>

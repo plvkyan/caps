@@ -77,6 +77,7 @@ const Archives = () => {
 
                 <TabsList className="w-full bg-light-bg border">
 
+                    <TabsTrigger value="amenities" className="w-full"> Amenities </TabsTrigger>
                     <TabsTrigger value="announcements" className="w-full"> Announcements </TabsTrigger>
                     <TabsTrigger value="bills" className="w-full"> Bills </TabsTrigger>
                     <TabsTrigger value="reservations" className="w-full"> Reservations </TabsTrigger>
