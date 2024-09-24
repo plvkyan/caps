@@ -54,18 +54,14 @@ import {
 // shadcn Skeleton Component Import
 import { Skeleton } from "@/components/ui/skeleton";
 
-// shadcn Table Component Imports
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-
 // shadcnc Textarea Component Import
 import { Textarea } from "@/components/ui/textarea";
+
+// shadcn Toaster Import
+import { Toaster } from "@/components/ui/toaster";
+
+// shadcn Toast Import
+import { useToast } from "@/components/ui/use-toast"
 
 
 
@@ -87,12 +83,28 @@ import * as zod from "zod";
 
 // Zod Resolver Import
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
 
+// Hooks
+// AuthContext Hooks for Users
+import { useAuthContext } from "@/hooks/useAuthContext"
+
+
+const MAX_FILE_SIZE = 500000;
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 
 // 
 const formSchema = zod.object({
 
+    profileImage: zod
+    .any()
+    .refine((files) => files?.length == 1, "Image is required.")
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+      ".jpg, .jpeg, .png and .webp files are accepted."
+    ).optional(),
     amenityName: zod.string().min(1,
         { message: "Facility name cannot be empty." }
     ),
@@ -104,6 +116,7 @@ const formSchema = zod.object({
     amenityAddress: zod.string().min(1,
         { message: "Facility address cannot be empty." }
     ),
+    amenityCreator: zod.string(),
     amenityReminder: zod.string().min(1,
         { message: "Facility reminder cannot be empty." }
     ),
@@ -113,14 +126,25 @@ const formSchema = zod.object({
 });
 
 
+
+
+
 const AmenityFacilityForm = () => {
+
+    // Use AuthContext to get user data
+    const { user } = useAuthContext();
 
 
 
     // React Router Dom Navigate
     const navigate = useNavigate();
 
+    //
+    const [error, setError] = useState<string | null>(null);
 
+    // 
+    const [image, setImage] = useState<File | undefined | null>();
+    console.log(image, 12);
 
     // Functions
     // Function to navigate to the facility form page
@@ -140,6 +164,7 @@ const AmenityFacilityForm = () => {
             amenityDescription: "",
             amenityAddress: "",
             amenityReminder: "",
+            amenityCreator: user.blkLt,
             stat: "Unarchived",
         }
     });
@@ -157,13 +182,44 @@ const AmenityFacilityForm = () => {
 
         const json = await response.json();
 
+        if (!response.ok) {
+
+            setError(json.error);
+            console.log('Error creating new equipment amenity: ', json);
+
+        }
+
         if (response.ok) {
 
             console.log('New facility amenity created: ', json);
+            localStorage.setItem("newAmenity", JSON.stringify(json))
+            window.location.reload();
 
         }
 
     }
+
+    // For toast confirmation
+    const { toast } = useToast()
+
+    useEffect(() => {
+
+        if (localStorage.getItem("newAmenity")) {
+
+            const newAmenity = JSON.parse(localStorage.getItem("newAmenity") as any)
+
+            toast({
+
+                title: "Facility amenity created",
+                description: `Facility ${newAmenity.amenityName} was successfully created.`,
+
+            })
+
+            localStorage.removeItem("newAmenity")
+
+        }
+
+    }, []);
 
 
 
@@ -171,8 +227,9 @@ const AmenityFacilityForm = () => {
     return (
 
 
-
         <LayoutWrapper>
+
+            <Toaster />
 
             <Form {...form}>
 
@@ -241,6 +298,11 @@ const AmenityFacilityForm = () => {
                                                             </div>
 
                                                         </FormControl>
+
+                                                        <FormMessage />
+
+                                                        {error && <div className="text-destructive"> {error} </div>}
+
                                                     </FormItem>
                                                 )
                                             }}
@@ -266,6 +328,9 @@ const AmenityFacilityForm = () => {
                                                                 />
                                                             </div>
                                                         </FormControl>
+
+                                                        <FormMessage />
+
                                                     </FormItem>
                                                 )
                                             }}
@@ -291,6 +356,9 @@ const AmenityFacilityForm = () => {
                                                                 />
                                                             </div>
                                                         </FormControl>
+
+                                                        <FormMessage />
+
                                                     </FormItem>
                                                 )
                                             }}
@@ -317,6 +385,9 @@ const AmenityFacilityForm = () => {
                                                             </div>
 
                                                         </FormControl>
+
+                                                        <FormMessage />
+
                                                     </FormItem>
                                                 )
                                             }
@@ -347,25 +418,7 @@ const AmenityFacilityForm = () => {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="grid gap-2">
-                                        <Skeleton
-                                            className="aspect-square w-full rounded-md object-cover h-[300] w-[300]"
-                                        />
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <button>
-                                                <Skeleton
-                                                    className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"
-                                                />
-                                            </button>
-                                            <button>
-                                                <Skeleton
-                                                    className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"
-                                                />
-                                            </button>
-                                            <button className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
-                                                <Upload className="h-4 w-4 text-muted-foreground" />
-                                                <span className="sr-only">Upload</span>
-                                            </button>
-                                        </div>
+                                        <Input onChange={(e) => setImage((e.target as HTMLInputElement)?.files?.[0])} id="amenityImage" type="file" />
                                     </div>
                                 </CardContent>
                             </Card>
@@ -400,6 +453,9 @@ const AmenityFacilityForm = () => {
                                                                     </SelectContent>
                                                                 </Select>
                                                             </FormControl>
+
+                                                            <FormMessage />
+
                                                         </FormItem>
                                                     )
                                                 }}
@@ -412,20 +468,7 @@ const AmenityFacilityForm = () => {
                             </Card>
 
 
-                            {/* <Card x-chunk="dashboard-07-chunk-5">
-                        <CardHeader>
-                            <CardTitle>Archive Product</CardTitle>
-                            <CardDescription>
-                                Lipsum dolor sit amet, consectetur adipiscing elit.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div></div>
-                            <Button size="sm" variant="secondary">
-                                Archive Product
-                            </Button>
-                        </CardContent>
-                    </Card> */}
+
                         </div>
                     </div>
 

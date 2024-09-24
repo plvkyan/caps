@@ -3,12 +3,16 @@
 
 const express = require('express')
 const router = express.Router()
+const multer = require('multer');
+
+const upload = multer({ dest: 'uploads/' });
 
 const { 
    
    createAmenity,
    deleteAmenity,
    getAmenities,
+   getArchivedAmenities,
    getSpecificAmenity,
    updateAmenity,
 
@@ -31,11 +35,14 @@ router.delete('/:amenityName', deleteAmenity);
 // GET all unarchived amenities
 router.get('/', getAmenities);
 
+// GET all unarchived amenities
+router.get('/archived', getArchivedAmenities);
+
 // GET a specific amenity
 router.get('/:amenityName', getSpecificAmenity);
 
 // POST a new amenity
-router.post('/', createAmenity);
+router.post('/', upload.single('amenityImage'), createAmenity);
 
 // UPDATE an amenity
 router.patch('/:amenityName', updateAmenity)

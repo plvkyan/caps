@@ -3,10 +3,13 @@ require('dotenv').config()
 const cors = require('cors')
 const express = require('express')
 const mongoose = require('mongoose')
+const multer = require('multer');
 const announcementRoutes = require('./routes/announcementRoutes')
 const userRoutes = require('./routes/userRoutes')
 const paymentRoutes = require('./routes/paymentRoutes')
 const webhookRoutes = require('./routes/webhookRoutes')
+
+const upload = multer({ dest: 'uploads/' });
 
 // Route Imports
 

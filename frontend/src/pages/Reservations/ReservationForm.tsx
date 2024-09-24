@@ -123,6 +123,7 @@ import { useReservationsContext } from "@/hooks/useReservationsContext"
 
 // Amenity Hook for Amenities
 import { useAmenitiesContext } from "@/hooks/useAmenitiesContext"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 
@@ -132,7 +133,7 @@ import { useAmenitiesContext } from "@/hooks/useAmenitiesContext"
 const formSchema = zod
     .object({
         blkLt: zod.string({
-            invalid_type_error: "Sa blkLtmali is required"
+            invalid_type_error: "Sa blkLtmail is required"
         }).optional(),
         blkLtPosition: zod.string().optional(),
         amenityAddress: zod.string().optional(),
@@ -443,9 +444,14 @@ export const ReservationForm = ({ amenityList }) => {
 
 
                                     <CardContent>
+                                        
 
                                         <div className="grid">
 
+                                        <div className="flex gap-2 items-center justify-between py-3"> 
+
+                                            
+                                        </div>
 
 
                                             {/* First FormField */}
@@ -943,7 +949,9 @@ export const ReservationForm = ({ amenityList }) => {
 
 
 
-                                    <CardHeader className="flex flex-row items-start bg-muted/50">
+                                    <CardHeader className="flex flex-col items-start bg-muted/50">
+
+                                        <Skeleton className="w-[20rem] h-48 mb-2" />
 
                                         <div className="grid gap-0.5">
 
@@ -961,33 +969,7 @@ export const ReservationForm = ({ amenityList }) => {
 
                                         <div className="ml-auto flex items-center gap-1">
 
-                                            {/* 
-
-                            <DropdownMenu>
-
-                                <DropdownMenuTrigger asChild>
-
-                                    <Button size="icon" variant="outline" className="h-8 w-8">
-                                        <MoreVertical className="h-3.5 w-3.5" />
-                                        <span className="sr-only">More</span>
-                                    </Button>
-
-                                </DropdownMenuTrigger>
-
-
-
-                                <DropdownMenuContent align="end">
-
-                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                    <DropdownMenuItem>Export</DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem>Trash</DropdownMenuItem>
-
-                                </DropdownMenuContent>
-
-                            </DropdownMenu> 
-
-                            */}
+                                        
 
                                         </div>
 

@@ -3,6 +3,8 @@
 
 const Amenity = require("../models/amenityModel")
 const mongoose = require('mongoose')
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 
 
@@ -13,6 +15,18 @@ const getAmenities = async (req, res) => {
 
     const amenities = initAmenities.filter(function (amenity) {
         return amenity.stat === "Unarchived";
+    });
+
+    res.status(200).json(amenities)
+}
+
+// GET all unarchived amenities
+const getArchivedAmenities = async (req, res) => {
+
+    const initAmenities = await Amenity.find({}).sort({ createdAt: -1 })
+
+    const amenities = initAmenities.filter(function (amenity) {
+        return amenity.stat === "Archived";
     });
 
     res.status(200).json(amenities)
@@ -42,13 +56,23 @@ const getSpecificAmenity = async (req, res) => {
 
 // CREATE new amenity
 const createAmenity = async (req, res) => {
-    
-    const { amenityName, amenityType, amenityAddress, amenityDescription, amenityQuantity, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat } = req.body
+
+    console.log(req.file, 16);
+
+    const { amenityName, amenityType, amenityAddress, amenityCreator, amenityDescription, amenityQuantity, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat } = req.body
 
     try {
 
+        const exists = await Amenity.findOne({ amenityName })
+
+
+
+        if (exists) {
+            throw Error('Amenity already exists')
+        }
+
         // Add amenity to database
-        const amenity = await Amenity.create({ amenityName, amenityType, amenityDescription, amenityAddress, amenityQuantity, amenityQuantityMin, amenityQuantityMax, amenityReminder,stat })
+        const amenity = await Amenity.create({ amenityName, amenityType, amenityCreator, amenityDescription, amenityAddress, amenityQuantity, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat })
         res.status(200).json(amenity)
 
     } catch (error) {
@@ -64,13 +88,13 @@ const createAmenity = async (req, res) => {
 
 // DELETE an amenity
 const deleteAmenity = async (req, res) => {
-    const { id } = req.params
+    const { amenityName } = req.params
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ error: 'No such amenity' })
-    }
+    // if (!mongoose.Types.ObjectId.isValid(id)) {
+    //     return res.status(400).json({ error: 'No such amenity' })
+    // }
 
-    const amenity = await Amenity.findOneAndDelete({ _id: id })
+    const amenity = await Amenity.findOneAndDelete({ amenityName: amenityName })
 
     if (!amenity) {
         return res.status(400).json({ error: 'No such amenity' })
@@ -111,6 +135,7 @@ module.exports = {
     createAmenity,
     deleteAmenity,
     getAmenities,
+    getArchivedAmenities,
     getSpecificAmenity,
     updateAmenity
 }

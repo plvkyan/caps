@@ -36,7 +36,6 @@ import { BillType } from "@/types/bill-type";
 import { useBillsContext } from "@/hooks/useBillsContext";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import { BillForm } from "./BillForm";
-import { MultiSelect } from "@/components/custom/MultiSelect";
 import { useAuthContext } from "@/hooks/useAuthContext";
 
 

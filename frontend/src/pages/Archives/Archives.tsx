@@ -33,6 +33,8 @@ import ArchivedReservations from "@/pages/Archives/ArchivedReservations"
 // Use State Import
 import { useState } from "react"
 import LayoutWrapper from "@/components/layout/LayoutWrapper"
+import ArchivedAmenitiesList from "./ArchivedAmenities"
+import ArchivedAmenities from "./ArchivedAmenities"
 
 
 
@@ -87,6 +89,7 @@ const Archives = () => {
 
                 
                 
+                <TabsContent value="amenities"> <ArchivedAmenities /> </TabsContent>
                 <TabsContent value="announcements"> <ArchivedAnnouncements /> </TabsContent>
                 {/* <TabsContent value="bills"> <ArchivedBills /> </TabsContent> */}
                 <TabsContent value="reservations"> <ArchivedReservations /> </TabsContent>

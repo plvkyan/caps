@@ -41,6 +41,9 @@ import AmenitiesList from './pages/Amenities/AmenitiesList.tsx';
 // Amenity Equipment Form Page Import
 import AmenityEquipmentForm from './pages/Amenities/AmenityEquipmentForm.tsx';
 
+// Amenity Details Page Import
+import AmenityDetails from './pages/Amenities/AmenityDetails.tsx';
+
 // Amenity Facility Form Page Import
 import AmenityFacilityForm from './pages/Amenities/AmenityFacilityForm.tsx';
 
@@ -267,6 +270,12 @@ function App() {
                                     <Route
                                         path="/amenities/facility/form"
                                         element={<AmenityFacilityForm />}
+                                    >
+                                    </Route>
+
+                                    <Route
+                                        path="/amenities/details/:amenityName"
+                                        element={<AmenityDetails />}
                                     >
                                     </Route>
 

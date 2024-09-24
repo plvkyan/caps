@@ -6,6 +6,8 @@
 // Reservation model import
 const Reservation = require('../models/reservationModel');
 
+const Amenity = require('../models/amenityModel');
+
 // Date-fns import
 const fns = require('date-fns')
 
@@ -66,6 +68,15 @@ const checkReservation = async (req, rest, next) => {
         const completedFunction = completedReservations.map( async (reservation) => {
 
             await Reservation.updateOne({  blkLt: reservation.blkLt, reservationDate: reservation.reservationDate }, {reservationStatus: "Completed", stat: "Archived"});
+
+        })
+
+        // Add back the item to the amenity quantity
+        const addBackFunction = completedReservations.map( async (reservation) => {
+
+            const amenity = await Amenity.findOne({ amenityName: reservation.amenityName });
+
+            await Amenity.updateOne({ amenityName: reservation.amenityName }, { amenityQuantity: amenity.amenityQuantity + reservation.reservationQuantity });
 
         })
         // Completed reservation function section --- END

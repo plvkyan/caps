@@ -48,6 +48,10 @@ const amenitySchema = new Schema({
         type: String,
         required: false
     },
+    amenityCreator: {
+        type: String,
+        required: true
+    },
     stat: {
         type: String,
         required: true,

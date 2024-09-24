@@ -72,9 +72,23 @@ import LayoutWrapper from "@/components/layout/LayoutWrapper";
 
 // Utility Imports
 // React Router Dom Imports
-import { 
-    useNavigate
- } from "react-router-dom";
+// useNavigate Hook Import
+import { useNavigate } from "react-router-dom";
+
+// React Imports
+// useEffect Hook Import
+import { useEffect, useState } from "react";
+
+
+
+// Types
+// Amenity Type Import
+import { Amenity } from "@/types/amenities";
+
+// shadcn Toast Import
+import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 
 
@@ -83,9 +97,44 @@ import {
 const AmenitiesList = () => {
 
 
+    const { toast } = useToast()
+
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+
 
     // React Router Dom Navigate
     const navigate = useNavigate();
+
+    const [amenityList, setAmenityList] = useState<Amenity[] | null>(null);
+
+    const [am, setAm] = useState<Amenity | null>(null);
+
+
+
+    // Use Effect for API calls
+    // Use Effect for Fetching Amenities
+    useEffect(() => {
+
+        const fetchAmenities = async () => {
+
+            const response = await fetch('http://localhost:4000/api/amenities/');
+
+            const json = await response.json();
+
+            if (response.ok) {
+
+                console.log(amenityList)
+                setAmenityList(json);
+
+
+            }
+
+        }
+
+        fetchAmenities();
+
+    }, []);
 
 
 
@@ -106,6 +155,111 @@ const AmenitiesList = () => {
 
     }
 
+    // Amenity Details Route
+    const amenityDetailsRoute = (amenity) => {
+
+        const fetchReservations = async () => {
+
+            const response = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName)
+
+            const json = await response.json()
+
+            if (response.ok) {
+
+                console.log(json)
+                const path = '/amenities/details/' + amenity.amenityName;
+                navigate(path)
+
+            }
+
+            if (!response.ok) {
+
+                console.log(json)
+
+            }
+
+        }
+
+        fetchReservations()
+    }
+
+    // Archive Function
+    const setArchive = async (amenity) => {
+
+        amenity.stat = "Archived"
+
+        const response = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(amenity)
+        })
+
+        const json = await response.json()
+
+        if (response.ok) {
+
+            toast({
+
+                title: "Amenity archived",
+                description: amenity.amenityName + " is archived",
+
+            })
+        }
+
+    }
+
+    // Unarchive Function
+    const setUnarchive = async (amenity) => {
+
+        amenity.stat = "Unarchived"
+
+        const response = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(amenity)
+        })
+
+        const json = await response.json()
+
+        if (response.ok) {
+
+            toast({
+
+                title: "Amenity archived",
+                description: amenity.amenityName + " is unarchived",
+
+            })
+
+        }
+
+    }
+
+    const deleteReservation = async (amenity) => {
+
+        const response = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName, {
+            method: 'DELETE'
+        })
+
+        const json = await response.json()
+
+        console.log(json)
+
+        if (response.ok) {
+
+            window.location.reload();
+
+            toast({
+
+                title: "Amenity deleted",
+                description: amenity.amenityName + " is deleted successfully",
+
+            })
+        }
+
+    }
+
+
+
 
 
     return (
@@ -113,6 +267,46 @@ const AmenitiesList = () => {
 
 
         <LayoutWrapper>
+
+            <Toaster />
+
+            {/* Delete dialog for deleting the reservation */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+
+                <AlertDialogContent>
+
+                    <AlertDialogHeader>
+
+                        {/* Deletion message */}
+                        <AlertDialogTitle> Are you sure you want to delete this amenity? </AlertDialogTitle>
+
+                        <AlertDialogDescription>
+                            This action cannot be undone. This amenity will permanently deleted and be no longer be accessible by anyone.
+                        </AlertDialogDescription>
+
+                    </AlertDialogHeader>
+
+
+
+                    <AlertDialogFooter>
+
+                        {/* Delete dialog cancel button */}
+                        <AlertDialogCancel> Cancel </AlertDialogCancel>
+
+                        {/* Delete dialog delete button */}
+                        <Button
+                            variant={"destructive"}
+                            onClick={ ()=> {deleteReservation(am)}}
+                        >
+                            Delete
+                        </Button>
+
+                    </AlertDialogFooter>
+
+                </AlertDialogContent>
+
+            </AlertDialog>
+
 
             <div className="mr-auto grid w-full max-w-6xl gap-2">
                 <h1 className="text-3xl font-semibold"> Amenities </h1>
@@ -129,41 +323,6 @@ const AmenitiesList = () => {
                     </TabsList>
 
                     <div className="ml-auto flex items-center gap-2">
-
-                        <DropdownMenu>
-
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-7 gap-1 text-sm"
-                                >
-                                    <ListFilter className="h-3.5 w-3.5" />
-                                    <span className="sr-only sm:not-sr-only">Filter</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuCheckboxItem checked>
-                                    Wala pa hehe
-                                </DropdownMenuCheckboxItem>
-
-                            </DropdownMenuContent>
-
-                        </DropdownMenu>
-
-
-
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 gap-1 text-sm"
-                        >
-                            <File className="h-3.5 w-3.5" />
-                            <span className="sr-only sm:not-sr-only">Export</span>
-                        </Button>
 
                     </div>
 
@@ -222,279 +381,83 @@ const AmenitiesList = () => {
                                 <TableBody>
 
 
+                                    {amenityList && amenityList.map((amenity) => {
 
-                                    <TableRow>
-
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Basketball Court Main Road </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    Blk 24 Lt 1 Cedar Drive
-                                                </div>
-                                            </div>
-                                        </TableCell>
+                                        return (
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            Facility
-                                        </TableCell>
+                                            // <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
+                                            <TableRow>
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
-
-                                        <TableCell className="items-end">
+                                                <TableCell className="flex flex-row items-center gap-4">
+                                                    <Skeleton className="h-24 w-24 " />
+                                                </TableCell>
 
-                                            <DropdownMenu>
-
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
+                                                <TableCell>
+                                                    <div>
+                                                        <div className="font-medium"> {amenity.amenityName} </div>
+                                                        <div className="hidden text-sm text-muted-foreground md:inline">
+                                                            {amenity.amenityType == "Facility" ? amenity.amenityAddress : amenity.amenityQuantity + " remaining"}
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
 
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
-
-                                            </DropdownMenu>
-
-                                        </TableCell>
-
-                                    </TableRow>
-
-
-
-                                    <TableRow>
-
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Basketball Court Side </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    Blk 14 Lt 2 Greyoak
-                                                </div>
-                                            </div>
-                                        </TableCell>
+                                                <TableCell className="hidden sm:table-cell">
+                                                    {amenity.amenityType}
+                                                </TableCell>
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            Facility
-                                        </TableCell>
+                                                <TableCell className="hidden sm:table-cell">
+                                                    <Badge className="text-xs" variant="secondary">
+                                                        {amenity.stat}
+                                                    </Badge>
+                                                </TableCell>
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
+                                                <TableCell className="items-end">
 
-                                        <TableCell className="items-end">
+                                                        <DropdownMenu>
 
-                                            <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button
+                                                                    aria-haspopup="true"
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                >
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                    <span className="sr-only">Toggle menu</span>
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
 
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
+                                                                {
+                                                                    (amenity.stat == "Unarchived") &&
+                                                                    (
+                                                                        <DropdownMenuItem onClick={() => { setArchive(amenity) }}> Archive </DropdownMenuItem>
+                                                                    )
+                                                                }
 
-                                            </DropdownMenu>
+                                                                {
+                                                                    (amenity.stat == "Archived") &&
+                                                                    (
+                                                                        <DropdownMenuItem onClick={() => { setUnarchive(amenity) }}> Unarchive </DropdownMenuItem>
+                                                                    )
+                                                                }
 
-                                        </TableCell>
+                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setAm(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
 
-                                    </TableRow>
 
+                                                            </DropdownMenuContent>
 
+                                                        </DropdownMenu>
 
-                                    <TableRow>
+                                                    </TableCell>
 
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
+                                            </TableRow>
 
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Chairs </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    50 remaining
-                                                </div>
-                                            </div>
-                                        </TableCell>
+                                        )
+                                    })
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            Equipment
-                                        </TableCell>
-
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
-
-                                        <TableCell className="items-end">
-
-                                            <DropdownMenu>
-
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
-
-                                            </DropdownMenu>
-
-                                        </TableCell>
-
-                                    </TableRow>
-
-
-
-                                    <TableRow>
-
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Grand Cedar Pavillion </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    Blk 25 Lt 1 Cedar Drive
-                                                </div>
-                                            </div>
-                                        </TableCell>
-
-                                        <TableCell className="hidden sm:table-cell">
-                                            Facility
-                                        </TableCell>
-
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
-
-                                        <TableCell className="items-end">
-
-                                            <DropdownMenu>
-
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
-
-                                            </DropdownMenu>
-
-                                        </TableCell>
-
-                                    </TableRow>
-
-
-
-                                    <TableRow>
-
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Tables </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    3 remaining
-                                                </div>
-                                            </div>
-                                        </TableCell>
-
-                                        <TableCell className="hidden sm:table-cell">
-                                            Equipment
-                                        </TableCell>
-
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
-
-                                        <TableCell className="items-end">
-
-                                            <DropdownMenu>
-
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
-
-                                            </DropdownMenu>
-
-                                        </TableCell>
-
-                                    </TableRow>
+                                    }
 
 
 
@@ -522,7 +485,7 @@ const AmenitiesList = () => {
                                 </CardDescription>
                             </div>
 
-                            <Button className="flex gap-2"  onClick={facilityFormRoute}>
+                            <Button className="flex gap-2" onClick={facilityFormRoute}>
                                 <CirclePlus className="h-5 w-5" />
                                 Add Facility
                             </Button>
@@ -567,168 +530,89 @@ const AmenitiesList = () => {
 
 
 
-                                    <TableRow>
+                                    {amenityList && amenityList.map((amenity) => {
 
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
+                                        if (amenity.amenityType == "Facility") {
 
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Basketball Court Main Road </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    Blk 24 Lt 1 Cedar Drive
-                                                </div>
-                                            </div>
-                                        </TableCell>
+                                            return (
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            Facility
-                                        </TableCell>
+                                                // <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
+                                                <TableRow>
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
+                                                    <TableCell className="flex flex-row items-center gap-4">
+                                                        <Skeleton className="h-24 w-24 " />
+                                                    </TableCell>
 
-                                        <TableCell className="items-end">
+                                                    <TableCell>
+                                                        <div>
+                                                            <div className="font-medium"> {amenity.amenityName} </div>
+                                                            <div className="hidden text-sm text-muted-foreground md:inline">
+                                                                {amenity.amenityAddress}
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
 
-                                            <DropdownMenu>
+                                                    <TableCell className="hidden sm:table-cell">
+                                                        {amenity.amenityType}
+                                                    </TableCell>
 
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
+                                                    <TableCell className="hidden sm:table-cell">
+                                                        <Badge className="text-xs" variant="secondary">
+                                                            {amenity.stat}
+                                                        </Badge>
+                                                    </TableCell>
 
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
+                                                    <TableCell className="items-end">
 
-                                            </DropdownMenu>
+                                                        <DropdownMenu>
 
-                                        </TableCell>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button
+                                                                    aria-haspopup="true"
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                >
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                    <span className="sr-only">Toggle menu</span>
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
 
-                                    </TableRow>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
+                                                                {
+                                                                    (amenity.stat == "Unarchived") &&
+                                                                    (
+                                                                        <DropdownMenuItem onClick={() => { setArchive(amenity) }}> Archive </DropdownMenuItem>
+                                                                    )
+                                                                }
 
+                                                                {
+                                                                    (amenity.stat == "Archived") &&
+                                                                    (
+                                                                        <DropdownMenuItem onClick={() => { setUnarchive(amenity) }}> Unarchive </DropdownMenuItem>
+                                                                    )
+                                                                }
 
-                                    <TableRow>
-
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Basketball Court Side </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    Blk 14 Lt 2 Greyoak
-                                                </div>
-                                            </div>
-                                        </TableCell>
-
-                                        <TableCell className="hidden sm:table-cell">
-                                            Facility
-                                        </TableCell>
-
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
-
-                                        <TableCell className="items-end">
-
-                                            <DropdownMenu>
-
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
-
-                                            </DropdownMenu>
-
-                                        </TableCell>
-
-                                    </TableRow>
+                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setAm(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
 
 
+                                                            </DropdownMenuContent>
 
-                                    <TableRow>
+                                                        </DropdownMenu>
 
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
+                                                    </TableCell>
 
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Grand Cedar Pavillion </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    Blk 25 Lt 1 Cedar Drive
-                                                </div>
-                                            </div>
-                                        </TableCell>
+                                                </TableRow>
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            Facility
-                                        </TableCell>
+                                            )
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
 
-                                        <TableCell className="items-end">
+                                        }
+                                    })
 
-                                            <DropdownMenu>
 
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
-
-                                            </DropdownMenu>
-
-                                        </TableCell>
-
-                                    </TableRow>
+                                    }
 
 
 
@@ -801,169 +685,89 @@ const AmenitiesList = () => {
 
 
 
-                                    <TableRow>
+                                    {amenityList && amenityList.map((amenity) => {
 
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
+                                        if (amenity.amenityType == "Equipment") {
 
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Chairs </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    50 remaining
-                                                </div>
-                                            </div>
-                                        </TableCell>
+                                            return (
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            Equipment
-                                        </TableCell>
+                                                // <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
+                                                <TableRow>
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
+                                                    <TableCell className="flex flex-row items-center gap-4">
+                                                        <Skeleton className="h-24 w-24 " />
+                                                    </TableCell>
 
-                                        <TableCell className="items-end">
+                                                    <TableCell>
+                                                        <div>
+                                                            <div className="font-medium"> {amenity.amenityName} </div>
+                                                            <div className="hidden text-sm text-muted-foreground md:inline">
+                                                                {amenity.amenityQuantity + " remaining"}
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
 
-                                            <DropdownMenu>
+                                                    <TableCell className="hidden sm:table-cell">
+                                                        {amenity.amenityType}
+                                                    </TableCell>
 
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
+                                                    <TableCell className="hidden sm:table-cell">
+                                                        <Badge className="text-xs" variant="secondary">
+                                                            {amenity.stat}
+                                                        </Badge>
+                                                    </TableCell>
 
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
+                                                    <TableCell className="items-end">
 
-                                            </DropdownMenu>
+                                                        <DropdownMenu>
 
-                                        </TableCell>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button
+                                                                    aria-haspopup="true"
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                >
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                    <span className="sr-only">Toggle menu</span>
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
 
-                                    </TableRow>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
+                                                                {
+                                                                    (amenity.stat == "Unarchived") &&
+                                                                    (
+                                                                        <DropdownMenuItem onClick={() => { setArchive(amenity) }}> Archive </DropdownMenuItem>
+                                                                    )
+                                                                }
 
+                                                                {
+                                                                    (amenity.stat == "Archived") &&
+                                                                    (
+                                                                        <DropdownMenuItem onClick={() => { setUnarchive(amenity) }}> Unarchive </DropdownMenuItem>
+                                                                    )
+                                                                }
 
-                                    <TableRow>
-
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Tables </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    3 remaining
-                                                </div>
-                                            </div>
-                                        </TableCell>
-
-                                        <TableCell className="hidden sm:table-cell">
-                                            Equipment
-                                        </TableCell>
-
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
-
-                                        <TableCell className="items-end">
-
-                                            <DropdownMenu>
-
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
-
-                                            </DropdownMenu>
-
-                                        </TableCell>
-
-                                    </TableRow>
+                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setAm(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
 
 
+                                                            </DropdownMenuContent>
 
-                                    <TableRow>
+                                                        </DropdownMenu>
 
-                                        <TableCell className="flex flex-row items-center gap-4">
-                                            <Skeleton className="h-24 w-24 " />
-                                        </TableCell>
+                                                    </TableCell>
 
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium"> Tent </div>
-                                                <div className="hidden text-sm text-muted-foreground md:inline">
-                                                    1 remaining
-                                                </div>
-                                            </div>
-                                        </TableCell>
+                                                </TableRow>
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            Equipment
-                                        </TableCell>
+                                            )
 
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge className="text-xs" variant="secondary">
-                                                Available
-                                            </Badge>
-                                        </TableCell>
 
-                                        <TableCell className="items-end">
+                                        }
+                                    })
 
-                                            <DropdownMenu>
 
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
-
-                                            </DropdownMenu>
-
-                                        </TableCell>
-
-                                    </TableRow>
-
+                                    }
 
 
                                 </TableBody>

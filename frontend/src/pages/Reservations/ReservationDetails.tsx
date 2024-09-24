@@ -103,6 +103,7 @@ import { useAuthContext } from "@/hooks/useAuthContext"
 
 // Reservation Hook
 import { useReservationsContext } from "@/hooks/useReservationsContext"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 
@@ -218,61 +219,92 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
     }
 
     // Approved Function
-    const setApprove = async () => {
+    const setApprove = async (amenityName) => {
 
-        let reservation = reservations;
+        const approve = async () => {
 
-        reservation.reservationStatus = "Approved"
-        reservation.interactedBy = user.blkLt
-        reservation.interactionDate = date
+            let reservation = reservations;
 
-        const response = await fetch('http://localhost:4000/api/reservations/' + reservations._id, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reservation)
-        })
+            reservation.reservationStatus = "Approved"
+            reservation.interactedBy = user.blkLt
+            reservation.interactionDate = date
 
-        const json = await response.json()
-
-        if (response.ok) {
-
-            dispatch({ type: "UPDATE_RESERVATION", payload: json })
-
-            toast({
-
-                title: "Reservation approved",
-                description: reservations.amenityName + " by " + reservations.blkLt + " is approved",
-
-            })
-        }
-
-
-
-        // Reduce Amenity
-
-        let amenity = amenityList.filter( function (ame) {
-            console.log(ame)
-            return ame.amenityName === reservation.amenityName;
-        })
-        
-        const amenityUpdatedQuant = amenity.amenityQuantity - reservation.reservationQuantity;
-
-
-        amenity.amenityQuantity = amenityUpdatedQuant;
-
-        const updated = amenity;
-
-
-        if (reservation.amenityType === "Equipment") {
-            const res = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName, {
+            const response = await fetch('http://localhost:4000/api/reservations/' + reservations._id, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updated)
+                body: JSON.stringify(reservation)
             })
+
+            const json = await response.json()
+
+            if (response.ok) {
+
+                dispatch({ type: "UPDATE_RESERVATION", payload: json })
+
+                toast({
+
+                    title: "Reservation approved",
+                    description: reservations.amenityName + " by " + reservations.blkLt + " is approved",
+
+                })
+            }
+
         }
+
+        approve()
+
+
+        const reduceAmenity = async () => {
+
+            // Reduce Amenity
+    
+            let reservation = reservations;
+    
+            let amenity = amenityList.filter(function (ame) {
+                return ame.amenityName === amenityName;
+            })
+    
+            console.log(amenity)
+
+
+            const amenityUpdatedQuant = amenity[0].amenityQuantity - reservation.reservationQuantity;
+
+            amenity[0].amenityQuantity = amenityUpdatedQuant;
+
+            console.log(amenity[0].amentyQuantity);
+    
+            const updated = amenity[0];
+
+            console.log(updated);
+    
+    
+            if (reservation.amenityType === "Equipment") {
+                const res = await fetch('http://localhost:4000/api/amenities/' + amenityName, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updated)
+                })
+
+                if (res.ok) {
+                    console.log("Amenity quantity reduced")
+                }
+
+                if (!res.ok) {
+                    console.log("Amenity quantity not reduced")
+                }
+
+
+            }
+    
+    
+        };
+
+        reduceAmenity();
 
 
     }
+
+    
 
     // Rejected Function
     const setReject = async () => {
@@ -308,7 +340,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
 
     // setReopen Function
-    const setReopen = async () => {
+    const setReopen = async (amenityName) => {
 
         let reservation = reservations;
 
@@ -337,6 +369,55 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
             })
         }
+
+
+
+        const addAmenity = async () => {
+
+            // Reduce Amenity
+    
+            let reservation = reservations;
+    
+            let amenity = amenityList.filter(function (ame) {
+                return ame.amenityName === amenityName;
+            })
+    
+            console.log(amenity)
+
+
+            const amenityUpdatedQuant = amenity[0].amenityQuantity + reservation.reservationQuantity;
+
+            amenity[0].amenityQuantity = amenityUpdatedQuant;
+
+            console.log(amenity[0].amentyQuantity);
+    
+            const updated = amenity[0];
+
+            console.log(updated);
+    
+    
+            if (reservation.amenityType === "Equipment") {
+                const res = await fetch('http://localhost:4000/api/amenities/' + amenityName, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updated)
+                })
+
+                if (res.ok) {
+                    console.log("Amenity quantity reduced")
+                }
+
+                if (!res.ok) {
+                    console.log("Amenity quantity not reduced")
+                }
+
+
+            }
+    
+    
+        };
+
+        addAmenity();
 
     }
 
@@ -419,7 +500,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
     filteredUser = users.filter((user) => {
 
         if (user.blkLt === reservations.blkLt) {
-            console.log(user.blkLt);    
+            console.log(user.blkLt);
         }
 
         return user.blkLt === reservations.blkLt;
@@ -476,7 +557,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                         {/* Delete dialog cancel button */}
                         <AlertDialogCancel> Cancel </AlertDialogCancel>
-                        
+
                         {/* Delete dialog delete button */}
                         <Button
                             variant={"destructive"}
@@ -555,7 +636,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                     {/* Dropdown button for archiving and deleting */}
                     <DropdownMenu>
-                        
+
                         <DropdownMenuTrigger asChild>
 
                             {
@@ -611,7 +692,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                 <Button type="submit" form="reservationForm" onClick={setReject} variant="outline" size="sm">
                                     Reject
                                 </Button>
-                                <Button type="submit" form="reservationForm" onClick={setApprove} size="sm"> Approve Reservation </Button>
+                                <Button type="submit" form="reservationForm" onClick={ () => { setApprove( reservations.amenityName )}} size="sm"> Approve Reservation </Button>
                             </>
                         )
                     }
@@ -621,7 +702,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                         (reservations.reservationStatus == "Approved" || reservations.reservationStatus == "Rejected" && reservations.reservationStatus != "Expired" && user.position === "Admin") &&
                         (
                             <>
-                                <Button onClick={setReopen} variant="outline" size="sm"> Reopen </Button>
+                                <Button onClick={ () => {setReopen(reservations.amenityName)}} variant="outline" size="sm"> Reopen </Button>
                             </>
                         )
                     }
@@ -658,6 +739,8 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                             <div className="grid gap-0.5">
 
+
+
                                 <CardTitle className="group flex items-center gap-2 text-lg">
 
                                     {reservations.blkLt}
@@ -676,14 +759,18 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                 </CardTitle>
 
 
+
                                 <CardDescription> {formatDistanceToNow(new Date(reservations.createdAt), { addSuffix: true })} </CardDescription>
 
                             </div>
 
 
 
+
+
                             <div className="ml-auto flex items-center gap-1">
 
+                                <Skeleton className="w-[16rem] h-48 mb-2" />
 
 
                             </div>

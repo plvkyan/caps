@@ -64,6 +64,12 @@ import {
 // shadcnc Textarea Component Import
 import { Textarea } from "@/components/ui/textarea";
 
+// shadcn Toaster Import
+import { Toaster } from "@/components/ui/toaster";
+
+// shadcn Toast Import
+import { useToast } from "@/components/ui/use-toast"
+
 
 
 // Custom Component Imports
@@ -73,6 +79,9 @@ import LayoutWrapper from "@/components/layout/LayoutWrapper";
 
 
 // Utility Imports
+// Date format Import
+import { format } from "date-fns"
+
 // React Router Dom Imports
 import { useNavigate } from "react-router-dom";
 
@@ -84,6 +93,15 @@ import * as zod from "zod";
 
 // Zod Resolver Import
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+
+
+
+// Hooks
+// AuthContext Hooks for Users
+import { useAuthContext } from "@/hooks/useAuthContext"
+
+
 
 
 
@@ -104,6 +122,7 @@ const formSchema = zod.object({
     amenityQuantityMax: zod.coerce.number().min(1,
         { message: "Maximum equipment reservation quantity cannot be zero." }
     ),
+    amenityCreator: zod.string(),
     amenityReminder: zod.string(
     ).optional(),
     stat: zod.string(
@@ -112,12 +131,20 @@ const formSchema = zod.object({
 });
 
 
+
+
+
 const AmenityEquipmentForm = () => {
 
 
 
+    // Use AuthContext to get user data
+    const { user } = useAuthContext();
+
     // React Router Dom Navigate
     const navigate = useNavigate();
+
+    const [error, setError] = useState(null);
 
 
 
@@ -140,6 +167,7 @@ const AmenityEquipmentForm = () => {
             amenityQuantity: 0,
             amenityQuantityMax: 0,
             amenityReminder: "",
+            amenityCreator: user.blkLt,
             stat: "Unarchived",
         }
     });
@@ -157,17 +185,49 @@ const AmenityEquipmentForm = () => {
 
         const json = await response.json();
 
+        if (!response.ok) {
+
+            setError(json.error);
+            console.log('Error creating new equipment amenity: ', json);
+
+        }
+
         if (response.ok) {
 
             console.log('New equipment amenity created: ', json);
+
+            localStorage.setItem("newAmenity", JSON.stringify(json))
+            window.location.reload();
 
         }
 
     }
 
+    // For toast confirmation
+    const { toast } = useToast()
+
+    useEffect(() => {
+
+        if (localStorage.getItem("newAmenity")) {
+
+            const newAmenity = JSON.parse(localStorage.getItem("newAmenity") as any)
+
+            toast({
+
+                title: "Equipment amenity created",
+                description: `Equipment ${newAmenity.amenityName} was successfully created.`,
+
+            })
+
+            localStorage.removeItem("newAmenity")
+
+        }
+
+    }, []);
 
 
-    
+
+
 
     return (
 
@@ -175,12 +235,17 @@ const AmenityEquipmentForm = () => {
 
         <LayoutWrapper>
 
+            <Toaster />
+
+
             <Form {...form}>
 
                 <form onSubmit={form.handleSubmit(handleSubmit)}>
 
                     {/* Container for top row items */}
                     <div className="flex items-center gap-4 mb-3">
+
+
 
                         {/* Return to Amenity List button */}
                         <Button
@@ -254,10 +319,14 @@ const AmenityEquipmentForm = () => {
                                                                     type="text"
                                                                     {...field}
                                                                 />
-                                                                <FormMessage />
                                                             </div>
 
                                                         </FormControl>
+
+                                                        <FormMessage />
+
+                                                        {error && <div className="text-destructive"> {error} </div>}
+
                                                     </FormItem>
                                                 )
                                             }}
@@ -278,12 +347,15 @@ const AmenityEquipmentForm = () => {
                                                                 <Label htmlFor="description">Description</Label>
                                                                 <Textarea
                                                                     id="amenityDescription"
-                                                                    placeholder="Enter equipment description"   
+                                                                    placeholder="Enter equipment description"
                                                                     className="min-h-32"
                                                                     {...field}
                                                                 />
                                                             </div>
                                                         </FormControl>
+
+                                                        <FormMessage />
+
                                                     </FormItem>
                                                 )
                                             }
@@ -311,6 +383,9 @@ const AmenityEquipmentForm = () => {
                                                                 />
                                                             </div>
                                                         </FormControl>
+
+                                                        <FormMessage />
+
                                                     </FormItem>
                                                 )
                                             }
@@ -357,11 +432,12 @@ const AmenityEquipmentForm = () => {
                                                                         <Input
                                                                             id="amenityQuantity"
                                                                             type="number"
-                                                                            defaultValue="0"
                                                                             {...field}
                                                                         />
                                                                     </FormControl>
+
                                                                     <FormMessage />
+
                                                                 </FormItem>
                                                             )
                                                         }}
@@ -386,10 +462,12 @@ const AmenityEquipmentForm = () => {
                                                                         <Input
                                                                             id="amenityQuantityMax"
                                                                             type="number"
-                                                                            defaultValue="0"
                                                                             {...field}
                                                                         />
                                                                     </FormControl>
+
+                                                                    <FormMessage />
+
                                                                 </FormItem>
                                                             )
                                                         }}
@@ -400,7 +478,7 @@ const AmenityEquipmentForm = () => {
                                         </TableBody>
                                     </Table>
                                 </CardContent>
-                                
+
                             </Card>
 
                         </div>
@@ -411,7 +489,7 @@ const AmenityEquipmentForm = () => {
 
                         <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
 
-                            
+
                             <Card
                                 className="overflow-hidden" x-chunk="dashboard-07-chunk-4"
                             >
@@ -478,6 +556,9 @@ const AmenityEquipmentForm = () => {
                                                                     </SelectContent>
                                                                 </Select>
                                                             </FormControl>
+
+                                                            <FormMessage />
+
                                                         </FormItem>
                                                     )
                                                 }}
@@ -491,7 +572,7 @@ const AmenityEquipmentForm = () => {
 
                                 </CardContent>
                             </Card>
-                            
+
                         </div>
                     </div>
 
