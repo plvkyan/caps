@@ -1,13 +1,15 @@
 
 
 
-export type Amenity = {
+export type AmenityType = {
 
+    _id: string;
     amenityName: string;
     amenityType: string;
     amenityAddress: string;
     amenityDescription: string;
-    amenityQuantity: number;
+    amenityStock: number;
+    amenityStockMax: number;
     amenityQuantityMin: number;
     amenityQuantityMax: number;
     amenityReminder: string;

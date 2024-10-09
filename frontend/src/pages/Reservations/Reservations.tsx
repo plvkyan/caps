@@ -72,7 +72,7 @@ export default function Reservations() {
     // Use Effects
     // Document Title Use Effect
     useEffect(() => {
-        document.title = "Reservations | GCTMS "
+        document.title = "Reservations | GCTMS"
     }, []);
 
     // GET ALL Unarchived Reservations Use Effect for Reservation Table

@@ -65,17 +65,15 @@ import {
 // shadcn Separator Import
 import { Separator } from "@/components/ui/separator"
 
+// shadcn Skeleton Import
+import { Skeleton } from "@/components/ui/skeleton"
+
 // shadcn Textarea Import
 import { Textarea } from "@/components/ui/textarea"
 
 // shadcn Toast Import
-import { useToast } from "@/components/ui/use-toast"
 import { Toaster } from "@/components/ui/toaster"
-
-
-
-// Custom Component Imports
-// LayoutWrapper Component Import
+import { useToast } from "@/components/ui/use-toast"
 
 
 
@@ -83,34 +81,32 @@ import { Toaster } from "@/components/ui/toaster"
 // cn Import
 import { cn } from "@/lib/utils"
 
-// Date format Import
+// date-fns Date Format Import
 import { format } from "date-fns"
 
-// Link Import
-import { useNavigate } from "react-router-dom"
-
-// React Import Everything
+// React Import
 import * as React from 'react';
 
-// zod Import
-import * as zod from "zod";
+// React Day Picker Matcher Import
+import { Matcher } from "react-day-picker"
 
-// React useForm Import
+// React Hook Form useForm Import
 import { useForm } from "react-hook-form";
 
-// zodResolver Import
-import { zodResolver } from "@hookform/resolvers/zod";
+// React Router Dom useNavigate Import
+import { useNavigate } from "react-router-dom"
 
-// useEffect and useState Import for React
+// React useEffect and useState Import
 import {
     useEffect,
     useState
 } from "react"
 
-// Matcher for React Day Picker
-import { Matcher } from "react-day-picker"
+// zod Import
+import * as zod from "zod";
 
-
+// zodResolver Import
+import { zodResolver } from "@hookform/resolvers/zod";
 
 
 
@@ -121,38 +117,37 @@ import { useAuthContext } from "@/hooks/useAuthContext"
 // Reservation Hook for Reservatinos
 import { useReservationsContext } from "@/hooks/useReservationsContext"
 
-// Amenity Hook for Amenities
-import { useAmenitiesContext } from "@/hooks/useAmenitiesContext"
-import { Skeleton } from "@/components/ui/skeleton"
-
 
 
 
 
 // The data types of the form field requirements
 const formSchema = zod
-    .object({
-        blkLt: zod.string({
-            invalid_type_error: "Sa blkLtmail is required"
-        }).optional(),
-        blkLtPosition: zod.string().optional(),
-        amenityAddress: zod.string().optional(),
-        amenityName: zod.string().optional(),
-        amenityType: zod.enum(["Facility", "Equipment"]),
-        reservationDate: zod.date(),
-        reservationQuantity: zod.coerce.number().min(1, {
-            message: "You can't reserve less than 1 amenity."
-        }),
-        reservationReason: zod.string().optional(),
-        reservationStatus: zod.string().optional(),
-        stat: zod.string().optional()
-    })
+    .object(
+        {
+            blkLt: zod.string().optional(),
+            blkLtPosition: zod.string().optional(),
+            amenityAddress: zod.string().optional(),
+            amenityName: zod.string().optional(),
+            amenityType: zod.enum(["Facility", "Equipment"]),
+            reservationDate: zod.date(),
+            reserveeEmail: zod.string().email().optional(),
+            reservationQuantity: zod.coerce.number().min(1, {
+                message: "You can't reserve less than 1 amenity."
+            }),
+            reservationReason: zod.string().optional(),
+            reservationStatus: zod.string().optional(),
+            stat: zod.string().optional()
+        }
+    );
 
 
 
 
 
 export const ReservationForm = ({ amenityList }) => {
+
+
 
 
 
@@ -165,48 +160,17 @@ export const ReservationForm = ({ amenityList }) => {
     // React Router Dom Navigate
     const navigate = useNavigate();
 
-
-
-    // States
-    // State to check for existing reservation dates
-    const [existingReservations, setExistingReservations] = useState<Date[]>([]);
+    // For toast confirmation
+    const { toast } = useToast()
 
     // Get current date and add 7 days
     let date = new Date();
     date.setDate(date.getDate() + 7);
 
-    // For toast confirmation
-    const { toast } = useToast()
-
-
-
-    // Use Effects
-    // GETTING new reservation confirmation and unrejected reservations for calendar 
-    useEffect(() => {
-
-        if (localStorage.getItem("newReservation")) {
-
-            const newReservation = JSON.parse(localStorage.getItem("newReservation") as any)
-
-            toast({
-
-                title: "Reservation placed",
-                description: newReservation.amenityName + " reserved at: " + format(newReservation.reservationDate, "PPP") + ". Please wait for approval.",
-
-            })
-
-            localStorage.removeItem("newReservation")
-
-        }
-
-    }, [])
-
-
-
     // Using Forms
     const form = useForm<zod.infer<typeof formSchema>>({
 
-        // Initializing default values
+        // Initializing form default values
         resolver: zodResolver(formSchema),
         defaultValues: {
             blkLt: user.blkLt,
@@ -222,18 +186,53 @@ export const ReservationForm = ({ amenityList }) => {
 
     })
 
-    // Watch for any updates for these fields
-    const amenityName = form.watch("amenityName");
-    const amenityType = form.watch("amenityType");
-    const reservationQuantity = form.watch("reservationQuantity");
-    const reservationReason = form.watch("reservationReason");
-
-
     // For reseting the form
     const { reset } = form;
 
     // Checking if the form is successfully submitted
     const { isSubmitSuccessful } = form.formState;
+
+
+
+    // States
+    // State to check for existing reservation dates
+    const [existingReservations, setExistingReservations] = useState<Date[]>([]);
+
+
+
+    // Use Effects
+    // GETTING new reservation confirmation and unrejected reservations for calendar 
+    useEffect(() => {
+
+        // Checking if there's a new reservation stored locally
+        if (localStorage.getItem("newReservation")) {
+
+            // Get the details for the new reservation
+            const newReservation = JSON.parse(localStorage.getItem("newReservation") as any)
+
+            // Output the details into a toast
+            toast({
+
+                // Toast title
+                title: "Reservation placed",
+                // Toast description
+                description: newReservation.amenityName + " reserved at: " + format(newReservation.reservationDate, "PPP") + ". Please wait for approval.",
+
+            })
+
+            // After showing the toast, remove the new reservation details from the local storage
+            localStorage.removeItem("newReservation")
+
+        }
+
+    }, [])
+
+
+
+    // Watch for any updates for these fields
+    const amenityName = form.watch("amenityName");
+    const amenityType = form.watch("amenityType");
+    const reservationReason = form.watch("reservationReason");
 
     // Check if the form is successfully submitted, then reset its contents
     React.useEffect(() => {
@@ -241,8 +240,6 @@ export const ReservationForm = ({ amenityList }) => {
         isSubmitSuccessful && reset()
 
     }, [isSubmitSuccessful, reset])
-
-
 
     useEffect(() => {
 
@@ -327,12 +324,8 @@ export const ReservationForm = ({ amenityList }) => {
     arrayMatcher.push({ before: date });
 
 
-
-
-
-    const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
-
     
+    const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
 
         const response = await fetch('http://localhost:4000/api/reservations', {
             method: 'POST',
@@ -344,7 +337,7 @@ export const ReservationForm = ({ amenityList }) => {
 
         const json = await response.json()
 
-        // Conditional statement if announcement creation is successful
+        // Conditional statement if reservation creation is successful
         if (response.ok) {
 
             console.log('New reservation placed:', json);
@@ -444,14 +437,14 @@ export const ReservationForm = ({ amenityList }) => {
 
 
                                     <CardContent>
-                                        
+
 
                                         <div className="grid">
 
-                                        <div className="flex gap-2 items-center justify-between py-3"> 
+                                            <div className="flex gap-2 items-center justify-between py-3">
 
-                                            
-                                        </div>
+
+                                            </div>
 
 
                                             {/* First FormField */}
@@ -593,7 +586,7 @@ export const ReservationForm = ({ amenityList }) => {
                                                         <FormField
                                                             control={form.control}
                                                             name="amenityAddress"
-                                                            render={({ field }) => (
+                                                            render={() => (
 
                                                                 <FormItem>
 
@@ -782,8 +775,8 @@ export const ReservationForm = ({ amenityList }) => {
 
                                                             return (
                                                                 <FormDescription className="text-sm text-end">
-                                                                    {amenity.amenityQuantity} {amenity.amenityName.toLowerCase()}{ amenity.amenityQuantity <= 1 ? "" : "s" } available for reservation.
-                                                                    You can only reserve {amenity.amenityQuantityMax} {amenity.amenityName.toLowerCase()}{ amenity.amenityQuantityMax <= 1 ? "" : "s" } at a time.
+                                                                    {amenity.amenityQuantity} {amenity.amenityName.toLowerCase()}{amenity.amenityQuantity <= 1 ? "" : "s"} available for reservation.
+                                                                    You can only reserve {amenity.amenityQuantityMax} {amenity.amenityName.toLowerCase()}{amenity.amenityQuantityMax <= 1 ? "" : "s"} at a time.
                                                                 </FormDescription>
                                                             )
 
@@ -813,7 +806,7 @@ export const ReservationForm = ({ amenityList }) => {
 
                                                     <FormItem className="flex flex-col">
 
-                                                        <div className="flex gap-6 items-center justify-between py-3">
+                                                        <div className="flex gap-6 items-center justify-between pt-3">
 
 
                                                             <FormLabel> Reservation Date </FormLabel>
@@ -873,16 +866,46 @@ export const ReservationForm = ({ amenityList }) => {
 
                                                         </div>
 
-                                                        <FormDescription className="text-sm text-end">
+                                                        <FormDescription className="text-sm text-end pb-2">
                                                             Reservations should not be within the next 7 days or less.
                                                         </FormDescription>
-
-                                                        <FormMessage />
 
                                                     </FormItem>
                                                 )}
                                             />
 
+
+
+
+                                            <FormField
+                                                control={form.control}
+                                                name="reserveeEmail"
+                                                render={({ field }) => (
+
+                                                    <FormItem>
+
+                                                        <div className="flex gap-6 items-center justify-between pt-3">
+
+                                                            <FormLabel className=""> Reservee Email (Optional) </FormLabel>
+
+                                                            <Input
+                                                                // className="focus-visible:ring-transparent focus-visible:ring-offset-0"
+                                                                id="reserveeEmail"
+                                                                placeholder="Type your email"
+                                                                type="email"
+                                                                {...field}
+                                                            />
+
+                                                        </div>
+
+                                                        <FormDescription className="text-sm text-end pb-2">
+                                                            You are notified of reservation confirmation through emails.
+                                                        </FormDescription>
+
+                                                    </FormItem>
+
+                                                )}
+                                            />
 
 
 
@@ -898,10 +921,10 @@ export const ReservationForm = ({ amenityList }) => {
                                                         <div className="flex gap-6 items-center justify-between py-3 mt-2">
 
 
-                                                            <FormLabel> Reservation Reason </FormLabel>
+                                                            <FormLabel className="mr-6"> Reservation Reason </FormLabel>
 
                                                             <Textarea
-                                                                className="bg-card border-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                                                                // className="focus-visible:ring-transparent focus-visible:ring-offset-0"
                                                                 placeholder="Type your reason here ..."
                                                                 {...field} />
 
@@ -969,7 +992,7 @@ export const ReservationForm = ({ amenityList }) => {
 
                                         <div className="ml-auto flex items-center gap-1">
 
-                                        
+
 
                                         </div>
 

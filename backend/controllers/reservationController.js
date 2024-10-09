@@ -124,6 +124,7 @@ const createReservation = async (req, res) => {
         reservationQuantity, 
         reservationReason, 
         reservationStatus, 
+        reserveeEmail,
         stat 
     } = req.body
 
@@ -142,6 +143,7 @@ const createReservation = async (req, res) => {
             reservationQuantity,
             reservationReason, 
             reservationStatus, 
+            reserveeEmail,
             stat 
         })
 

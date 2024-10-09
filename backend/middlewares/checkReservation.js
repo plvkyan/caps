@@ -76,7 +76,7 @@ const checkReservation = async (req, rest, next) => {
 
             const amenity = await Amenity.findOne({ amenityName: reservation.amenityName });
 
-            await Amenity.updateOne({ amenityName: reservation.amenityName }, { amenityQuantity: amenity.amenityQuantity + reservation.reservationQuantity });
+            await Amenity.updateOne({ amenityName: reservation.amenityName }, { amenityStock: amenity.amenityStock + reservation.reservationQuantity });
 
         })
         // Completed reservation function section --- END

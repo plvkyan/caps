@@ -59,7 +59,7 @@ const createAmenity = async (req, res) => {
 
     console.log(req.file, 16);
 
-    const { amenityName, amenityType, amenityAddress, amenityCreator, amenityDescription, amenityQuantity, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat } = req.body
+    const { amenityName, amenityType, amenityAddress, amenityCreator, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat } = req.body
 
     try {
 
@@ -72,7 +72,7 @@ const createAmenity = async (req, res) => {
         }
 
         // Add amenity to database
-        const amenity = await Amenity.create({ amenityName, amenityType, amenityCreator, amenityDescription, amenityAddress, amenityQuantity, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat })
+        const amenity = await Amenity.create({ amenityName, amenityType, amenityCreator, amenityDescription, amenityAddress, amenityStockMax, amenityStock, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat })
         res.status(200).json(amenity)
 
     } catch (error) {

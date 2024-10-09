@@ -103,9 +103,23 @@ export const ReservationAmenities = (reservations, amenityList) => {
                     </CardHeader>
 
                     <CardContent>
-                        <div className="text-sm text-muted-foreground">
-                            {((pendingReservations.length / allReservations.length) * 100).toFixed(2)}% of all reservations are pending.
-                        </div>
+
+                        {
+                            (pendingReservations.length === 0) && (
+                                <div className="text-sm text-muted-foreground">
+                                    There are currently no pending reservations.
+                                </div>
+                            )
+                        }
+
+                        {
+                            (pendingReservations.length > 0) && (
+                                <div className="text-sm text-muted-foreground">
+                                    {((pendingReservations.length / allReservations.length) * 100).toFixed(2)}% of reservations are pending.
+                                </div>
+                            )
+                        }
+
                     </CardContent>
 
                     <CardFooter>
@@ -124,9 +138,23 @@ export const ReservationAmenities = (reservations, amenityList) => {
                     </CardHeader>
 
                     <CardContent>
-                        <div className="text-sm text-muted-foreground">
-                            {((acceptedReservations.length / allReservations.length) * 100).toFixed(2)}% of reservations are accepted.
-                        </div>
+
+                        {
+                            (acceptedReservations.length === 0) && (
+                                <div className="text-sm text-muted-foreground">
+                                    There are currently no accepted reservations.
+                                </div>
+                            )
+                        }
+
+                        {
+                            (acceptedReservations.length > 0) && (
+                                <div className="text-sm text-muted-foreground">
+                                    {((acceptedReservations.length / allReservations.length) * 100).toFixed(2)}% of reservations are accepted.
+                                </div>
+                            )
+                        }
+
                     </CardContent>
 
                     <CardFooter>
@@ -143,9 +171,23 @@ export const ReservationAmenities = (reservations, amenityList) => {
                     </CardHeader>
 
                     <CardContent>
-                        <div className="text-sm text-muted-foreground">
-                            {((rejectedReservations.length / allReservations.length) * 100).toFixed(2)}% of reservations are rejected.
-                        </div>
+
+                        {
+                            (rejectedReservations.length === 0) && (
+                                <div className="text-sm text-muted-foreground">
+                                    There are currently no rejected reservations.
+                                </div>
+                            )
+                        }
+
+                        {
+                            (rejectedReservations.length > 0) && (
+                                <div className="text-sm text-muted-foreground">
+                                    {((rejectedReservations.length / allReservations.length) * 100).toFixed(2)}% of reservations are rejected.
+                                </div>
+                            )
+                        }
+
                     </CardContent>
 
                     <CardFooter>

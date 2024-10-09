@@ -45,6 +45,10 @@ const reservationSchema = new Schema({
         type: Date,
         required: true
     },
+    reserveeEmail: {
+        type: String,
+        required: false
+    },
     reservationQuantity: {
         type: Number,
         required: false,

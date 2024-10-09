@@ -1,6 +1,6 @@
 
 export type PaymentType = {
-    id: string
+    _id: string
     amount: number
     statusObj: object
     status: string

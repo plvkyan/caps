@@ -6,14 +6,23 @@
 // Lucide Icons Imports
 import {
     CirclePlus,
-    File,
-    ListFilter,
     MoreHorizontal,
 } from "lucide-react";
 
 
 
 // shadcn Component Imports
+// shadcn Alert Dialog Imports
+import { 
+    AlertDialog, 
+    AlertDialogCancel, 
+    AlertDialogContent, 
+    AlertDialogDescription, 
+    AlertDialogFooter, 
+    AlertDialogHeader, 
+    AlertDialogTitle 
+} from "@/components/ui/alert-dialog";
+
 // shadcn Badge Imports
 import { Badge } from "@/components/ui/badge"
 
@@ -32,11 +41,9 @@ import {
 // shadcn Dropdown Imports
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -53,7 +60,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-
 // shadcn Tab Imports
 import {
     Tabs,
@@ -61,6 +67,10 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs"
+
+// shadcn Toast Import
+import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
 
 
 
@@ -83,12 +93,7 @@ import { useEffect, useState } from "react";
 
 // Types
 // Amenity Type Import
-import { Amenity } from "@/types/amenities";
-
-// shadcn Toast Import
-import { useToast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AmenityType } from "@/types/amenity-type";
 
 
 
@@ -97,24 +102,30 @@ import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescript
 const AmenitiesList = () => {
 
 
-    const { toast } = useToast()
 
+    // States
+    // Specific Amenity State
+    const [am, setAm] = useState<AmenityType | null>(null);
+
+    // Amenity List State
+    const [amenityList, setAmenityList] = useState<AmenityType[] | null>(null);
+
+    // Delete Dialog State
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
-
+    // Toast Confirmations
+    const { toast } = useToast()
 
     // React Router Dom Navigate
     const navigate = useNavigate();
-
-    const [amenityList, setAmenityList] = useState<Amenity[] | null>(null);
-
-    const [am, setAm] = useState<Amenity | null>(null);
 
 
 
     // Use Effect for API calls
     // Use Effect for Fetching Amenities
     useEffect(() => {
+        
+        document.title = "Amenities | GCTMS";
 
         const fetchAmenities = async () => {
 
@@ -124,10 +135,13 @@ const AmenitiesList = () => {
 
             if (response.ok) {
 
-                console.log(amenityList)
+                console.log(amenityList);
                 setAmenityList(json);
 
-
+            } else if (!response.ok) {
+                    
+                console.log("Fetching amenities failed: " + json);
+    
             }
 
         }
@@ -335,6 +349,7 @@ const AmenitiesList = () => {
                     <Card x-chunk="dashboard-05-chunk-3">
 
                         <CardHeader className="px-7 flex flex-row justify-between">
+
                             <div className="flex flex-col gap-2">
                                 <CardTitle> Amenities </CardTitle>
                                 <CardDescription>
@@ -385,27 +400,27 @@ const AmenitiesList = () => {
 
                                         return (
 
-                                            // <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
                                             <TableRow>
+                                            {/* <TableRow> */}
 
-                                                <TableCell className="flex flex-row items-center gap-4">
+                                                <TableCell className="flex flex-row items-center gap-4" onClick={() => { amenityDetailsRoute(amenity); }}>
                                                     <Skeleton className="h-24 w-24 " />
                                                 </TableCell>
 
-                                                <TableCell>
+                                                <TableCell onClick={() => { amenityDetailsRoute(amenity); }}>
                                                     <div>
                                                         <div className="font-medium"> {amenity.amenityName} </div>
                                                         <div className="hidden text-sm text-muted-foreground md:inline">
-                                                            {amenity.amenityType == "Facility" ? amenity.amenityAddress : amenity.amenityQuantity + " remaining"}
+                                                            {amenity.amenityType == "Facility" ? amenity.amenityAddress : amenity.amenityStock + " remaining"}
                                                         </div>
                                                     </div>
                                                 </TableCell>
 
-                                                <TableCell className="hidden sm:table-cell">
+                                                <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity); }}>
                                                     {amenity.amenityType}
                                                 </TableCell>
 
-                                                <TableCell className="hidden sm:table-cell">
+                                                <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity); }}>
                                                     <Badge className="text-xs" variant="secondary">
                                                         {amenity.stat}
                                                     </Badge>
@@ -417,6 +432,7 @@ const AmenitiesList = () => {
 
                                                             <DropdownMenuTrigger asChild>
                                                                 <Button
+                                                                    type="button"
                                                                     aria-haspopup="true"
                                                                     size="icon"
                                                                     variant="ghost"
@@ -536,8 +552,8 @@ const AmenitiesList = () => {
 
                                             return (
 
-                                                // <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
-                                                <TableRow>
+                                                <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
+                                                {/* <TableRow> */}
 
                                                     <TableCell className="flex flex-row items-center gap-4">
                                                         <Skeleton className="h-24 w-24 " />
@@ -691,8 +707,8 @@ const AmenitiesList = () => {
 
                                             return (
 
-                                                // <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
-                                                <TableRow>
+                                                <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
+                                                {/* <TableRow> */}
 
                                                     <TableCell className="flex flex-row items-center gap-4">
                                                         <Skeleton className="h-24 w-24 " />
@@ -702,7 +718,7 @@ const AmenitiesList = () => {
                                                         <div>
                                                             <div className="font-medium"> {amenity.amenityName} </div>
                                                             <div className="hidden text-sm text-muted-foreground md:inline">
-                                                                {amenity.amenityQuantity + " remaining"}
+                                                                {amenity.amenityStock + " remaining"}
                                                             </div>
                                                         </div>
                                                     </TableCell>

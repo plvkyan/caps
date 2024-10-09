@@ -28,7 +28,7 @@ import * as React from "react";
 
 
 // Interfaces
-interface GithubAccessTokenEmailProps {
+interface ReservationConfirmationEmailProps {
   username?: string;
 }
 
@@ -40,7 +40,7 @@ const baseUrl = process.env.VERCEL_URL
 
 
 
-export const GithubAccessTokenEmail = ({ username, }: GithubAccessTokenEmailProps) => (
+export const ReservationConfirmationEmail = ({ username, }: ReservationConfirmationEmailProps) => (
 
   <Html>
 
@@ -52,7 +52,7 @@ export const GithubAccessTokenEmail = ({ username, }: GithubAccessTokenEmailProp
     <Body style={main}>
       <Container style={container}>
         <Img
-
+          src="/lol.png"
           width="32"
           height="32"
 
@@ -90,11 +90,11 @@ export const GithubAccessTokenEmail = ({ username, }: GithubAccessTokenEmailProp
 
 
 
-GithubAccessTokenEmail.PreviewProps = {
+ReservationConfirmationEmail.PreviewProps = {
   username: "alanturing",
-} as GithubAccessTokenEmailProps;
+} as ReservationConfirmationEmailProps;
 
-export default GithubAccessTokenEmail;
+export default ReservationConfirmationEmail;
 
 
 

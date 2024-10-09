@@ -32,7 +32,11 @@ const amenitySchema = new Schema({
         type: String,
         required: false
     },
-    amenityQuantity: {
+    amenityStock: {
+        type: Number,
+        required: false
+    },
+    amenityStockMax: {
         type: Number,
         required: false
     },

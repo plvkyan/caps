@@ -116,8 +116,12 @@ const formSchema = zod.object({
     amenityDescription: zod.string().min(1,
         { message: "Equipment description cannot be empty." }
     ),
-    amenityQuantity: zod.coerce.number().min(1,
-        { message: "Equipment quantity cannot be zero." }
+    amenityStock: zod.coerce.number().min(1).optional(),
+    amenityStockMax: zod.coerce.number().min(1,
+        { message: "Equipment stock cannot be zero." }
+    ),
+    amenityQuantityMin: zod.coerce.number().min(1,
+        { message: "Minimum equipment reservation quantity cannot be zero." }
     ),
     amenityQuantityMax: zod.coerce.number().min(1,
         { message: "Maximum equipment reservation quantity cannot be zero." }
@@ -164,8 +168,10 @@ const AmenityEquipmentForm = () => {
             amenityDescription: "",
             amenityName: "",
             amenityType: "Equipment",
-            amenityQuantity: 0,
+            amenityStock: 1,
+            amenityStockMax: 0,
             amenityQuantityMax: 0,
+            amenityQuantityMin: 1,
             amenityReminder: "",
             amenityCreator: user.blkLt,
             stat: "Unarchived",
@@ -174,6 +180,8 @@ const AmenityEquipmentForm = () => {
 
     // Handle Submit Function for CREATING an amenity
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
+
+        values.amenityStock = values.amenityStockMax;
 
         const response = await fetch('http://localhost:4000/api/amenities', {
             method: 'POST',
@@ -249,6 +257,7 @@ const AmenityEquipmentForm = () => {
 
                         {/* Return to Amenity List button */}
                         <Button
+                            type="button"
                             variant="outline" size="icon"
                             className="h-7 w-7"
                             onClick={returnRoute}
@@ -311,7 +320,8 @@ const AmenityEquipmentForm = () => {
                                                         <FormControl>
 
                                                             <div className="grid gap-2">
-                                                                <Label htmlFor="name">Name</Label>
+                                                                <Label htmlFor="name"> Name </Label>
+                                                                <CardDescription> The equipment name should be in singular form. </CardDescription>
                                                                 <Input
                                                                     id="amenityName"
                                                                     className="w-full"
@@ -415,22 +425,56 @@ const AmenityEquipmentForm = () => {
                                     <Table>
 
                                         <TableBody>
-                                            <TableRow>
+
+
+
+                                        <TableRow>
                                                 <TableCell className="font-semibold">
-                                                    Maximum amount per reservation
+                                                    Equipment Stocks
                                                 </TableCell>
+                                                <TableCell>
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="amenityStockMax"
+                                                        render={({ field }) => {
+                                                            return (
+                                                                <FormItem>
+                                                                    <FormLabel className="hidden"> Amenity Maximum Stock </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            id="amenityStockMax"
+                                                                            type="number"
+                                                                            {...field}
+                                                                        />
+                                                                    </FormControl>
+
+                                                                    <FormMessage />
+
+                                                                </FormItem>
+                                                            )
+                                                        }}
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+
+                                            <TableRow>
+
+                                                <TableCell className="font-semibold">
+                                                    Minimum amount per reservation
+                                                </TableCell>
+
                                                 <TableCell>
 
                                                     <FormField
                                                         control={form.control}
-                                                        name="amenityQuantity"
+                                                        name="amenityQuantityMin"
                                                         render={({ field }) => {
                                                             return (
                                                                 <FormItem>
-                                                                    <FormLabel className="hidden"> Amenity Quantity </FormLabel>
+                                                                    <FormLabel className="hidden"> Minimum Amenity Quantity per Reservation </FormLabel>
                                                                     <FormControl>
                                                                         <Input
-                                                                            id="amenityQuantity"
+                                                                            id="amenityQuantityMin"
                                                                             type="number"
                                                                             {...field}
                                                                         />
@@ -445,19 +489,24 @@ const AmenityEquipmentForm = () => {
 
 
                                                 </TableCell>
+
                                             </TableRow>
+
                                             <TableRow>
+
                                                 <TableCell className="font-semibold">
-                                                    Maximum stocks
+                                                    Maximum amount per reservation
                                                 </TableCell>
+
                                                 <TableCell>
+
                                                     <FormField
                                                         control={form.control}
                                                         name="amenityQuantityMax"
                                                         render={({ field }) => {
                                                             return (
                                                                 <FormItem>
-                                                                    <FormLabel className="hidden"> Amenity Maximum Quantity </FormLabel>
+                                                                    <FormLabel className="hidden"> Maximum Amenity Quantity per Reservation </FormLabel>
                                                                     <FormControl>
                                                                         <Input
                                                                             id="amenityQuantityMax"
@@ -472,11 +521,15 @@ const AmenityEquipmentForm = () => {
                                                             )
                                                         }}
                                                     />
-                                                </TableCell>
-                                            </TableRow>
 
+                                                </TableCell>
+
+                                            </TableRow>
+                                            
                                         </TableBody>
+
                                     </Table>
+
                                 </CardContent>
 
                             </Card>
@@ -494,40 +547,55 @@ const AmenityEquipmentForm = () => {
                                 className="overflow-hidden" x-chunk="dashboard-07-chunk-4"
                             >
                                 <CardHeader>
-                                    <CardTitle> Equipment Images</CardTitle>
+                                    <CardTitle> Equipment Images </CardTitle>
                                     <CardDescription>
                                         Attach images of the new equipment. You can upload up to 3 images.
                                     </CardDescription>
                                 </CardHeader>
+
                                 <CardContent>
+
                                     <div className="grid gap-2">
+
                                         <Skeleton
                                             className="aspect-square w-full rounded-md object-cover h-[300] w-[300]"
                                         />
+
                                         <div className="grid grid-cols-3 gap-2">
-                                            <button>
+
+                                            <button type="button">
                                                 <Skeleton
                                                     className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"
                                                 />
                                             </button>
-                                            <button>
+
+                                            <button type="button">
                                                 <Skeleton
                                                     className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"
                                                 />
                                             </button>
-                                            <button className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
+
+                                            <button type="button" className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
                                                 <Upload className="h-4 w-4 text-muted-foreground" />
                                                 <span className="sr-only">Upload</span>
                                             </button>
+                                            
                                         </div>
+
                                     </div>
+
                                 </CardContent>
                             </Card>
 
                             <Card x-chunk="dashboard-07-chunk-3">
 
                                 <CardHeader>
+
                                     <CardTitle> Equipment Status </CardTitle>
+                                    <CardDescription> 
+                                        The equipment's visibility to the unit owners. 
+                                    </CardDescription>
+
                                 </CardHeader>
 
                                 <CardContent>
@@ -536,28 +604,47 @@ const AmenityEquipmentForm = () => {
 
                                         <div className="grid gap-3">
 
-                                            <Label htmlFor="status">Status</Label>
-
                                             <FormField
                                                 control={form.control}
                                                 name="stat"
                                                 render={({ field }) => {
                                                     return (
                                                         <FormItem>
-                                                            <FormLabel className="hidden"> Equipment Status</FormLabel>
+
+                                                            <FormLabel> Status</FormLabel>
+
                                                             <FormControl>
+
                                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
+
                                                                     <SelectTrigger id="stat" aria-label="Select status">
                                                                         <SelectValue placeholder="Select status" />
                                                                     </SelectTrigger>
+
                                                                     <SelectContent>
                                                                         <SelectItem value="Unarchived"> Unarchived </SelectItem>
                                                                         <SelectItem value="Archived"> Archived </SelectItem>
                                                                     </SelectContent>
+
                                                                 </Select>
+
                                                             </FormControl>
 
                                                             <FormMessage />
+
+                                                            {/* If Equipment Status is currently archived, show this */}
+                                                            { form.getValues("stat") === "Archived" &&
+                                                                <CardDescription>
+                                                                    Archived equipments are hidden from the unit owners. 
+                                                                </CardDescription>
+                                                            }
+
+                                                            {/* If Equipment Status is currently unarchived, show this */}
+                                                            { form.getValues("stat") === "Unarchived" &&
+                                                                <CardDescription>
+                                                                    Unarchived equipments are shown to the unit owners. 
+                                                                </CardDescription>
+                                                            }
 
                                                         </FormItem>
                                                     )

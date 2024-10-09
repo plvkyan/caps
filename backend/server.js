@@ -8,6 +8,7 @@ const announcementRoutes = require('./routes/announcementRoutes')
 const userRoutes = require('./routes/userRoutes')
 const paymentRoutes = require('./routes/paymentRoutes')
 const webhookRoutes = require('./routes/webhookRoutes')
+const emailRoutes = require('./routes/emailRoutes')
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -57,9 +58,9 @@ app.use('/api/announcements', announcementRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/reservations', reservationRoutes)
 app.use('/api/amenities', amenityRoutes)
-// app.use('/api/payments', paymentRoutes)
 app.use('/api/webhooks', webhookRoutes)
 app.use('/api/bills', billRoutes)
+app.use('/api/emails', emailRoutes)
 
 
 // Connect to DB

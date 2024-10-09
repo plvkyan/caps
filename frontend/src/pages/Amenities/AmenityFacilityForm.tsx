@@ -283,11 +283,15 @@ const AmenityFacilityForm = () => {
                                             render={({ field }) => {
                                                 return (
                                                     <FormItem>
+
                                                         <FormLabel className="hidden"> Facility Name </FormLabel>
                                                         <FormControl>
 
                                                             <div className="grid gap-2">
-                                                                <Label htmlFor="name">Name</Label>
+
+                                                                <Label htmlFor="name"> Name </Label>
+                                                                <CardDescription> The facility name as how it is generally known. </CardDescription>
+
                                                                 <Input
                                                                     id="amenityName"
                                                                     type="text"
@@ -295,6 +299,7 @@ const AmenityFacilityForm = () => {
                                                                     placeholder="Enter facility name"
                                                                     {...field}
                                                                 />
+                                                                
                                                             </div>
 
                                                         </FormControl>
@@ -424,12 +429,19 @@ const AmenityFacilityForm = () => {
                             </Card>
 
                             <Card x-chunk="dashboard-07-chunk-3">
-                                <CardHeader>
-                                    <CardTitle> Facility Status </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid gap-6">
 
+                                <CardHeader>
+
+                                    <CardTitle> Facility Status </CardTitle>
+                                    <CardDescription> 
+                                        The equipment's visibility to the unit owners. 
+                                    </CardDescription>
+
+                                </CardHeader>
+
+                                <CardContent>
+
+                                    <div className="grid gap-6">
 
                                         <div className="grid gap-3">
 
@@ -440,21 +452,43 @@ const AmenityFacilityForm = () => {
                                                 name="stat"
                                                 render={({ field }) => {
                                                     return (
+
                                                         <FormItem>
+
                                                             <FormLabel className="hidden"> Facility Status </FormLabel>
+
                                                             <FormControl>
+
                                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
+
                                                                     <SelectTrigger id="stat" aria-label="Select status">
                                                                         <SelectValue placeholder="Select status" />
                                                                     </SelectTrigger>
+
                                                                     <SelectContent>
                                                                         <SelectItem value="Unarchived"> Unarchived </SelectItem>
                                                                         <SelectItem value="Archived"> Archived </SelectItem>
                                                                     </SelectContent>
+
                                                                 </Select>
+
                                                             </FormControl>
 
                                                             <FormMessage />
+
+                                                            {/* If Equipment Status is currently archived, show this */}
+                                                            { form.getValues("stat") === "Archived" &&
+                                                                <CardDescription>
+                                                                    Archived facilities aren't visible to the unit owners. 
+                                                                </CardDescription>
+                                                            }
+
+                                                            {/* If Equipment Status is currently unarchived, show this */}
+                                                            { form.getValues("stat") === "Unarchived" &&
+                                                                <CardDescription>
+                                                                    Unarchived facilities are shown to the unit owners. 
+                                                                </CardDescription>
+                                                            }
 
                                                         </FormItem>
                                                     )

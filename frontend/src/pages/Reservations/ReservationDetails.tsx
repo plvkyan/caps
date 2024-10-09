@@ -63,6 +63,9 @@ import { Input } from "@/components/ui/input"
 // shadcn Separator Import
 import { Separator } from "@/components/ui/separator"
 
+// shadcn Skeleton Import
+import { Skeleton } from "@/components/ui/skeleton"
+
 // shadcn Textarea Import
 import { Textarea } from "@/components/ui/textarea"
 
@@ -72,25 +75,27 @@ import { Toaster } from "@/components/ui/toaster"
 
 
 
-// Custom Component Imports
-
-
-
 // Utility Imports
-// Date format Import
+// date-fns format date Import
 import { format, formatDistanceToNow } from "date-fns"
 
-// Link Import
-import { Link, useNavigate } from "react-router-dom"
+// React Router Dom useNavigate Import
+import { useNavigate } from "react-router-dom"
 
 // React Import Everything
 import * as React from 'react';
 
-// zod Import
-import * as zod from "zod";
-
 // React useForm Import
 import { useForm } from "react-hook-form";
+
+// React useEffect, useState Import
+import {
+    useEffect,
+    useState
+} from "react"
+
+// zod Import
+import * as zod from "zod";
 
 // zodResolver Import
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -103,7 +108,6 @@ import { useAuthContext } from "@/hooks/useAuthContext"
 
 // Reservation Hook
 import { useReservationsContext } from "@/hooks/useReservationsContext"
-import { Skeleton } from "@/components/ui/skeleton"
 
 
 
@@ -111,16 +115,18 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 //
 const formSchema = zod
-    .object({
-        reservationComment: zod.string().optional(),
-        reservationCommentSubject: zod.string().optional(),
-    })
+    .object(
+        {
+            reservationComment: zod.string().optional(),
+            reservationCommentSubject: zod.string().optional(),
+        }
+    );
 
 
 
 
 
-export const ReservationDetails = ({ reservations, users, amenityList }) => {
+export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
 
 
@@ -134,6 +140,9 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
     // Toast
     const { toast } = useToast()
 
+    // For page navigation
+    const navigate = useNavigate();
+
     // Use Date Today
     const date = new Date()
 
@@ -143,6 +152,53 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
     // Delete Dialog
     const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
 
+    // Email state
+    const [censoredEmail, setCensoredEmail] = useState(reservation.reserveeEmail ? reservation.reserveeEmail.substring(0, reservation.reserveeEmail.indexOf("@")) : undefined);
+
+
+
+
+    // useEffects
+    // useEffect for censoring email
+    useEffect(() => {
+
+        // Censor Email Function
+        const censorEmail = () => {
+
+            // Checks if email exists
+            if (censoredEmail != undefined) {
+
+                // Create email variable to store censored email
+                let email = "";
+
+                // Iterate over the email and replace them with '*' unless it's the first or last letter
+                for (let i = 0; i < censoredEmail.length; i++) {
+
+                    // If it's the first letter, keep it
+                    if (i === 0) {
+                        email += censoredEmail[i];
+                        // If it's not the first letter and is before the '@' symbol, censor it
+                    } else if (i < (censoredEmail.length - 1)) {
+                        email += "*";
+                        // Any letter beyond the '@' symbol, keep it
+                    } else {
+                        email += censoredEmail[i] + reservation.reserveeEmail.substring(reservation.reserveeEmail.indexOf("@"));
+                    }
+
+                }
+
+                // Change the state to the censored email
+                setCensoredEmail(email);
+
+            }
+
+        }
+
+        // Call Censor Email Function
+        censorEmail();
+
+    }, []);
+
 
 
     // New form validated by Zod
@@ -150,8 +206,8 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
         resolver: zodResolver(formSchema),
         defaultValues: {
-            reservationComment: reservations.reservationComment,
-            reservationCommentSubject: reservations.reservationCommentSubject,
+            reservationComment: reservation.reservationComment,
+            reservationCommentSubject: reservation.reservationCommentSubject,
         }
 
     })
@@ -162,11 +218,9 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
     // Archive Function
     const setArchive = async () => {
 
-        let reservation = reservations;
+        reservation.stat = "Archived";
 
-        reservation.stat = "Archived"
-
-        const response = await fetch('http://localhost:4000/api/reservations/' + reservations._id, {
+        const response = await fetch('http://localhost:4000/api/reservations/' + reservation._id, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reservation)
@@ -181,7 +235,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
             toast({
 
                 title: "Reservation archived",
-                description: reservations.amenityName + " by " + reservations.blkLt + " is unarchived",
+                description: "Reservation for " + reservation.amenityName + " by " + reservation.blkLt + " on " + format(reservation.reservationDate, "yyyy/MM/dd") + " has been archived.",
 
             })
         }
@@ -191,11 +245,9 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
     // Unarchive Function
     const setUnarchive = async () => {
 
-        let reservation = reservations;
-
         reservation.stat = "Unarchived"
 
-        const response = await fetch('http://localhost:4000/api/reservations/' + reservations._id, {
+        const response = await fetch('http://localhost:4000/api/reservations/' + reservation._id, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reservation)
@@ -210,7 +262,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
             toast({
 
                 title: "Reservation unarchived",
-                description: reservations.amenityName + " by " + reservations.blkLt + " is archived",
+                description: "Reservation for " + reservation.amenityName + " by " + reservation.blkLt + " on " + format(reservation.reservationDate, "yyyy/MM/dd") + " has been archived.",
 
             })
 
@@ -221,15 +273,13 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
     // Approved Function
     const setApprove = async (amenityName) => {
 
-        const approve = async () => {
+        const approveReservation = async () => {
 
-            let reservation = reservations;
+            reservation.reservationStatus = "Approved";
+            reservation.interactedBy = user.blkLt;
+            reservation.interactionDate = date;
 
-            reservation.reservationStatus = "Approved"
-            reservation.interactedBy = user.blkLt
-            reservation.interactionDate = date
-
-            const response = await fetch('http://localhost:4000/api/reservations/' + reservations._id, {
+            const response = await fetch('http://localhost:4000/api/reservations/' + reservation._id, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(reservation)
@@ -244,78 +294,85 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                 toast({
 
                     title: "Reservation approved",
-                    description: reservations.amenityName + " by " + reservations.blkLt + " is approved",
+                    description: "Reservation for " + reservation.amenityName + " by " + reservation.blkLt + " on " + format(reservation.reservationDate, "yyyy/MM/dd") + " has been approved.",
 
                 })
             }
 
         }
 
-        approve()
+        approveReservation();
 
+        const reduceAmenityQuant = async () => {
 
-        const reduceAmenity = async () => {
-
-            // Reduce Amenity
-    
-            let reservation = reservations;
-    
+            // Get the current state of amenity
             let amenity = amenityList.filter(function (ame) {
                 return ame.amenityName === amenityName;
             })
-    
-            console.log(amenity)
 
+            // Take the currrent amenity quantity and reduce the desired reservation quantity
+            amenity[0].amenityQuantity = amenity[0].amenityQuantity - reservation.reservationQuantity;
 
-            const amenityUpdatedQuant = amenity[0].amenityQuantity - reservation.reservationQuantity;
-
-            amenity[0].amenityQuantity = amenityUpdatedQuant;
-
-            console.log(amenity[0].amentyQuantity);
-    
-            const updated = amenity[0];
-
-            console.log(updated);
-    
-    
             if (reservation.amenityType === "Equipment") {
                 const res = await fetch('http://localhost:4000/api/amenities/' + amenityName, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updated)
-                })
+                    body: JSON.stringify(amenity[0]),
+                });
 
                 if (res.ok) {
-                    console.log("Amenity quantity reduced")
+                    console.log("Amenity quantity reduced.");
                 }
 
                 if (!res.ok) {
-                    console.log("Amenity quantity not reduced")
+                    console.log("Amenity quantity not reduced.");
                 }
 
 
             }
-    
-    
+
+
         };
 
-        reduceAmenity();
+        reduceAmenityQuant();
 
+        const sendConfirmationEmail = async () => {
+
+            if (reservation.reserveeEmail != undefined) {
+
+                const res = await fetch('http://localhost:4000/api/emails', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reservation),
+                });
+
+                if (res.ok) {
+                    console.log("Confirmation email sent.");
+                }
+
+                if (!res.ok) {
+                    console.log("Email not sent.");
+                }
+
+            } else {
+                console.log("No emails provided.");
+            }
+        }
+
+        sendConfirmationEmail();
 
     }
 
-    
+
 
     // Rejected Function
     const setReject = async () => {
 
-        let reservation = reservations;
+        reservation.reservationStatus = "Rejected";
+        reservation.interactedBy = user.blkLt;
+        reservation.interactionDate = date;
 
-        reservation.reservationStatus = "Rejected"
-        reservation.interactedBy = user.blkLt
-        reservation.interactionDate = date
-
-        const response = await fetch('http://localhost:4000/api/reservations/' + reservations._id, {
+        const response = await fetch('http://localhost:4000/api/reservations/' + reservation._id, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reservation)
@@ -330,7 +387,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
             toast({
 
                 title: "Reservation rejected",
-                description: reservations.amenityName + " by " + reservations.blkLt + " is rejected",
+                description: "Reservation for " + reservation.amenityName + " by " + reservation.blkLt + " on " + format(reservation.reservationDate, "yyyy/MM/dd") + " has been rejected.",
 
             })
         }
@@ -342,15 +399,13 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
     // setReopen Function
     const setReopen = async (amenityName) => {
 
-        let reservation = reservations;
+        reservation.reservationStatus = "Pending";
+        reservation.interactedBy = "";
+        reservation.interactionDate = undefined;
+        reservation.reservationComment = "";
+        reservation.reservationCommentSubject = "";
 
-        reservation.reservationStatus = "Pending"
-        reservation.interactedBy = ""
-        reservation.interactionDate = undefined
-        reservation.reservationComment = ""
-        reservation.reservationCommentSubject = ""
-
-        const response = await fetch('http://localhost:4000/api/reservations/' + reservations._id, {
+        const response = await fetch('http://localhost:4000/api/reservations/' + reservation._id, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reservation)
@@ -365,7 +420,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
             toast({
 
                 title: "Reservation reopened",
-                description: reservations.amenityName + " by " + reservations.blkLt + " is pending",
+                description: "Reservation for " + reservation.amenityName + " by " + reservation.blkLt + " on " + format(reservation.reservationDate, "yyyy/MM/dd") + " is now pending.",
 
             })
         }
@@ -374,67 +429,45 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
         const addAmenity = async () => {
 
-            // Reduce Amenity
-    
-            let reservation = reservations;
-    
+            // Get the current state of amenity
             let amenity = amenityList.filter(function (ame) {
                 return ame.amenityName === amenityName;
             })
-    
-            console.log(amenity)
 
+            // Take the currrent amenity quantity and add back the reservation quantity
+            amenity[0].amenityQuantity = amenity[0].amenityQuantity + reservation.reservationQuantity;
 
-            const amenityUpdatedQuant = amenity[0].amenityQuantity + reservation.reservationQuantity;
-
-            amenity[0].amenityQuantity = amenityUpdatedQuant;
-
-            console.log(amenity[0].amentyQuantity);
-    
-            const updated = amenity[0];
-
-            console.log(updated);
-    
-    
             if (reservation.amenityType === "Equipment") {
                 const res = await fetch('http://localhost:4000/api/amenities/' + amenityName, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updated)
+                    body: JSON.stringify(amenity[0])
                 })
 
                 if (res.ok) {
-                    console.log("Amenity quantity reduced")
+                    console.log("Amenity quantity added back.")
                 }
 
                 if (!res.ok) {
-                    console.log("Amenity quantity not reduced")
+                    console.log("Amenity quantity not added back.")
                 }
 
 
             }
-    
-    
+
+
         };
 
         addAmenity();
 
     }
 
-    const navigate = useNavigate();
 
-    const routeChange = () => {
 
-        const path = '/admin/reservations/details/edit/' + reservations._id
-        navigate(path)
-
-    }
 
     const deleteReservation = async () => {
 
-        let reservation = reservations;
-
-        const response = await fetch('http://localhost:4000/api/reservations/' + reservations._id, {
+        const response = await fetch('http://localhost:4000/api/reservations/' + reservation._id, {
             method: 'DELETE'
         })
 
@@ -444,7 +477,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
         if (response.ok) {
             dispatch({ type: 'DELETE_USER', payload: json })
-            window.location.assign("/admin/reservations")
+            window.location.assign("/reservations")
         }
 
     }
@@ -452,12 +485,10 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
     // 
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
 
-        let reservation = reservations;
+        reservation.reservationComment = values.reservationComment;
+        reservation.reservationCommentSubject = values.reservationCommentSubject;
 
-        reservation.reservationComment = values.reservationComment
-        reservation.reservationCommentSubject = values.reservationCommentSubject
-
-        const response = await fetch('http://localhost:4000/api/reservations/' + reservations._id, {
+        const response = await fetch('http://localhost:4000/api/reservations/' + reservation._id, {
             method: 'PATCH',
             body: JSON.stringify(reservation),
             headers: {
@@ -481,14 +512,12 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
     }
 
-    //
-    const boom = () => {
-
-        const path = "/reservations";
-        navigate(path)
+    // Navigation Function
+    // Navigate back to the reservation list
+    const navToList = () => {
+        const listPath = "/reservations";
+        navigate(listPath)
         window.location.reload()
-
-
     }
 
     //
@@ -498,29 +527,17 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
     //
     filteredUser = users.filter((user) => {
-
-        if (user.blkLt === reservations.blkLt) {
-            console.log(user.blkLt);
-        }
-
-        return user.blkLt === reservations.blkLt;
+        return user.blkLt === reservation.blkLt;
     })
 
     //
     if (filteredUser[0].memberStatus === "Outstanding") {
-
         badgeColor = "default" as any;
         badgeMessage = "Outstanding";
-    }
-
-    //
-    if (filteredUser[0].memberStatus === "Delinquent") {
+    } else if (filteredUser[0].memberStatus === "Delinquent") {
         badgeColor = "warning" as any;
         badgeMessage = "Delinquent";
-    }
-
-    //
-    if (filteredUser[0].stat === "Archived") {
+    } else if (filteredUser[0].stat === "Archived") {
         badgeColor = "outline" as any;
         badgeMessage = "Archived";
     }
@@ -551,18 +568,13 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                     </AlertDialogHeader>
 
-
-
                     <AlertDialogFooter>
 
                         {/* Delete dialog cancel button */}
                         <AlertDialogCancel> Cancel </AlertDialogCancel>
 
                         {/* Delete dialog delete button */}
-                        <Button
-                            variant={"destructive"}
-                            onClick={deleteReservation}
-                        >
+                        <Button variant={"destructive"} onClick={deleteReservation}>
                             Delete
                         </Button>
 
@@ -578,7 +590,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
 
                 {/* Return button */}
-                <Button onClick={boom} variant="outline" size="icon" className="h-7 w-7">
+                <Button onClick={navToList} variant="outline" size="icon" className="h-7 w-7">
 
                     <span> <ChevronLeft className="h-4 w-4" /> </span>
                     <span className="sr-only"> Back </span>
@@ -587,12 +599,12 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                 {/* Reservation title/Amenity name */}
                 <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                    {reservations.amenityName}
+                    {reservation.amenityName}
                 </h1>
 
                 {/* Reservation status if pending */}
                 {
-                    (reservations.reservationStatus == "Pending") &&
+                    (reservation.reservationStatus == "Pending") &&
                     (
                         <Badge variant="warning" className="ml-auto sm:ml-0">
                             Pending
@@ -602,7 +614,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                 {/* Reservation status if approved */}
                 {
-                    (reservations.reservationStatus == "Approved") &&
+                    (reservation.reservationStatus == "Approved") &&
                     (
                         <Badge variant="default" className="ml-auto sm:ml-0">
                             Approved
@@ -612,7 +624,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                 {/* Reservation status if rejected */}
                 {
-                    (reservations.reservationStatus == "Rejected") &&
+                    (reservation.reservationStatus == "Rejected") &&
                     (
                         <Badge variant="destructive" className="ml-auto sm:ml-0">
                             Rejected
@@ -622,15 +634,13 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                 {/* Reservation status if expired */}
                 {
-                    (reservations.reservationStatus == "Expired") &&
+                    (reservation.reservationStatus == "Expired") &&
                     (
                         <Badge variant="outline" className="ml-auto sm:ml-0">
                             Expired
                         </Badge>
                     )
                 }
-
-
 
                 <div className="hidden items-center gap-2 md:ml-auto md:flex">
 
@@ -643,20 +653,19 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                 user.position === "Admin" && (
                                     <Button size="icon" variant="outline" className="h-8 w-8">
                                         <MoreVertical className="h-3.5 w-3.5" />
-                                        <span className="sr-only">More</span>
+                                        <span className="sr-only"> Mor </span>
                                     </Button>
                                 )
                             }
 
                         </DropdownMenuTrigger>
 
-
                         {/* Dropdown menu for archiving/unarchiving */}
                         <DropdownMenuContent align="end">
 
                             {/* Archive button when unarchived */}
                             {
-                                (reservations.stat == "Unarchived" && user.position === "Admin") &&
+                                (reservation.stat == "Unarchived" && user.position === "Admin") &&
                                 (
                                     <DropdownMenuItem onClick={setArchive}> Archive </DropdownMenuItem>
                                 )
@@ -664,7 +673,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                             {/* Unarchive button when archived */}
                             {
-                                (reservations.stat == "Archived" && user.position === "Admin") &&
+                                (reservation.stat == "Archived" && user.position === "Admin") &&
                                 (
                                     <DropdownMenuItem onClick={setUnarchive}> Unarchive </DropdownMenuItem>
                                 )
@@ -686,30 +695,30 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                     {/* Approve and reject button when reservation is pending */}
                     {
-                        (reservations.reservationStatus != "Approved" && reservations.reservationStatus != "Rejected" && reservations.reservationStatus != "Expired" && user.position === "Admin") &&
+                        (reservation.reservationStatus != "Approved" && reservation.reservationStatus != "Rejected" && reservation.reservationStatus != "Expired" && user.position === "Admin") &&
                         (
                             <>
                                 <Button type="submit" form="reservationForm" onClick={setReject} variant="outline" size="sm">
                                     Reject
                                 </Button>
-                                <Button type="submit" form="reservationForm" onClick={ () => { setApprove( reservations.amenityName )}} size="sm"> Approve Reservation </Button>
+                                <Button type="submit" form="reservationForm" onClick={() => { setApprove(reservation.amenityName) }} size="sm"> Approve Reservation </Button>
                             </>
                         )
                     }
 
                     {/* Reopen button when reservation is approved or rejected */}
                     {
-                        (reservations.reservationStatus == "Approved" || reservations.reservationStatus == "Rejected" && reservations.reservationStatus != "Expired" && user.position === "Admin") &&
+                        (reservation.reservationStatus == "Approved" || reservation.reservationStatus == "Rejected" && reservation.reservationStatus != "Expired" && user.position === "Admin") &&
                         (
                             <>
-                                <Button onClick={ () => {setReopen(reservations.amenityName)}} variant="outline" size="sm"> Reopen </Button>
+                                <Button onClick={() => { setReopen(reservation.amenityName) }} variant="outline" size="sm"> Reopen </Button>
                             </>
                         )
                     }
 
                     {/* Reopen button when reservation is approved or rejected */}
                     {
-                        (reservations.reservationStatus == "Expired" && user.position === "Admin") &&
+                        (reservation.reservationStatus == "Expired" && user.position === "Admin") &&
                         (
                             <>
                                 <Button disabled onClick={setReopen} variant="outline" size="sm"> Expired </Button>
@@ -743,7 +752,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                                 <CardTitle className="group flex items-center gap-2 text-lg">
 
-                                    {reservations.blkLt}
+                                    {reservation.blkLt}
 
                                     {/* <Button
                                         size="icon"
@@ -760,7 +769,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
 
 
-                                <CardDescription> {formatDistanceToNow(new Date(reservations.createdAt), { addSuffix: true })} </CardDescription>
+                                <CardDescription> {formatDistanceToNow(new Date(reservation.createdAt), { addSuffix: true })} ({format(reservation.createdAt, "yyyy/MM/dd")}) </CardDescription>
 
                             </div>
 
@@ -797,7 +806,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                             Amenity Type:
                                         </span>
 
-                                        <span className="text-end"> {reservations.amenityType} </span>
+                                        <span className="text-end"> {reservation.amenityType} </span>
 
                                     </li>
 
@@ -807,11 +816,11 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                             Amenity Name:
                                         </span>
 
-                                        <span className="text-end"> {reservations.amenityName} </span>
+                                        <span className="text-end"> {reservation.amenityName} </span>
 
                                     </li>
 
-                                    {reservations.amenityType == "Facility" &&
+                                    {reservation.amenityType == "Facility" &&
                                         (
                                             <li className="flex items-center justify-between">
 
@@ -819,13 +828,13 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                                     Amenity Address:
                                                 </span>
 
-                                                <span className="text-end"> {reservations.amenityAddress} </span>
+                                                <span className="text-end"> {reservation.amenityAddress} </span>
 
                                             </li>
                                         )
                                     }
 
-                                    {reservations.amenityType == "Equipment" &&
+                                    {reservation.amenityType == "Equipment" &&
                                         (
                                             <li className="flex items-center justify-between">
 
@@ -833,7 +842,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                                     Amenity Quantity:
                                                 </span>
 
-                                                <span className="text-end"> {reservations.reservationQuantity} </span>
+                                                <span className="text-end"> {reservation.reservationQuantity} </span>
 
                                             </li>
                                         )
@@ -862,10 +871,20 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                     <li className="flex items-center justify-between">
 
                                         <span className="text-muted-foreground">
+                                            Reservee Email:
+                                        </span>
+
+                                        <span className="text-end"> {reservation.reserveeEmail ? censoredEmail : "No email provided."} </span>
+
+                                    </li>
+
+                                    <li className="flex items-center justify-between">
+
+                                        <span className="text-muted-foreground">
                                             Reservation Date:
                                         </span>
 
-                                        <span className="text-end"> {format(reservations.reservationDate, "PPP")} </span>
+                                        <span className="text-end"> {format(reservation.reservationDate, "PPP")} </span>
 
                                     </li>
 
@@ -888,7 +907,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                             </span>
                                         </div>
 
-                                        <span className="text-end"> {reservations.reservationReason} </span>
+                                        <span className="text-end"> {reservation.reservationReason} </span>
 
                                     </li>
 
@@ -905,33 +924,45 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                                 {
                                     (
-                                        (reservations.reservationStatus == "Approved" || reservations.reservationStatus == "Rejected") && user.position === "Admin") &&
+                                        (reservation.reservationStatus == "Approved" || reservation.reservationStatus == "Rejected") && user.position === "Admin") &&
                                     (
                                         <>
 
                                             <Separator className="mt-4 mb-2" />
 
-                                            <div className="font-semibold"> {reservations.reservationStatus} Details </div>
+                                            {reservation.reservationStatus == "Approved" && (
+                                                <div className="font-semibold"> Approval Details </div>
+                                            )
+                                            }
+
+                                            {reservation.reservationStatus == "Rejected" && (
+                                                <div className="font-semibold"> Rejection Details </div>
+                                            )
+                                            }
 
                                             <ul className="grid gap-3">
 
                                                 <li className="flex items-center justify-between">
 
                                                     <span className="text-muted-foreground">
-                                                        {reservations.reservationStatus} by:
+                                                        {reservation.reservationStatus} by:
                                                     </span>
 
-                                                    <span> {reservations.interactedBy} </span>
+                                                    <span> {reservation.interactedBy} </span>
 
                                                 </li>
 
                                                 <li className="flex items-center justify-between">
 
                                                     <span className="text-muted-foreground">
-                                                        {reservations.reservationStatus} on:
+                                                        {reservation.reservationStatus} on:
                                                     </span>
 
-                                                    <span> {formatDistanceToNow(new Date(reservations.interactionDate), { addSuffix: true })}  </span>
+                                                    <span>
+                                                        {formatDistanceToNow(new Date(reservation.interactionDate), { addSuffix: true })} ({format(reservation.interactionDate, "yyyy/MM/dd")})
+                                                    </span>
+
+
 
                                                 </li>
 
@@ -940,11 +971,11 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
 
                                                     <div className="w-[100%]">
                                                         <span className="text-muted-foreground">
-                                                            {reservations.reservationCommentSubject}
+                                                            {reservation.reservationCommentSubject}
                                                         </span>
                                                     </div>
 
-                                                    <span className="text-end"> {reservations.reservationComment} </span>
+                                                    <span className="text-end"> {reservation.reservationComment} </span>
 
                                                 </li>
 
@@ -1025,7 +1056,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                                                         type="text"
                                                                         className="w-full"
                                                                         placeholder="Enter comment subject here"
-                                                                        {...field}
+                                                                        { ...field }
                                                                     />
 
                                                                 </FormControl>
@@ -1059,7 +1090,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                                                                         id="reservationComment"
                                                                         placeholder="Enter comment message here"
                                                                         className="min-h-32"
-                                                                        {...field}
+                                                                        { ...field }
                                                                     />
 
                                                                 </FormControl>
@@ -1109,7 +1140,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                             user.position === "Admin" && (
                                 <Button size="icon" variant="outline" className="h-8 w-8">
                                     <MoreVertical className="h-3.5 w-3.5" />
-                                    <span className="sr-only">More</span>
+                                    <span className="sr-only"> More </span>
                                 </Button>
                             )
                         }
@@ -1121,16 +1152,16 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                     <DropdownMenuContent align="end">
 
                         {
-                            (reservations.stat == "Unarchived" && user.position === "Admin") &&
+                            (reservation.stat == "Unarchived" && user.position === "Admin") &&
                             (
-                                <DropdownMenuItem onClick={setArchive}> Archive </DropdownMenuItem>
+                                <DropdownMenuItem onClick={ setArchive }> Archive </DropdownMenuItem>
                             )
                         }
 
                         {
-                            (reservations.stat == "Archived" && user.position === "Admin") &&
+                            (reservation.stat == "Archived" && user.position === "Admin") &&
                             (
-                                <DropdownMenuItem onClick={setUnarchive}> Unarchive </DropdownMenuItem>
+                                <DropdownMenuItem onClick={ setUnarchive }> Unarchive </DropdownMenuItem>
                             )
                         }
 
@@ -1139,7 +1170,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                         {
                             user.position === "Admin" &&
                             (
-                                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive"> Delete </DropdownMenuItem>
+                                <DropdownMenuItem onClick={ () => setShowDeleteDialog(true) } className="text-destructive"> Delete </DropdownMenuItem>
                             )
                         }
 
@@ -1148,7 +1179,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                 </DropdownMenu>
 
                 {
-                    (reservations.reservationStatus != "Approved" && reservations.reservationStatus != "Rejected" && user.position === "Admin") &&
+                    (reservation.reservationStatus != "Approved" && reservation.reservationStatus != "Rejected" && user.position === "Admin") &&
                     (
                         <>
                             <Button type="submit" form="reservationForm" onClick={setReject} variant="outline" size="sm">
@@ -1160,7 +1191,7 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                 }
 
                 {
-                    (reservations.reservationStatus == "Approved" || reservations.reservationStatus == "Rejected" && user.position === "Admin") &&
+                    (reservation.reservationStatus == "Approved" || reservation.reservationStatus == "Rejected" && user.position === "Admin") &&
                     (
                         <>
                             <Button onClick={setReopen} variant="outline" size="sm"> Reopen </Button>
@@ -1169,9 +1200,6 @@ export const ReservationDetails = ({ reservations, users, amenityList }) => {
                 }
 
             </div>
-
-
-
 
 
 

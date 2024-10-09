@@ -9,7 +9,6 @@ import './index.css';
 
 
 // Utility Import
-
 // React Imports
 // React Router Imports
 import {
@@ -18,31 +17,24 @@ import {
     Route,
 } from 'react-router-dom';
 
-// React Context Import
-import { useContext } from "react";
-
 
 
 // Context Imports
-// Logout Context Import
-import { useLogout } from "@/hooks/useLogout"
-
 // Auth Context Import
 import { useAuthContext } from "@/hooks/useAuthContext.tsx"
 
 
 
 // Page Imports
-
 // Amenity-related Imports
 // Amenity List Page Import
 import AmenitiesList from './pages/Amenities/AmenitiesList.tsx';
 
-// Amenity Equipment Form Page Import
-import AmenityEquipmentForm from './pages/Amenities/AmenityEquipmentForm.tsx';
-
 // Amenity Details Page Import
 import AmenityDetails from './pages/Amenities/AmenityDetails.tsx';
+
+// Amenity Equipment Form Page Import
+import AmenityEquipmentForm from './pages/Amenities/AmenityEquipmentForm.tsx';
 
 // Amenity Facility Form Page Import
 import AmenityFacilityForm from './pages/Amenities/AmenityFacilityForm.tsx';
@@ -111,6 +103,7 @@ function App() {
 
     return (
 
+        
 
         // Main App Container
         <div className="App">

@@ -177,7 +177,7 @@ export function ReservationPage() {
 
 
                     {(reservations && users) && (
-                        <ReservationDetails reservations={reservations} users={users} amenityList={amenityList}/>
+                        <ReservationDetails reservation={reservations} users={users} amenityList={amenityList}/>
                     )
                     }
 

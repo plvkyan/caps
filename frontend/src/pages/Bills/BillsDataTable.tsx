@@ -60,6 +60,7 @@ import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { useBillsContext } from "@/hooks/useBillsContext";
 import { useAuthContext } from "@/hooks/useAuthContext";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 
 
@@ -148,7 +149,7 @@ export function BillsDataTable<TData, TValue>({
 
     }
 
-    const formRoute = () => {
+    const newBillRoute = () => {
 
         const path = '/bills/form'
         navigate(path)
@@ -157,7 +158,7 @@ export function BillsDataTable<TData, TValue>({
 
 
 
-    
+
 
     return (
 
@@ -189,13 +190,30 @@ export function BillsDataTable<TData, TValue>({
 
                 {
                     user.position === "Admin" && (
-                        <Button
-                            className="p-3 max-[640px]:w-full accent"
-                            onClick={formRoute}
-                        >
-                            <CirclePlus className="h-6 w-6 pr-2" />
-                            Create  Bill
-                        </Button>
+
+                        <DropdownMenu>
+                            
+                            <DropdownMenuTrigger>
+                                <Button variant="outline">
+                                    <CirclePlus className="h-6 w-6 pr-2" />
+                                    Create
+                                </Button>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent>
+
+                                <DropdownMenuItem onClick={newBillRoute}>
+                                    Create New Bill
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem>
+                                    Create New Bill Type
+                                </DropdownMenuItem>
+
+                            </DropdownMenuContent>
+
+                        </DropdownMenu>
+
                     )
                 }
 
