@@ -119,8 +119,6 @@ export default function Navbar() {
     }
 
 
-
-
     
     return (
 
@@ -150,15 +148,6 @@ export default function Navbar() {
                         </Button>
 
                     </SheetTrigger>
-
-                    <div className="relative ml-auto md:grow-0">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search..."
-                            className="w-full rounded-lg bg-background pl-8 md:w-[300px] lg:w-[400px]"
-                        />
-                    </div>
 
                     {/* Desktop View  */}
                     <SheetContent side="left" className="flex flex-col">

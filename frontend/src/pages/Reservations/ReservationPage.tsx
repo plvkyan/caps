@@ -2,8 +2,42 @@
 
 
 // Imports
+// shadcn Components Imports
+// shadcn AppSidebar Imports
+import { AppSidebar } from "@/components/app-sidebar"
+// shadcn Breadcrumb Imports
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+// shadcn NavUser Imports
+import { NavUser } from "@/components/nav-user"
+// shadcn Separator Imports
+import { Separator } from "@/components/ui/separator"
+// shadcn Sidebar Imports
+import {
+    SidebarInset,
+    SidebarProvider,
+    SidebarTrigger,
+} from "@/components/ui/sidebar"
 
-// shadcn Components Import
+
+
+// Data table imports
+// Data table column definitions imports
+import { ReservationTableColumns } from "@/pages/Reservations/ReservationColumns";
+// Data table component import
+import { ReservationTable } from "@/pages/Reservations/ReservationTable";
+
+
+
+// Hooks Imports
+// Authentication Hook Import
+import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 
@@ -11,153 +45,90 @@
 // React Imports
 import { useEffect, useState } from "react"
 
-// React Router Dom Imports
-import { 
-    useParams 
-} from "react-router-dom"
+
+
+// Types Imports
+// Reservation Type Import
+import { ReservationType } from "@/types/reservation-type"
 
 
 
-// Custom Components Import
-// Layout Wrapper Import
-import LayoutWrapper from "@/components/layout/LayoutWrapper"
-
-// Reservation Details Import
-import ReservationDetails from "./ReservationDetails"
-
+// Data Imports
+// All unarchived reservation data Import
+import { getUnarchivedReservations } from "@/data/reservation-api.ts";
+// All user unarchived reservation data Import
+import { getUserUnarchivedReservations } from "@/data/reservation-api.ts";
 
 
-// Hooks Import
-// Reservations Hook Import
-import { useReservationsContext } from "@/hooks/useReservationsContext"
-
-
-
-
-
-export function ReservationPage() {
-
-    const { id } = useParams()
+const data = {
+    user: {
+        name: "shadcn",
+        email: "m@example.com",
+        avatar: "/avatars/shadcn.jpg",
+    },
+}
 
 
 
-    
+export default function ReservationPage() {
 
-    const { reservations, dispatch } = useReservationsContext()
-    const [ amenityReservations, setAmenityReservations ] = useState()
-    const [ users, setUsers ] = useState();
 
-    // Amenity States
-    const [amenityList, setAmenityList] = useState()
+    // Contexts
+    // Authentication Context
+    const { user } = useAuthContext();
+
+
+
+    // States
+    // Reservations state
+    const [reservations, setReservations] = useState<ReservationType[]>([]);
 
 
 
     // Use Effects
-    // Use Effect for Page Name
+    // Page title effect
     useEffect(() => {
-        document.title = "Reservations | GCTMS "
+        document.title = "Reservations | GCTMS";
     }, []);
 
-    // Huge Use Effect for Fetching Data
+    // Fetching unarchived reservations effect
     useEffect(() => {
 
-        // Fetching a specific reservation
-        const fetchReservations = async () => {
 
-            const response = await fetch('http://localhost:4000/api/reservations/details/' + id)
+        async function fetchUnarchivedReservations() {
 
-            const json = await response.json()
+            setReservations([]);
 
-            if (response.ok) {
-
-                console.log(json)
-                dispatch({ type: 'SET_RESERVATIONS', payload: json })
-
-            }
-
-            if (!response.ok) {
-
-                console.log(json)
-
-            }
-
-        }
-
-        fetchReservations()
-
-
-
-        // 
-        const fetchAmenityReservations = async () => {
-
-            const response = await fetch('http://localhost:4000/api/reservations/details/' + id)
-
-            const json = await response.json()
-
-            if (response.ok) {
-
-                console.log(json)
-                dispatch({ type: 'SET_RESERVATIONS', payload: json })
-
-            }
-
-            if (!response.ok) {
-
-                console.log(json)
-
+            if (user.position === "Admin") {
+                const unarchivedReservationsResult = await getUnarchivedReservations();
+                const unarchivedReservations = await unarchivedReservationsResult.json();
+                if (!ignore && unarchivedReservationsResult.ok) {
+                    console.log("All unarchived reservations fetched successfully: ", unarchivedReservations);
+                    setReservations(unarchivedReservations);
+                }
+                if (!ignore && !unarchivedReservationsResult.ok) {
+                    console.log("All unarchived reservations fetch failed.");
+                }
+            } else {
+                const userUnarchivedReservationsResult = await getUserUnarchivedReservations(user._id);
+                const userUnarchivedReservations = await userUnarchivedReservationsResult.json();
+                if (!ignore && userUnarchivedReservationsResult.ok) {
+                    console.log("User unarchived reservations fetched successfully.");
+                    setReservations(userUnarchivedReservations);
+                }
+                if (!ignore && !userUnarchivedReservationsResult.ok) {
+                    console.log("User unarchived reservations fetch failed.");
+                }
             }
 
         }
 
-        fetchAmenityReservations()
-
-
-
-        const fetchUsers = async () => {
-
-            const response = await fetch('http://localhost:4000/api/users/')
-
-            const json = await response.json()
-
-            if (response.ok) {
-
-                console.log(json)
-                setUsers(json)
-
-            }
-
-            if (!response.ok) {
-
-                console.log(json)
-
-            }
-
+        let ignore = false;
+        fetchUnarchivedReservations();
+        return () => {
+            ignore = true;
         }
-
-        fetchUsers()
-
-        const fetchAmenities = async () => {
-
-            const response = await fetch('http://localhost:4000/api/amenities/');
-
-            const json = await response.json();
-
-            if (response.ok) {
-
-                console.log(amenityList)
-                setAmenityList(json);
-
-
-            }
-
-        }
-
-        fetchAmenities();
-
-    }, [])
-
-    console.log(reservations)
-
+    }, []);
 
 
 
@@ -165,36 +136,70 @@ export function ReservationPage() {
 
     return (
 
+        // The sidebar provider - no changes here
+        <SidebarProvider>
 
+            {/* The sidebar itself and its contents - there are changes here */}
+            <AppSidebar />
 
-        <LayoutWrapper>
+            {/* The inset effect - no changes here */}
+            <SidebarInset>
 
+                {/* The header provided along with the sidebar */}
+                <header className="flex h-16 shrink-0 p-4 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
 
-            <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+                    {/* Container within the header to organize items */}
+                    <div className="w-full flex items-center justify-between gap-2">
 
-                <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
+                        {/* Container for breadcrumbs and sidebar trigger */}
+                        <div className="flex items-center gap-2 p-4">
 
+                            <SidebarTrigger className="-ml-1" />
 
+                            <Separator orientation="vertical" className="mr-2 h-4" />
 
-                    {(reservations && users) && (
-                        <ReservationDetails reservation={reservations} users={users} amenityList={amenityList}/>
-                    )
-                    }
+                            {/* Page breadcrumbs */}
+                            <Breadcrumb>
 
+                                <BreadcrumbList>
 
+                                    <BreadcrumbItem className="hidden md:block">
+                                        <BreadcrumbLink href="/dashboard">
+                                            Dashboard
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
 
+                                    <BreadcrumbSeparator className="hidden md:block" />
 
-                </div>
+                                    <BreadcrumbItem className="hidden md:block">
+                                        <BreadcrumbPage>
+                                            Reservations
+                                        </BreadcrumbPage>
+                                    </BreadcrumbItem>
 
-            </main>
+                                </BreadcrumbList>
 
+                            </Breadcrumb>
 
+                        </div>
 
+                        {/* Account navigation */}
+                        <div className="hidden md:block">
+                            <NavUser user={data.user} />
+                        </div>
 
-        </LayoutWrapper>
+                    </div>
 
+                </header>
 
+                <main className="flex flex-col gap-4 p-8 pt-4">
 
+                    <ReservationTable columns={ReservationTableColumns} data={reservations} />
+
+                </main>
+
+            </SidebarInset>
+
+        </SidebarProvider>
     )
-
 }

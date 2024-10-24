@@ -5,7 +5,7 @@ const Amenity = require("../models/amenityModel")
 const mongoose = require('mongoose')
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
-
+const cloudinary = require('../utils/cloudinary');
 
 
 // GET all unarchived amenities
@@ -39,15 +39,19 @@ const getArchivedAmenities = async (req, res) => {
 // GET specific amenity name
 const getSpecificAmenity = async (req, res) => {
 
-    const { amenityName } = req.params
+    const { id } = req.params;
 
-    const initAmenities = await Amenity.find({}).sort({ createdAt: -1 })
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: "This amenity does not exist." });
+    }
 
-    const amenities = initAmenities.filter(function (amenity) {
-        return amenity.amenityName === amenityName;
-    });
+    const amenity = await Amenity.findById(id);
 
-    res.status(200).json(amenities)
+    if (!amenity) {
+        return res.status(404).json({ error: "This amenity does not exist." });
+    }
+
+    res.status(200).json(amenity);
 }
 
 
@@ -55,25 +59,23 @@ const getSpecificAmenity = async (req, res) => {
 
 
 // CREATE new amenity
-const createAmenity = async (req, res) => {
+const createAmenity = async (req, res) => {S
 
-    console.log(req.file, 16);
-
-    const { amenityName, amenityType, amenityAddress, amenityCreator, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat } = req.body
+    const { amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, stat } = req.body
 
     try {
 
+        
         const exists = await Amenity.findOne({ amenityName })
-
-
-
+        
         if (exists) {
             throw Error('Amenity already exists')
         }
-
+        
+        const amenityData = await Amenity.createAmenity( amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, stat )
         // Add amenity to database
-        const amenity = await Amenity.create({ amenityName, amenityType, amenityCreator, amenityDescription, amenityAddress, amenityStockMax, amenityStock, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat })
-        res.status(200).json(amenity)
+        // const amenity = await Amenity.create({ amenityName, amenityType, amenityCreator, amenityDescription, amenityAddress, amenityStockMax, amenityStock, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat })
+        res.status(200).json(amenityData)
 
     } catch (error) {
 
@@ -110,21 +112,28 @@ const deleteAmenity = async (req, res) => {
 
 // UPDATE an announcement
 const updateAmenity = async (req, res) => {
-    const { amenityName } = req.params
+
 
     // if (!mongoose.Types.amenityName.isValid(amenityName)) {
     //     return res.status(400).json({ error: 'No such amenity' })
     // }
 
-    const amenity = await Amenity.findOneAndUpdate({ amenityName: amenityName }, {
-        ...req.body
-    })
+    const { initialAmenityName, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, stat } = req.body
 
-    if (!amenity) {
-        return res.status(400).json({ error: 'No such amenity' })
+    try {
+
+        const amenity = await Amenity.editEquipment(
+            initialAmenityName, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, stat
+        )
+
+        res.status(200).json(amenity)
+
+    } catch (error) {
+        return res.status(400).json({ error: error.message })
     }
 
-    res.status(200).json(amenity)
+
+
 }
 
 

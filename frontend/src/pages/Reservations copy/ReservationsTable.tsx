@@ -6,10 +6,14 @@
 
 
 // Lucide Icons Import
+import { CirclePlus } from "lucide-react";
 
 
 
 // shadcn Component Imports
+// shadcn Button Import
+import { Button } from "@/components/ui/button";
+
 // shadcn Input Import
 import { Input } from "@/components/ui/input";
 
@@ -33,8 +37,6 @@ import { Toaster } from "@/components/ui/toaster";
 import {
     ColumnDef,
     ColumnFiltersState,
-    SortingState,
-    VisibilityState,
     flexRender,
     getCoreRowModel,
     getFacetedRowModel,
@@ -42,6 +44,7 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    SortingState,
     useReactTable,
 } from "@tanstack/react-table"
 
@@ -54,16 +57,28 @@ import { DataTableFacetedFilter } from "@/pages/Admin/Users/user-table-filter";
 
 
 // Utility Imports
-// React Import Everything
+// React import everything
 import * as React from "react";
 
-// Import useNavigate from React Router
+// React useEffect and useState Import
+import { 
+    useEffect, 
+    useState 
+} from "react";
+
+// react-router-dom useNavigate Import
 import { useNavigate } from "react-router-dom";
-import { CirclePlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { RESERVATION_STATUS } from "@/data/reservation-data";
+
+
+
+// Data and Types Import
+// Reservation Data Import
+import { RESERVATION_DATA } from "@/data/reservation-data";
+
+
+
+// Hooks Import
 import { useReservationsContext } from "@/hooks/useReservationsContext";
-import { useEffect, useState } from "react";
 
 
 
@@ -187,13 +202,14 @@ export function ReservationsTable<TData, TValue>({ columns, data }: Reservations
                         onChange={(e) => setGlobalFilter(e.target.value)
                         }
                         className="p-3 w-full"
-                    />
+                    >
+                    </Input>
 
                     {table.getColumn("reservationStatus") && (
                         <DataTableFacetedFilter
                             column={table.getColumn("reservationStatus")}
                             title="Reservation Status"
-                            options={RESERVATION_STATUS}
+                            options={RESERVATION_DATA}
                         />
                     )}
 

@@ -28,10 +28,13 @@ import { useAuthContext } from "@/hooks/useAuthContext.tsx"
 // Page Imports
 // Amenity-related Imports
 // Amenity List Page Import
-import AmenitiesList from './pages/Amenities/AmenitiesList.tsx';
+import AmenitiesList from './pages/Amenities/AmenityList.tsx';
 
 // Amenity Details Page Import
 import AmenityDetails from './pages/Amenities/AmenityDetails.tsx';
+
+// Amenity Edit Form Page Import
+import AmenityEditForm from './pages/Amenities/AmenityEditForm.tsx';
 
 // Amenity Equipment Form Page Import
 import AmenityEquipmentForm from './pages/Amenities/AmenityEquipmentForm.tsx';
@@ -76,14 +79,16 @@ import Login from './pages/Login/Login.tsx';
 
 // Reservation-related Imports
 // Reservation Details Page Import
-import { ReservationPage } from './pages/Reservations/ReservationPage.tsx';
+// import { ReservationPage } from './pages/Reservations/ReservationPage.tsx';
 
 // Reservations List Page Import
-import Reservations from './pages/Reservations/Reservations.tsx';
+import ReservationPage from '@/pages/Reservations/ReservationPage.tsx';
 
 // User-related Imports
 // Users List Page Import
 import AdminUsers from './pages/Admin/Users/UsersList.tsx';
+import { useEffect, useState } from 'react';
+import Settings from './pages/Settings.tsx';
 
 
 
@@ -100,10 +105,9 @@ function App() {
 
 
 
-
     return (
 
-        
+
 
         // Main App Container
         <div className="App">
@@ -181,23 +185,23 @@ function App() {
                                     {/* Reservations Page */}
                                     <Route
                                         path="/reservations"
-                                        element={!user ? <Login /> : <Reservations />}
+                                        element={!user ? <Login /> : <ReservationPage />}
                                     >
                                     </Route>
 
                                     {/* Reservation Form Page */}
-                                    <Route
+                                    {/* <Route
                                         path="/reservations/form"
                                         element={!user ? <Login /> : <Reservations />}
                                     >
-                                    </Route>
+                                    </Route> */}
 
                                     {/* Reservation Details Page */}
-                                    <Route
+                                    {/* <Route
                                         path="/reservations/details/:id"
                                         element={!user ? <Login /> : <ReservationPage />}
                                     >
-                                    </Route>
+                                    </Route> */}
 
                                     {/* Bills Page */}
                                     <Route
@@ -267,10 +271,24 @@ function App() {
                                     </Route>
 
                                     <Route
-                                        path="/amenities/details/:amenityName"
+                                        path="/amenities/details/:id"
                                         element={<AmenityDetails />}
                                     >
                                     </Route>
+
+                                    <Route
+                                        path="/amenities/edit/:id"
+                                        element={<AmenityEditForm />}
+                                    >
+                                    </Route>
+
+                                    <Route
+                                        path="/settings"
+                                        element={ <Settings /> }
+                                    >
+                                    </Route>
+
+
 
                                     {/* If a page is not found, redirect to Error 404 Page */}
                                     <Route

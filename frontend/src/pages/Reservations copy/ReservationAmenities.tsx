@@ -20,6 +20,8 @@ export const ReservationAmenities = (reservations, amenityList) => {
 
     const allReservations = reservations.reservations
 
+    console.log(allReservations)
+
     const pendingReservations = allReservations.filter(function (reservation) {
         return reservation.reservationStatus === "Pending";
     });

@@ -13,6 +13,13 @@ export type AmenityType = {
     amenityQuantityMin: number;
     amenityQuantityMax: number;
     amenityReminder: string;
+    amenityCreator: string;
+    amenityImages: [
+        {
+            url?: string;
+            public_id?: string;
+        }
+    ];
     stat: string;
 
 };

@@ -20,7 +20,7 @@ import React, { useEffect, useState } from "react";
 import { useUsersContext } from "@/hooks/useUsersContext";
 import UserEditForm from "@/pages/Admin/Users/AdminEditUser";
 import { format } from "date-fns";
-import { RESERVATION_STATUS } from "@/data/reservation-data";
+import { RESERVATION_DATA } from "@/data/reservation-data";
 import { Badge } from "@/components/ui/badge";
 
 // This type is used to define the shape of our data.
@@ -182,7 +182,7 @@ export const columns: ColumnDef<User>[] = [
             <DataTableColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-            const role = RESERVATION_STATUS.find(
+            const role = RESERVATION_DATA.find(
                 (role) => role.value === row.getValue("reservationStatus")
             )
 

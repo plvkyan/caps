@@ -7,7 +7,6 @@
 import {
     ChevronLeft,
     PlusCircle,
-    Upload,
 } from "lucide-react";
 
 
@@ -21,7 +20,6 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
@@ -50,9 +48,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-
-// shadcn Skeleton Component Import
-import { Skeleton } from "@/components/ui/skeleton";
 
 // shadcnc Textarea Component Import
 import { Textarea } from "@/components/ui/textarea";

@@ -6,8 +6,11 @@
 // Lucide Icon Imports
 import {
     ChevronLeft,
+    ChevronRight,
     PlusCircle,
+    TriangleAlert,
     Upload,
+    X,
 } from "lucide-react";
 
 
@@ -50,9 +53,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-// shadcn Skeleton Component Import
-import { Skeleton } from "@/components/ui/skeleton";
-
 // shadcn Table Component Imports
 import {
     Table,
@@ -82,37 +82,50 @@ import LayoutWrapper from "@/components/layout/LayoutWrapper";
 // Date format Import
 import { format } from "date-fns"
 
-// React Router Dom Imports
-import { useNavigate } from "react-router-dom";
-
 // React Hook Form Imports
 import { useForm } from "react-hook-form";
+
+// React useEffect and useState Imports
+import {
+    useEffect,
+    useState
+} from "react";
+
+// React Router Dom Imports
+import { useNavigate } from "react-router-dom";
 
 // Zod Imports
 import * as zod from "zod";
 
 // Zod Resolver Import
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
 
 
 
 // Hooks
 // AuthContext Hooks for Users
 import { useAuthContext } from "@/hooks/useAuthContext"
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogTrigger } from "@radix-ui/react-dialog";
 
 
 
 
 
-//
+// Constant Variables
+const MAX_FILE_SIZE = 500000;
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"];
+
+
+
+
+
+// Zod Schema for Form Validation
 const formSchema = zod.object({
-
     amenityName: zod.string().min(1,
         { message: "Equipment name cannot be empty." }
     ),
-    amenityType: zod.string(
-    ).optional(),
+    amenityType: zod.string().optional(),
     amenityDescription: zod.string().min(1,
         { message: "Equipment description cannot be empty." }
     ),
@@ -127,11 +140,9 @@ const formSchema = zod.object({
         { message: "Maximum equipment reservation quantity cannot be zero." }
     ),
     amenityCreator: zod.string(),
-    amenityReminder: zod.string(
-    ).optional(),
-    stat: zod.string(
-    ).optional(),
-
+    amenityImages: zod.any().optional(),
+    amenityReminder: zod.string().optional(),
+    stat: zod.string().optional(),
 });
 
 
@@ -142,25 +153,28 @@ const AmenityEquipmentForm = () => {
 
 
 
+    // For toast confirmation
+    const { toast } = useToast();
+
+    // Contexts
     // Use AuthContext to get user data
     const { user } = useAuthContext();
 
-    // React Router Dom Navigate
-    const navigate = useNavigate();
 
-    const [error, setError] = useState(null);
+
+    // States
+    // State for rotating index of images for image preview
+    const [rotatingIndex, setRotatingIndex] = useState(0);
+    // State for current index of images for image preview
+    const [currentIndex, setCurrentIndex] = useState(0);
+    // State for form error message
+    const [error, setError] = useState<any>();
+    // State for current images uploaded
+    const [images, setImages] = useState<any>([]);
 
 
 
     // Functions
-    // Function to navigate to the equipment form page
-    const returnRoute = () => {
-
-        const path = '/amenities';
-        navigate(path);
-
-    }
-
     // Create Form Function
     const form = useForm<zod.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -180,10 +194,13 @@ const AmenityEquipmentForm = () => {
 
     // Handle Submit Function for CREATING an amenity
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
-
+        // Set the stock to the maximum stock
         values.amenityStock = values.amenityStockMax;
+        // Set the images state value to the images array
+        values.amenityImages = images;
 
-        const response = await fetch('http://localhost:4000/api/amenities', {
+        // Post the data to the server
+        const equipmentDataResponse = await fetch('http://localhost:4000/api/amenities', {
             method: 'POST',
             body: JSON.stringify(values, null, 2),
             headers: {
@@ -191,47 +208,122 @@ const AmenityEquipmentForm = () => {
             },
         });
 
-        const json = await response.json();
+        const equipmentData = await equipmentDataResponse.json();
 
-        if (!response.ok) {
-
-            setError(json.error);
-            console.log('Error creating new equipment amenity: ', json);
-
+        if (!equipmentDataResponse.ok) {
+            setError(equipmentData.error);
+            console.log('Error creating new equipment amenity: ', equipmentData);
         }
 
-        if (response.ok) {
-
-            console.log('New equipment amenity created: ', json);
-
-            localStorage.setItem("newAmenity", JSON.stringify(json))
-            window.location.reload();
-
+        if (equipmentDataResponse.ok) {
+            console.log('New equipment amenity created: ', equipmentData);
+            // Set the new amenity to local storage
+            localStorage.setItem("newAmenity", JSON.stringify(equipmentData))
+            // Set the images state to an empty array for a new amenity
+            setImages([]);
         }
 
     }
 
-    // For toast confirmation
-    const { toast } = useToast()
 
+
+    // useEffects
+    // Use Effect for toast confirmation about the creation of a new equipment amenity
     useEffect(() => {
-
+        // Check if there is a new amenity in local storage
         if (localStorage.getItem("newAmenity")) {
 
+            // Parse the new amenity from local storage
             const newAmenity = JSON.parse(localStorage.getItem("newAmenity") as any)
 
+            // Show a toast confirmation that the new equipment amenity was created
             toast({
-
+                // Set the title of the toast
                 title: "Equipment amenity created",
+                // Set the description of the toast
                 description: `Equipment ${newAmenity.amenityName} was successfully created.`,
-
             })
-
+            // Remove the new amenity from local storage after confirmation
             localStorage.removeItem("newAmenity")
+        }
+    }, []);
 
+    // Use Effect for image preview
+    useEffect(() => {
+        // const imageCheck = () => {
+        //     if (rotatingIndex < 0) {
+        //         setRotatingIndex(0);
+        //     }
+        //     if (rotatingIndex >= images.length) {
+        //         setRotatingIndex(images.length - 1);
+        //     }
+        // }
+        const intervalId = setInterval(() => {
+
+            if (images.length <= 0 || images.length === 1) {
+                setRotatingIndex(0);
+            } else if (rotatingIndex === images.length - 1) {
+                setRotatingIndex(0);
+            } else if (rotatingIndex >= images.length) {
+                setRotatingIndex(0);
+            }
+            else {
+                setRotatingIndex(rotatingIndex + 1);
+            }
+        }, 5000)
+        // imageCheck();
+        return () => clearInterval(intervalId);
+    });
+
+    const handleImages = (e) => {
+
+        const imageFiles = Array.from(e.target.files);
+
+        if (images.length + imageFiles.length > 3) {
+            setError("You can only upload up to 3 images. Please remove at least 1 image to upload a new one.");
+            return;
         }
 
-    }, []);
+        if (imageFiles.length > 3) {
+            setError("You can only upload up to 3 images.");
+            setImages([]);
+            return;
+        }
+
+        if (images.length > 3) {
+            setError("You can only upload up to 3 images.");
+            setImages([]);
+            return;
+        }
+
+        imageFiles.forEach(file => {
+            setFileToBase(file);
+        })
+    }
+
+    const setFileToBase = (file) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onloadend = () => {
+            setImages(oldArray => [...oldArray, reader.result]);
+        }
+    }
+
+    const removeImage = (index) => {
+
+        if ((index >= images.length - 1 && rotatingIndex >= images.length - 1) || rotatingIndex >= images.length - 1 && images.length > 1) {
+            if (rotatingIndex === 0) {
+                setRotatingIndex(0);
+            } else {
+                setRotatingIndex(rotatingIndex - 1);
+            }
+        }
+
+        const updatedImagesArray = Array.from(images); // make a separate copy of the array
+        updatedImagesArray.splice(index, 1);
+        setImages(updatedImagesArray);
+    }
 
 
 
@@ -258,9 +350,10 @@ const AmenityEquipmentForm = () => {
                         {/* Return to Amenity List button */}
                         <Button
                             type="button"
-                            variant="outline" size="icon"
+                            variant="outline"
+                            size="icon"
                             className="h-7 w-7"
-                            onClick={returnRoute}
+                            onClick={() => history.back()}
                         >
 
                             <ChevronLeft className="h-4 w-4" />
@@ -281,6 +374,13 @@ const AmenityEquipmentForm = () => {
                         </div>
 
                     </div>
+
+                    {error && (
+                        <div className="bg-destructive w-full h-fit rounded-lg mb-3 py-4 px-6 flex gap-3 items-center">
+                            <TriangleAlert className="w-6 h-6" />
+                            {error}
+                        </div>
+                    )}
 
 
 
@@ -320,8 +420,8 @@ const AmenityEquipmentForm = () => {
                                                         <FormControl>
 
                                                             <div className="grid gap-2">
-                                                                <Label htmlFor="name"> Name </Label>
-                                                                <CardDescription> The equipment name should be in singular form. </CardDescription>
+                                                                <Label htmlFor="amenityName"> Name </Label>
+                                                                <CardDescription> The equipment name should be in plural form. </CardDescription>
                                                                 <Input
                                                                     id="amenityName"
                                                                     className="w-full"
@@ -334,8 +434,6 @@ const AmenityEquipmentForm = () => {
                                                         </FormControl>
 
                                                         <FormMessage />
-
-                                                        {error && <div className="text-destructive"> {error} </div>}
 
                                                     </FormItem>
                                                 )
@@ -428,9 +526,10 @@ const AmenityEquipmentForm = () => {
 
 
 
-                                        <TableRow>
+                                            <TableRow>
+
                                                 <TableCell className="font-semibold">
-                                                    Equipment Stocks
+                                                    Maximum Equipment Stocks
                                                 </TableCell>
                                                 <TableCell>
                                                     <FormField
@@ -525,7 +624,7 @@ const AmenityEquipmentForm = () => {
                                                 </TableCell>
 
                                             </TableRow>
-                                            
+
                                         </TableBody>
 
                                     </Table>
@@ -557,30 +656,124 @@ const AmenityEquipmentForm = () => {
 
                                     <div className="grid gap-2">
 
-                                        <Skeleton
-                                            className="aspect-square w-full rounded-md object-cover h-[300] w-[300]"
-                                        />
+                                        {images && images[0] && (
+                                            <Dialog>
+                                                <DialogTrigger onClick={() => setRotatingIndex(rotatingIndex)}>
+                                                    <img
+                                                        src={images[rotatingIndex]} className="aspect-video w-full rounded-md object-cover cursor-pointer"
+                                                    />
+                                                </DialogTrigger>
+
+                                                <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
+
+                                                    <Button
+                                                        className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (currentIndex === 0) {
+                                                                setCurrentIndex(images.length - 1)
+                                                            } else {
+                                                                setCurrentIndex(currentIndex - 1)
+                                                            }
+                                                        }}
+                                                        size="icon"
+                                                        variant="outline"
+                                                    >
+                                                        <ChevronLeft className="h-4 w-4" />
+                                                    </Button>
+
+                                                    <Button
+                                                        className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (currentIndex === images.length - 1) {
+                                                                setCurrentIndex(0)
+                                                            } else {
+                                                                setCurrentIndex(currentIndex + 1)
+                                                            }
+                                                        }}
+                                                        size="icon"
+                                                        variant="outline"
+                                                    >
+                                                        <ChevronRight className="h-4 w-4" />
+                                                    </Button>
+
+                                                    <img
+                                                        src={images[currentIndex]} className="aspect-video rounded-md object-contain"
+                                                    />
+
+                                                </DialogContent>
+
+                                            </ Dialog>
+                                        )}
 
                                         <div className="grid grid-cols-3 gap-2">
 
-                                            <button type="button">
-                                                <Skeleton
-                                                    className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"
-                                                />
-                                            </button>
+                                            {images && images?.map((image, index) => (
+                                                <div className="group relative">
+                                                    <Button
+                                                        className="h-5 w-5 rounded-full absolute -top-2 -right-2 group-hover:flex hidden z-50"
+                                                        variant="destructive"
+                                                        size="icon"
+                                                        type="button"
+                                                        onClick={() => { removeImage(index) }}>
+                                                        <X className="h-3 w-3" />
+                                                    </Button>
+                                                    <img
+                                                        src={image} className="cursor-pointer aspect-video w-full rounded-md object-cover h-[84] w-[84]" onClick={() => setRotatingIndex(index)}
+                                                    />
+                                                </div>
+                                            )
+                                            )}
 
-                                            <button type="button">
-                                                <Skeleton
-                                                    className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"
-                                                />
-                                            </button>
-
-                                            <button type="button" className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
-                                                <Upload className="h-4 w-4 text-muted-foreground" />
-                                                <span className="sr-only">Upload</span>
-                                            </button>
-                                            
                                         </div>
+
+                                        {images.length !== 3 && images.length! <= 3 && (
+                                            <button type="button" className="relative flex flex-col gap-2 aspect-video w-full items-center justify-center rounded-md border border-dashed">
+
+                                                <Upload className="h-6 w-6 text-muted-foreground" />
+
+                                                <div className="flex flex-col">
+                                                    <span className="text-muted-foreground text-base font-medium"> Click here to upload images </span>
+                                                    <span className="text-muted-foreground text-xs font-normal"> The total file size should not exceed 15 MB. </span>
+                                                </div>
+
+                                                <span className="sr-only"> Upload </span>
+
+                                                <FormField
+                                                    control={form.control}
+                                                    name="amenityImages"
+                                                    render={({ field: { value, onChange, ...fieldProps } }) => {
+
+                                                        return (
+
+                                                            <FormItem>
+                                                                <FormLabel className="hidden"> Amenity Image </FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        accept="image/jpeg, image/png, image/jpg"
+                                                                        className="block absolute w-full h-full left-0 top-0 right-0 bottom-0 opacity-0 z-50 disabled:opacity-0 !mt-0 pointer"
+                                                                        disabled={images.length === 3 || images.length > 3}
+                                                                        id="amenityImages"
+                                                                        multiple
+                                                                        onChange={handleImages}
+                                                                        title="Drag and drop an image file or click here to upload."
+                                                                        type="file"
+                                                                        {...fieldProps}
+                                                                    />
+                                                                </FormControl>
+
+                                                                <FormMessage />
+
+                                                            </FormItem>
+                                                        )
+                                                    }}
+                                                />
+
+                                            </button>
+                                        )}
+
+
 
                                     </div>
 
@@ -592,8 +785,8 @@ const AmenityEquipmentForm = () => {
                                 <CardHeader>
 
                                     <CardTitle> Equipment Status </CardTitle>
-                                    <CardDescription> 
-                                        The equipment's visibility to the unit owners. 
+                                    <CardDescription>
+                                        The equipment's visibility to the unit owners.
                                     </CardDescription>
 
                                 </CardHeader>
@@ -633,16 +826,16 @@ const AmenityEquipmentForm = () => {
                                                             <FormMessage />
 
                                                             {/* If Equipment Status is currently archived, show this */}
-                                                            { form.getValues("stat") === "Archived" &&
+                                                            {form.getValues("stat") === "Archived" &&
                                                                 <CardDescription>
-                                                                    Archived equipments are hidden from the unit owners. 
+                                                                    Archived equipments are hidden from the unit owners.
                                                                 </CardDescription>
                                                             }
 
                                                             {/* If Equipment Status is currently unarchived, show this */}
-                                                            { form.getValues("stat") === "Unarchived" &&
+                                                            {form.getValues("stat") === "Unarchived" &&
                                                                 <CardDescription>
-                                                                    Unarchived equipments are shown to the unit owners. 
+                                                                    Unarchived equipments are shown to the unit owners.
                                                                 </CardDescription>
                                                             }
 

@@ -5,60 +5,130 @@ const express = require('express')
 const router = express.Router()
 
 const { 
+   // POST controllers
+   createReservation,
 
-    createReservation,
-    deleteReservation,
-    getApprovedReservations,
-    getAmenityReservations,
-    getArchivedReservations,
-    getReservation,
-    getReservations,
-    getUserReservations,
-    updateReservation
+   // GET controllers
+   getAllReservations,
+   getReservation,
+   getUnarchivedReservations,
+   getUnarchivedPendingReservations,
+   getUnarchivedApprovedReservations,
+   getArchivedReservations,
+   getArchivedPendingReservations,
+   getArchivedApprovedReservations,
+   getAmenityReservations,
+   getAmenityPendingReservations,
+   getAmenityApprovedReservations,
+   getAmenityRejectedReservations,
+   getAmenityArchivedReservations,
+   getAmenityCompletedReservations,
+   getAmenityExpiredReservations,
+   getUserReservations,
+   getUserUnarchivedReservations,
+   getUserArchivedReservations,
+   getUserPendingReservations,
+   getUserApprovedReservations,
+   getUserRejectedReservations,
 
+   // DELETE controllers
+   deleteReservation,
+
+   // PATCH controllers
+   updateReservation
 } = require('../controllers/reservationController')
 
 
-const requireAuth = require('../middlewares/requireAuth')
+
+
+
+// POST routes
+// Create a new reservation
+router.post('/', createReservation);
 
 
 
 
-// Require auth for all announcement routes
-// router.use(requireAuth)
+
+// GET routes
+// All reservations
+router.get('/', getAllReservations);
+
+// Single reservation
+router.get('/:id', getReservation);
+
+// Unarchived reservations
+router.get('/unarchived/a', getUnarchivedReservations);
+
+// Unarchived and pending reservations
+router.get('/unarchived/pending', getUnarchivedPendingReservations);
+
+// Unarchived and approved reservations
+router.get('/unarchived/approved', getUnarchivedApprovedReservations);
+
+// Archived reservations
+router.get('/archived', getArchivedReservations);
+
+// Archived and pending reservations
+router.get('/archived/pending', getArchivedPendingReservations);
+
+// Archived and approved reservations
+router.get('/archived/approved', getArchivedApprovedReservations);
+
+// Amenity reservations
+router.get('/amenity/:id', getAmenityReservations);
+
+// Amenity pending reservations
+router.get('/amenity/pending/:id', getAmenityPendingReservations);
+
+// Amenity approved reservations
+router.get('/amenity/approved/:id', getAmenityApprovedReservations);
+
+// Amenity rejected reservations
+router.get('/amenity/rejected/:id', getAmenityRejectedReservations);
+
+// Amenity archived reservations
+router.get('/amenity/archived/:id', getAmenityArchivedReservations);
+
+// Amenity completed reservations
+router.get('/amenity/completed/:id', getAmenityCompletedReservations);
+
+// Amenity expired reservations
+router.get('/amenity/expired/:id', getAmenityExpiredReservations);
+
+// User reservations
+router.get('/user/:id', getUserReservations);
+
+// User unarchived reservations
+router.get('/user/unarchived/:id', getUserUnarchivedReservations);
+
+// User archived reservations
+router.get('/user/archived/:id', getUserArchivedReservations);
+
+// User pending reservations
+router.get('/user/pending/:id', getUserPendingReservations);
+
+// User approved reservations
+router.get('/user/approved/:id', getUserApprovedReservations);
+
+// User rejected reservations
+router.get('/user/rejected/:id', getUserRejectedReservations);
 
 
 
-router.get('/approved', getApprovedReservations)
 
-// GET all unarchived reservations
-router.get('/', getReservations)
 
-// GET all unarchived and unrejected reservations
-
-// GET all unarchived and unrejected reservations of a specific amenity
-router.get('/approved/:amenityName', getAmenityReservations)
-
-// GET all unarchived reservations from members
-router.get('/:blkLt', getUserReservations)
-
-// GET all archived reservations
-router.get('/archive/asd', getArchivedReservations)
-
-// GET a single reservation
-router.get('/details/:id', getReservation)
-
-// POST a new reservation
-router.post('/', createReservation)
-
-// DELETE a reservation
+// DELETE routes
+// Delete a reservation
 router.delete('/:id', deleteReservation)
 
-// UPDATE a reservation
-router.patch('/:id', updateReservation)
 
-// UPDATE a reservation
-router.patch('/details/edit/:id', updateReservation)
+
+
+
+// PATCH routes
+// Update a reservation
+router.patch('/:id', updateReservation)
 
 
 

@@ -30,7 +30,7 @@ const requireAuth = require('../middlewares/requireAuth')
 
 
 // DELETE an amenity
-router.delete('/:amenityName', deleteAmenity);
+router.delete('/:id', deleteAmenity);
 
 // GET all unarchived amenities
 router.get('/', getAmenities);
@@ -39,13 +39,13 @@ router.get('/', getAmenities);
 router.get('/archived', getArchivedAmenities);
 
 // GET a specific amenity
-router.get('/:amenityName', getSpecificAmenity);
+router.get('/:id', getSpecificAmenity);
 
 // POST a new amenity
-router.post('/', upload.single('amenityImage'), createAmenity);
+router.post('/', createAmenity);
 
 // UPDATE an amenity
-router.patch('/:amenityName', updateAmenity)
+router.patch('/:id', updateAmenity)
 
 
 

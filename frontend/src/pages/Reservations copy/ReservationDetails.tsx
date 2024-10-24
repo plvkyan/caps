@@ -108,6 +108,7 @@ import { useAuthContext } from "@/hooks/useAuthContext"
 
 // Reservation Hook
 import { useReservationsContext } from "@/hooks/useReservationsContext"
+import { AmenityType } from "@/types/amenity-type"
 
 
 
@@ -155,6 +156,13 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
     // Email state
     const [censoredEmail, setCensoredEmail] = useState(reservation.reserveeEmail ? reservation.reserveeEmail.substring(0, reservation.reserveeEmail.indexOf("@")) : undefined);
 
+    // Amenity state
+    const [amenity, setAmenity] = useState<AmenityType>();
+
+    // Current index state for image preview
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const [images, setImages] = useState([]);
 
 
 
@@ -194,10 +202,38 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
         }
 
+        // Get the current state of amenity
+        let amen = amenityList.filter(function (ame) {
+            return ame.amenityName === reservation.amenityName;
+        })
+
+        setAmenity(amen[0]);
+
+        setImages(amen[0].amenityImages);
+
         // Call Censor Email Function
         censorEmail();
 
     }, []);
+
+    useEffect(() => {
+
+        const intervalId = setInterval(() => {
+            if (amenity!.amenityImages!.length <= 0 || amenity!.amenityImages!.length === 1) {
+                setCurrentIndex(0);
+            } else if (currentIndex === amenity!.amenityImages!.length - 1) {
+                setCurrentIndex(0);
+            } else if (currentIndex >= amenity!.amenityImages!.length) {
+                setCurrentIndex(0);
+            }
+            else {
+                setCurrentIndex(currentIndex + 1);
+            }
+        }, 5000)
+
+        return () => clearInterval(intervalId);
+
+    });
 
 
 
@@ -310,8 +346,12 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                 return ame.amenityName === amenityName;
             })
 
+            setAmenity(amenity);
+
+            console.log(amenity)
+
             // Take the currrent amenity quantity and reduce the desired reservation quantity
-            amenity[0].amenityQuantity = amenity[0].amenityQuantity - reservation.reservationQuantity;
+            amenity[0].amenityStock = amenity[0].amenityStock - reservation.reservationQuantity;
 
             if (reservation.amenityType === "Equipment") {
                 const res = await fetch('http://localhost:4000/api/amenities/' + amenityName, {
@@ -321,11 +361,11 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                 });
 
                 if (res.ok) {
-                    console.log("Amenity quantity reduced.");
+                    console.log("Amenity stock reduced.");
                 }
 
                 if (!res.ok) {
-                    console.log("Amenity quantity not reduced.");
+                    console.log("Amenity stock not reduced.");
                 }
 
 
@@ -435,7 +475,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
             })
 
             // Take the currrent amenity quantity and add back the reservation quantity
-            amenity[0].amenityQuantity = amenity[0].amenityQuantity + reservation.reservationQuantity;
+            amenity[0].amenityStock = amenity[0].amenityStock + reservation.reservationQuantity;
 
             if (reservation.amenityType === "Equipment") {
                 const res = await fetch('http://localhost:4000/api/amenities/' + amenityName, {
@@ -445,11 +485,11 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                 })
 
                 if (res.ok) {
-                    console.log("Amenity quantity added back.")
+                    console.log("Amenity stock added back.")
                 }
 
                 if (!res.ok) {
-                    console.log("Amenity quantity not added back.")
+                    console.log("Amenity stock not added back.")
                 }
 
 
@@ -590,7 +630,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
 
                 {/* Return button */}
-                <Button onClick={navToList} variant="outline" size="icon" className="h-7 w-7">
+                <Button onClick={() => history.back()} variant="outline" size="icon" className="h-7 w-7">
 
                     <span> <ChevronLeft className="h-4 w-4" /> </span>
                     <span className="sr-only"> Back </span>
@@ -653,7 +693,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                                 user.position === "Admin" && (
                                     <Button size="icon" variant="outline" className="h-8 w-8">
                                         <MoreVertical className="h-3.5 w-3.5" />
-                                        <span className="sr-only"> Mor </span>
+                                        <span className="sr-only"> More </span>
                                     </Button>
                                 )
                             }
@@ -744,9 +784,9 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
 
 
-                        <CardHeader className="flex flex-row items-start bg-muted/50">
+                        <CardHeader className="flex flex-col gap-2 bg-muted/50">
 
-                            <div className="grid gap-0.5">
+                            <div className="grid gap-1">
 
 
 
@@ -777,9 +817,21 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
 
 
-                            <div className="ml-auto flex items-center gap-1">
+                            <div className="ml-auto flex flex-col items-center gap-1">
 
-                                <Skeleton className="w-[16rem] h-48 mb-2" />
+                                <div className="grid grid-cols-3 gap-2">
+
+                                    {amenity && amenity.amenityImages && (
+                                        <img src={amenity.amenityImages[currentIndex].url} alt="Amenity Image" className="aspect-video rounded-md col-span-3 object-cover" />
+                                    )
+                                    }
+
+                                    {amenity && amenity.amenityImages.map((image, index) => (
+                                        <img src={image.url} alt="Amenity Image" className="aspect-video rounded-md object-cover cursor-pointer" onClick={() => setCurrentIndex(index)} />
+                                    ))
+                                    }
+
+                                </div>
 
 
                             </div>
@@ -1056,7 +1108,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                                                                         type="text"
                                                                         className="w-full"
                                                                         placeholder="Enter comment subject here"
-                                                                        { ...field }
+                                                                        {...field}
                                                                     />
 
                                                                 </FormControl>
@@ -1090,7 +1142,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                                                                         id="reservationComment"
                                                                         placeholder="Enter comment message here"
                                                                         className="min-h-32"
-                                                                        { ...field }
+                                                                        {...field}
                                                                     />
 
                                                                 </FormControl>
@@ -1154,14 +1206,14 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                         {
                             (reservation.stat == "Unarchived" && user.position === "Admin") &&
                             (
-                                <DropdownMenuItem onClick={ setArchive }> Archive </DropdownMenuItem>
+                                <DropdownMenuItem onClick={setArchive}> Archive </DropdownMenuItem>
                             )
                         }
 
                         {
                             (reservation.stat == "Archived" && user.position === "Admin") &&
                             (
-                                <DropdownMenuItem onClick={ setUnarchive }> Unarchive </DropdownMenuItem>
+                                <DropdownMenuItem onClick={setUnarchive}> Unarchive </DropdownMenuItem>
                             )
                         }
 
@@ -1170,7 +1222,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                         {
                             user.position === "Admin" &&
                             (
-                                <DropdownMenuItem onClick={ () => setShowDeleteDialog(true) } className="text-destructive"> Delete </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive"> Delete </DropdownMenuItem>
                             )
                         }
 

@@ -44,6 +44,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -105,7 +106,7 @@ const AmenitiesList = () => {
 
     // States
     // Specific Amenity State
-    const [am, setAm] = useState<AmenityType | null>(null);
+    const [deletedAmenity, setDeletedAmenity] = useState<AmenityType | null>(null);
 
     // Amenity List State
     const [amenityList, setAmenityList] = useState<AmenityType[] | null>(null);
@@ -129,19 +130,15 @@ const AmenitiesList = () => {
 
         const fetchAmenities = async () => {
 
-            const response = await fetch('http://localhost:4000/api/amenities/');
+            const amenityListResponse = await fetch('http://localhost:4000/api/amenities/');
 
-            const json = await response.json();
+            const amenityListData = await amenityListResponse.json();
 
-            if (response.ok) {
-
-                console.log(amenityList);
-                setAmenityList(json);
-
-            } else if (!response.ok) {
-                    
-                console.log("Fetching amenities failed: " + json);
-    
+            if (amenityListResponse.ok) {
+                console.log("Amenity list fetched successfully.");
+                setAmenityList(amenityListData);
+            } else if (!amenityListResponse.ok) {
+                console.log("Fetching amenities failed: " + amenityListData);
             }
 
         }
@@ -155,46 +152,20 @@ const AmenitiesList = () => {
     // Functions
     // Function to navigate to the equipment form page
     const equipmentFormRoute = () => {
-
-        const path = '/amenities/equipment/form';
-        navigate(path);
-
+        const equipmentFormPath = '/amenities/equipment/form';
+        navigate(equipmentFormPath);
     }
 
     // Function to navigate to the facility form page
     const facilityFormRoute = () => {
-
-        const path = '/amenities/facility/form';
-        navigate(path);
-
+        const facilityFormPath = '/amenities/facility/form';
+        navigate(facilityFormPath);
     }
 
     // Amenity Details Route
-    const amenityDetailsRoute = (amenity) => {
-
-        const fetchReservations = async () => {
-
-            const response = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName)
-
-            const json = await response.json()
-
-            if (response.ok) {
-
-                console.log(json)
-                const path = '/amenities/details/' + amenity.amenityName;
-                navigate(path)
-
-            }
-
-            if (!response.ok) {
-
-                console.log(json)
-
-            }
-
-        }
-
-        fetchReservations()
+    const amenityDetailsRoute = (id) => {
+        const amenityDetailsPath = '/amenities/details/' + id;
+        navigate(amenityDetailsPath);
     }
 
     // Archive Function
@@ -213,10 +184,8 @@ const AmenitiesList = () => {
         if (response.ok) {
 
             toast({
-
                 title: "Amenity archived",
                 description: amenity.amenityName + " is archived",
-
             })
         }
 
@@ -238,10 +207,8 @@ const AmenitiesList = () => {
         if (response.ok) {
 
             toast({
-
                 title: "Amenity archived",
                 description: amenity.amenityName + " is unarchived",
-
             })
 
         }
@@ -310,7 +277,7 @@ const AmenitiesList = () => {
                         {/* Delete dialog delete button */}
                         <Button
                             variant={"destructive"}
-                            onClick={ ()=> {deleteReservation(am)}}
+                            onClick={ ()=> {deleteReservation(deletedAmenity)}}
                         >
                             Delete
                         </Button>
@@ -400,14 +367,14 @@ const AmenitiesList = () => {
 
                                         return (
 
-                                            <TableRow>
+                                            <TableRow key={amenity._id}>
                                             {/* <TableRow> */}
 
-                                                <TableCell className="flex flex-row items-center gap-4" onClick={() => { amenityDetailsRoute(amenity); }}>
+                                                <TableCell className="flex flex-row items-center gap-4" onClick={() => { amenityDetailsRoute(amenity._id); }}>
                                                     <Skeleton className="h-24 w-24 " />
                                                 </TableCell>
 
-                                                <TableCell onClick={() => { amenityDetailsRoute(amenity); }}>
+                                                <TableCell onClick={() => { amenityDetailsRoute(amenity._id); }}>
                                                     <div>
                                                         <div className="font-medium"> {amenity.amenityName} </div>
                                                         <div className="hidden text-sm text-muted-foreground md:inline">
@@ -416,11 +383,11 @@ const AmenitiesList = () => {
                                                     </div>
                                                 </TableCell>
 
-                                                <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity); }}>
+                                                <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity._id); }}>
                                                     {amenity.amenityType}
                                                 </TableCell>
 
-                                                <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity); }}>
+                                                <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity._id); }}>
                                                     <Badge className="text-xs" variant="secondary">
                                                         {amenity.stat}
                                                     </Badge>
@@ -432,9 +399,9 @@ const AmenitiesList = () => {
 
                                                             <DropdownMenuTrigger asChild>
                                                                 <Button
-                                                                    type="button"
                                                                     aria-haspopup="true"
                                                                     size="icon"
+                                                                    type="button"
                                                                     variant="ghost"
                                                                 >
                                                                     <MoreHorizontal className="h-4 w-4" />
@@ -443,7 +410,10 @@ const AmenitiesList = () => {
                                                             </DropdownMenuTrigger>
 
                                                             <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                
+                                                                <DropdownMenuLabel> Actions </DropdownMenuLabel>
+
+                                                                <DropdownMenuSeparator />
 
                                                                 {
                                                                     (amenity.stat == "Unarchived") &&
@@ -459,7 +429,7 @@ const AmenitiesList = () => {
                                                                     )
                                                                 }
 
-                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setAm(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setDeletedAmenity(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
 
 
                                                             </DropdownMenuContent>
@@ -552,14 +522,14 @@ const AmenitiesList = () => {
 
                                             return (
 
-                                                <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
+                                                <TableRow key={amenity._id}>
                                                 {/* <TableRow> */}
 
-                                                    <TableCell className="flex flex-row items-center gap-4">
+                                                    <TableCell className="flex flex-row items-center gap-4" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
                                                         <Skeleton className="h-24 w-24 " />
                                                     </TableCell>
 
-                                                    <TableCell>
+                                                    <TableCell onClick={ () => { amenityDetailsRoute(amenity._id) }}>
                                                         <div>
                                                             <div className="font-medium"> {amenity.amenityName} </div>
                                                             <div className="hidden text-sm text-muted-foreground md:inline">
@@ -568,11 +538,11 @@ const AmenitiesList = () => {
                                                         </div>
                                                     </TableCell>
 
-                                                    <TableCell className="hidden sm:table-cell">
+                                                    <TableCell className="hidden sm:table-cell" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
                                                         {amenity.amenityType}
                                                     </TableCell>
 
-                                                    <TableCell className="hidden sm:table-cell">
+                                                    <TableCell className="hidden sm:table-cell" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
                                                         <Badge className="text-xs" variant="secondary">
                                                             {amenity.stat}
                                                         </Badge>
@@ -610,7 +580,7 @@ const AmenitiesList = () => {
                                                                     )
                                                                 }
 
-                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setAm(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setDeletedAmenity(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
 
 
                                                             </DropdownMenuContent>
@@ -707,14 +677,14 @@ const AmenitiesList = () => {
 
                                             return (
 
-                                                <TableRow onClick={() => { amenityDetailsRoute(amenity); console.log(amenity); }}>
+                                                <TableRow key={amenity._id}>
                                                 {/* <TableRow> */}
 
-                                                    <TableCell className="flex flex-row items-center gap-4">
+                                                    <TableCell className="flex flex-row items-center gap-4" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
                                                         <Skeleton className="h-24 w-24 " />
                                                     </TableCell>
 
-                                                    <TableCell>
+                                                    <TableCell onClick={ () => { amenityDetailsRoute(amenity._id) }}>
                                                         <div>
                                                             <div className="font-medium"> {amenity.amenityName} </div>
                                                             <div className="hidden text-sm text-muted-foreground md:inline">
@@ -723,11 +693,11 @@ const AmenitiesList = () => {
                                                         </div>
                                                     </TableCell>
 
-                                                    <TableCell className="hidden sm:table-cell">
+                                                    <TableCell className="hidden sm:table-cell" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
                                                         {amenity.amenityType}
                                                     </TableCell>
 
-                                                    <TableCell className="hidden sm:table-cell">
+                                                    <TableCell className="hidden sm:table-cell" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
                                                         <Badge className="text-xs" variant="secondary">
                                                             {amenity.stat}
                                                         </Badge>
@@ -741,6 +711,7 @@ const AmenitiesList = () => {
                                                                 <Button
                                                                     aria-haspopup="true"
                                                                     size="icon"
+                                                                    type="button"
                                                                     variant="ghost"
                                                                 >
                                                                     <MoreHorizontal className="h-4 w-4" />
@@ -749,7 +720,10 @@ const AmenitiesList = () => {
                                                             </DropdownMenuTrigger>
 
                                                             <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                                                                <DropdownMenuLabel> Actions </DropdownMenuLabel>
+
+                                                                <DropdownMenuSeparator />
 
                                                                 {
                                                                     (amenity.stat == "Unarchived") &&
@@ -765,7 +739,7 @@ const AmenitiesList = () => {
                                                                     )
                                                                 }
 
-                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setAm(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setDeletedAmenity(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
 
 
                                                             </DropdownMenuContent>

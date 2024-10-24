@@ -8,16 +8,16 @@
 import { columns } from "@/pages/Admin/Reservations/AdminReservationColumn"
 
 // Data Table Import
-import { ReservationsTable } from "@/pages/Reservations/ReservationsTable"
+// import { ReservationsTable } from "@/pages/Reservations/ReservationsTable"
 
 // Layout Wrapper Import
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 
 // Reservation Form
-import { ReservationForm } from "@/pages/Reservations/ReservationForm";
+// import { ReservationForm } from "@/pages/Reservations/ReservationForm";
 
 // Reservation Amenity Details
-import { ReservationAmenities } from "@/pages/Reservations/ReservationAmenities";
+// import { ReservationAmenities } from "@/pages/Reservations/ReservationAmenities";
 
 
 
@@ -166,23 +166,23 @@ export default function Reservations() {
                             <h1 className="text-3xl font-semibold"> Reservations </h1>
                         </div>
 
-                        {
+                        {/* {
                             (user.position === "Admin" && reservations && amenityList) && 
                             (
-                                <ReservationAmenities reservations={reservations} amenityList={amenityList} />
+                                // <ReservationAmenities reservations={reservations} amenityList={amenityList} />
                             )
-                        }
+                        } */}
 
-                        <ReservationsTable columns={columns} data={allUnarchivedReservations} />
+                        {/* <ReservationsTable columns={columns} data={allUnarchivedReservations} /> */}
                     </>
                 )
             }       
 
             {
-                (location.pathname === "/reservations/form" && amenityList)
-                && (
-                    <ReservationForm amenityList={amenityList} />
-                )
+                // (location.pathname === "/reservations/form" && amenityList)
+                // && (
+                //     // <ReservationForm amenityList={amenityList} />
+                // )
             }
 
         </LayoutWrapper>

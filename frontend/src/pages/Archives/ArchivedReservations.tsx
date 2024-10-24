@@ -8,7 +8,7 @@
 import { columns } from "@/pages/Admin/Reservations/AdminReservationColumn"
 
 // Reservations Data Table Import
-import { ReservationsTable } from "@/pages/Reservations/ReservationsTable"
+// import { ReservationsTable } from "@/pages/Reservations/ReservationsTable"
 
 
 

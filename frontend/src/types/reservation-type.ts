@@ -1,18 +1,30 @@
 
 export type ReservationType = {
+
     _id: string,
-    blkLt: string,
-    blkLtPosition: string,
-    amenityAddress: string,
+    reserveeId: string,
+    reserveeBlkLt: string,
+    reserveePosition: string,
+    reserveeEmail: string,
+    amenityId: string,
     amenityName: string,
     amenityType: string,
-    reservationComment: string,
+    amenityAddress: string,
+    amenityQuantity: string,
     reservationDate: Date,
-    reservationQuantity: number,
-    reservationStatus: string,
     reservationReason: string,
+    reservationComments: [
+        {
+            commentContent: string,
+            commentDate: Date,
+            commentAuthor: string,
+            commentAuthorPosition: string,
+        }
+    ],
+    reservationStatus: string,
+    reservationVisiblity: string,
     interactedBy: string,
+    interactedByPosition: string,
     interactionDate: Date,
-    stat: string,
-    createdAt: Date,
+
 }

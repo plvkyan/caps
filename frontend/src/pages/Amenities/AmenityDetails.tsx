@@ -6,13 +6,27 @@
 // Lucide Icon Imports
 import {
   ChevronLeft,
-  PlusCircle,
-  Upload,
+  ChevronRight,
+  MoreVertical,
 } from "lucide-react";
 
 
 
 // shadcn Component Imports
+// shadcn AlertDialog Component Imports
+import { 
+  AlertDialog, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from "@/components/ui/alert-dialog";
+
+// shadcn Badge Component Import
+import { Badge } from "@/components/ui/badge";
+
 // shadcn Button Component Import
 import { Button } from "@/components/ui/button";
 
@@ -25,15 +39,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// shadcn Form Component Imports
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+// shadcn Dialog Component Import
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogTrigger 
+} from "@/components/ui/dialog";
+
+// shadcn Dropdown Menu Component Imports
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator,
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 // shadcn Input Component Import
 import { Input } from "@/components/ui/input";
@@ -50,25 +70,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// shadcn Skeleton Component Import
-import { Skeleton } from "@/components/ui/skeleton";
-
 // shadcn Table Component Imports
 import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 
+// shadcn Tabs Component Imports
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger,
+} from "@/components/ui/tabs";
+
 // shadcnc Textarea Component Import
 import { Textarea } from "@/components/ui/textarea";
-
-// shadcn Toaster Import
-import { Toaster } from "@/components/ui/toaster";
-
-// shadcn Toast Import
-import { useToast } from "@/components/ui/use-toast"
 
 
 
@@ -83,26 +104,25 @@ import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import { format } from "date-fns"
 
 // React Router Dom Imports
-import { useLocation, useNavigate } from "react-router-dom";
+import { 
+  useLocation, 
+  useNavigate 
+} from "react-router-dom";
 
-// React Hook Form Imports
-import { useForm } from "react-hook-form";
-
-// Zod Imports
-import * as zod from "zod";
-
-// Zod Resolver Import
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+// React useEffect and useState Imports
+import { 
+  useEffect, 
+  useState 
+} from "react";
 
 
 
 // Data and Types Import
-// Reservation Type Import
+// Amenity Type Import
 import { AmenityType } from "@/types/amenity-type";
+// Reservation Type Import
 import { ReservationType } from "@/types/reservation-type";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 
 
@@ -121,13 +141,25 @@ const AmenityDetails = () => {
 
   // States
   // Amenity State
-  const [amenity, setAmenity] = useState<AmenityType[]>([]);
-
-  // Amenity List State
-  const [amenityList, setAmenityList] = useState<[]>([]);
+  const [amenity, setAmenity] = useState<AmenityType | any>();
 
   // Reservations List State
   const [reservationsList, setReservationsList] = useState<[]>([]);
+
+  // Archived Reservations List State
+  const [archivedReservationsList, setArchivedReservationsList] = useState<[]>([]);
+
+  // All Reservations State
+  const [allReservations, setAllReservations] = useState<[]>([]);
+
+  // Delete Dialog
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Rotating Index State for Images
+  const [rotatingIndex, setRotatingIndex] = useState(0);
+
+  // Paused State for Image Carousel
+  const [currentIndex, setCurrentIndex] = useState(0);
 
 
 
@@ -137,6 +169,47 @@ const AmenityDetails = () => {
     const amenityListPath = '/amenities';
     navigate(amenityListPath);
   }
+
+  useEffect(() => {
+
+    // const imageCheck = () => {
+
+    //     if (rotatingIndex < 0) {
+    //         setRotatingIndex(0);
+    //     }
+
+    //     if (rotatingIndex >= images.length) {
+    //         setRotatingIndex(images.length - 1);
+    //     }
+
+    // }
+
+    let intervalId = setInterval(() => {
+
+      console.log(amenity.amenityImages)
+
+      if (amenity.amenityImages.length <= 0 || amenity.amenityImages.length === 1) {
+        setRotatingIndex(0);
+      } else if (rotatingIndex === amenity.amenityImages.length - 1) {
+        setRotatingIndex(0);
+      } else if (rotatingIndex >= amenity.amenityImages.length) {
+        setRotatingIndex(0);
+      }
+      else {
+        setRotatingIndex(rotatingIndex + 1);
+      }
+    }, 3000)
+
+    // Pause logic for the carousel
+    // if (paused) {
+    //   clearInterval(intervalId);
+    // } else {
+    //   return () => clearInterval(intervalId);
+    // }
+
+    return () => clearInterval(intervalId);
+
+  });
 
 
 
@@ -149,24 +222,60 @@ const AmenityDetails = () => {
     // Set the document title
     document.title = "Amenity | GCTMS";
 
+    // Function to fetch all reservations
+    const fetchAllReservations = async () => {
 
-
-    // Function to fetch reservations
-    const fetchReservations = async () => {
-
-      // Fetch reservations
-      const reservationResponse = await fetch("http://localhost:4000/api/reservations");
+      const reservationListDataResponse = await fetch("http://localhost:4000/api/reservations/all");
 
       // Parse the response to JSON
-      const reservationData = await reservationResponse.json();
+      const reservationListData = await reservationListDataResponse.json();
 
       // If the response is successful, log to the console that fetching reservations list is successful
-      if (reservationResponse.ok) {
-        console.log("Fetching reservations list successful.");
-        console.log(reservationData);
-        setReservationsList(reservationData);
-      } else if (!reservationResponse.ok) {
-        console.log("Fetching reservations list failed.");
+      if (reservationListDataResponse.ok) {
+        console.log("Fetching all reservations list successful.");
+        setAllReservations(reservationListData);
+      }
+
+      if (!reservationListDataResponse.ok) {
+        console.log("Fetching all reservations list failed.");
+      }
+
+    }
+
+    // Function to fetch reservations
+    const fetchUnarchivedReservations = async () => {
+
+      // Fetch reservations
+      const unarchivedReservationListDataResponse = await fetch("http://localhost:4000/api/reservations");
+
+      // Parse the response to JSON
+      const unarchivedReservationListData = await unarchivedReservationListDataResponse.json();
+
+      // If the response is successful, log to the console that fetching reservations list is successful
+      if (unarchivedReservationListDataResponse.ok) {
+        console.log("Fetching unarchived reservations list successful.");
+        setReservationsList(unarchivedReservationListData);
+      } else if (!unarchivedReservationListDataResponse.ok) {
+        console.log("Fetching unarchived reservations list failed.");
+      };
+
+    };
+
+    // Function to fetch reservations
+    const fetchArchivedReservations = async () => {
+
+      // Fetch reservations
+      const archivedReservationListDataResponse = await fetch("http://localhost:4000/api/reservations/archive/asd");
+
+      // Parse the response to JSON
+      const archivedReservationListData = await archivedReservationListDataResponse.json();
+
+      // If the response is successful, log to the console that fetching reservations list is successful
+      if (archivedReservationListDataResponse.ok) {
+        console.log("Fetching archived reservations list successful.");
+        setArchivedReservationsList(archivedReservationListData);
+      } else if (!archivedReservationListDataResponse.ok) {
+        console.log("Fetching archived reservations list failed.");
       };
 
     };
@@ -175,17 +284,17 @@ const AmenityDetails = () => {
     const fetchAmenity = async () => {
 
       // Fetch amenity
-      const amenityResponse = await fetch("http://localhost:4000/api/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "));
+      const amenityDataResponse = await fetch("http://localhost:4000/api/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length));
 
       // Parse the response to JSON
-      const amenityData = await amenityResponse.json();
+      const amenityData = await amenityDataResponse.json();
 
       // If the response is successful, log to the console that fetching amenity is successful  
-      if (amenityResponse.ok) {
+      if (amenityDataResponse.ok) {
         console.log("Fetching amenity successful.");
         console.log(amenityData);
         setAmenity(amenityData);
-      } else if (!amenityResponse.ok) {
+      } else if (!amenityDataResponse.ok) {
         console.log("Fetching amenity failed.");
       }
 
@@ -194,14 +303,93 @@ const AmenityDetails = () => {
 
 
     // Call all API call functions
-    // Fetch Reservations
-    fetchReservations();
+    // Fetch All Reservations
+    fetchAllReservations();
+    // Fetch ALl Unarchived Reservations
+    fetchUnarchivedReservations();
+    // Fetch All Archived Reservations
+    fetchArchivedReservations();
     // Fetch Amenity
     fetchAmenity();
+
 
   }, []);
 
 
+
+  // Functions
+  // Function to redirect back to amenity list
+  const reservationDetailsRoute = (reservationId) => {
+    const reservationDetailsPath = '/reservations/details/' + reservationId;
+    navigate(reservationDetailsPath);
+  }
+
+  // Function to archive amenity
+  const setArchive = async () => {
+
+    amenity.stat = "Archived";
+
+    const archiveResponse = await fetch("http://localhost:4000/api/amenities/" + amenity.amenityName, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(amenity)
+    });
+
+    const archivedAmenityData = await archiveResponse.json();
+
+    if (archiveResponse.ok) {
+      console.log("Archiving amenity successful.");
+      console.log(archivedAmenityData);
+      setAmenity(archivedAmenityData);
+      window.location.reload();
+    } else if (!archiveResponse.ok) {
+      console.log("Archiving amenity failed.");
+    }
+
+  }
+
+  // Function to unarchive amenity
+  const setUnarchive = async () => {
+
+    amenity.stat = "Unarchived";
+
+    const unarchiveResponse = await fetch("http://localhost:4000/api/amenities/" + amenity.amenityName, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(amenity)
+    });
+
+    const unarchivedAmenityData = await unarchiveResponse.json();
+
+    if (unarchiveResponse.ok) {
+      console.log("Unarchiving amenity successful.");
+      console.log(unarchivedAmenityData);
+      setAmenity(unarchivedAmenityData);
+      window.location.reload();
+    } else if (!unarchiveResponse.ok) {
+      console.log("Unarchiving amenity failed.");
+    }
+
+  }
+
+  const deleteAmenity = async () => {
+
+    const deleteResponse = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName, {
+      method: 'DELETE'
+    })
+
+    const deletedAmenity = await deleteResponse.json()
+
+    console.log(deletedAmenity);
+
+    if (deleteResponse.ok) {
+      console.log("Deleting amenity successful.");
+      window.location.assign("/amenities")
+    } else if (!deleteResponse.ok) {
+      console.log("Deleting amenity failed.");
+    }
+
+  }
 
 
 
@@ -212,9 +400,41 @@ const AmenityDetails = () => {
     // Layout Wrapper Component
     <LayoutWrapper>
 
+      {/* Delete dialog for deleting the reservation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+
+        <AlertDialogContent>
+
+          <AlertDialogHeader>
+
+            {/* Deletion message */}
+            <AlertDialogTitle> Are you sure you want to delete this amenity? </AlertDialogTitle>
+
+            <AlertDialogDescription>
+              This action cannot be undone. This amenity will permanently deleted and be no longer be accessible by anyone.
+            </AlertDialogDescription>
+
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+
+            {/* Delete dialog cancel button */}
+            <AlertDialogCancel> Cancel </AlertDialogCancel>
+
+            {/* Delete dialog delete button */}
+            <Button variant={"destructive"} onClick={deleteAmenity}>
+              Delete
+            </Button>
+
+          </AlertDialogFooter>
+
+        </AlertDialogContent>
+
+      </AlertDialog>
 
 
-      {amenity[0] && (
+
+      {amenity && (
 
         <>
 
@@ -235,16 +455,63 @@ const AmenityDetails = () => {
 
             {/* Title */}
             <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-              {amenity[0].amenityName}
+              {amenity.amenityName}
             </h1>
 
-            {amenity[0].stat === "Unarchived" &&
+            {amenity.stat === "Unarchived" &&
               (
                 <Badge variant="secondary" className="ml-auto sm:ml-0">
                   Unarchived
                 </Badge>
               )
             }
+
+            <div className="hidden items-center gap-2 md:ml-auto md:flex">
+
+              {/* Dropdown button for archiving and deleting */}
+              <DropdownMenu>
+
+                <DropdownMenuTrigger asChild>
+
+                  <Button size="icon" variant="outline" className="h-8 w-8">
+                    <MoreVertical className="h-3.5 w-3.5" />
+                    <span className="sr-only"> More </span>
+                  </Button>
+
+                </DropdownMenuTrigger>
+
+                {/* Dropdown menu for archiving/unarchiving */}
+                <DropdownMenuContent align="end">
+
+                  {/* Archive button when unarchived */}
+                  {
+                    (amenity.stat == "Unarchived") &&
+                    (
+                      <DropdownMenuItem onClick={setArchive}> Archive </DropdownMenuItem>
+                    )
+                  }
+
+                  {/* Unarchive button when archived */}
+                  {
+                    (amenity.stat == "Archived") &&
+                    (
+                      <DropdownMenuItem onClick={setUnarchive}> Unarchive </DropdownMenuItem>
+                    )
+                  }
+
+                  {/* Edit button */}
+                  <DropdownMenuItem onClick={() => { navigate("/amenities/edit/" + amenity.amenityName) }}> Edit </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Delete button */}
+                  <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive"> Delete </DropdownMenuItem>
+
+                </DropdownMenuContent>
+
+              </DropdownMenu>
+
+            </div>
 
           </div>
 
@@ -262,9 +529,9 @@ const AmenityDetails = () => {
                 <CardHeader className="gap-1">
 
                   <div className="flex flex-row gap-4">
-                    <CardTitle> {amenity[0].amenityName} Details </CardTitle>
+                    <CardTitle> {amenity.amenityName} Details </CardTitle>
                     <Badge variant="outline" className="ml-auto sm:ml-0">
-                      {amenity[0].amenityType}
+                      {amenity.amenityType}
                     </Badge>
                   </div>
 
@@ -284,7 +551,7 @@ const AmenityDetails = () => {
 
                       <Label> Name </Label>
                       <CardDescription> The name of the amenity, preferably in plural form. </CardDescription>
-                      <Input className="w-full" value={amenity[0].amenityName} disabled />
+                      <Input className="w-full" value={amenity.amenityName} disabled />
 
                     </div>
 
@@ -292,17 +559,17 @@ const AmenityDetails = () => {
 
                       <Label> Description </Label>
                       <CardDescription> A brief description of the amenity. </CardDescription>
-                      <Textarea className="" value={amenity[0].amenityDescription} disabled />
+                      <Textarea className="" value={amenity.amenityDescription} disabled />
 
                     </div>
 
-                    {amenity[0].amenityType === "Facility" && (
+                    {amenity.amenityType === "Facility" && (
 
                       <div className="grid gap-2">
 
                         <Label> Address </Label>
                         <CardDescription> Where the amenity is located. </CardDescription>
-                        <Textarea className="" value={amenity[0].amenityAddress} disabled />
+                        <Textarea className="" value={amenity.amenityAddress} disabled />
 
                       </div>
 
@@ -313,7 +580,7 @@ const AmenityDetails = () => {
 
                       <Label> Reminder </Label>
                       <CardDescription> A reminder for the amenity. </CardDescription>
-                      <Textarea className="" value={amenity[0].amenityReminder} disabled />
+                      <Textarea className="" value={amenity.amenityReminder} disabled />
 
                     </div>
 
@@ -330,10 +597,10 @@ const AmenityDetails = () => {
 
                 <CardHeader className="flex flex-col">
 
-                  <CardTitle> {amenity[0].amenityName} Reservations </CardTitle>
+                  <CardTitle> {amenity.amenityName} Reservations </CardTitle>
 
                   <CardDescription>
-                    The reservations made for the {amenity[0].amenityType}.
+                    The reservations made for the {amenity.amenityType}.
                   </CardDescription>
 
                 </CardHeader>
@@ -350,7 +617,9 @@ const AmenityDetails = () => {
                       <TabsTrigger value="pending"> Pending </TabsTrigger>
                       <TabsTrigger value="accepted"> Accepted </TabsTrigger>
                       <TabsTrigger value="rejected"> Rejected </TabsTrigger>
+                      <TabsTrigger value="archived"> Archived </TabsTrigger>
                       <TabsTrigger value="completed"> Completed </TabsTrigger>
+                      <TabsTrigger value="expired"> Expired </TabsTrigger>
 
                     </TabsList>
 
@@ -358,18 +627,529 @@ const AmenityDetails = () => {
 
                     <TabsContent value="all">
 
-                      {reservationsList && reservationsList.map((reservation: ReservationType) => {
 
-                        if (reservation.amenityName === amenity[0].amenityName) {
 
-                          return (
-                            <div> Tite </div>
-                          )
-                        }
+                      <Table>
 
-                      })}
+                        <TableHeader>
+
+                          <TableRow className="">
+
+                            <TableHead> Reservation Date </TableHead>
+                            <TableHead> Block and Lot </TableHead>
+                            <TableHead className="text-center"> Quantity </TableHead>
+                            <TableHead className="text-center"> Status </TableHead>
+
+                          </TableRow>
+
+                        </TableHeader>
+
+                        {/* {allReservations && allReservations.map((reservation: ReservationType) => {
+
+                          if (reservation.amenityName === amenity.amenityName) {
+
+                            return (
+
+                              <TableBody>
+
+                                <TableRow onClick={() => { reservationDetailsRoute(reservation._id) }}>
+
+                                  <TableCell>
+                                    {format(new Date(reservation.reservationDate), "dd MMM yyyy")}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {reservation.blkLt}
+                                  </TableCell>
+
+                                  <TableCell className="text-center">
+                                    {reservation.reservationQuantity}
+                                  </TableCell>
+
+                                  <TableCell className="text-center">
+
+                                    {reservation.reservationStatus === "Pending" &&
+                                      (
+                                        <Badge variant="warning">
+                                          Pending
+                                        </Badge>
+                                      )
+                                    }
+
+                                    {reservation.reservationStatus === "Approved" &&
+                                      (
+                                        <Badge variant="default">
+                                          Approved
+                                        </Badge>
+                                      )
+                                    }
+
+                                    {reservation.reservationStatus === "Rejected" &&
+                                      (
+                                        <Badge variant="destructive">
+                                          Rejected
+                                        </Badge>
+                                      )
+                                    }
+
+                                  </TableCell>
+
+                                </TableRow>
+
+
+                              </TableBody>
+
+
+
+                            )
+                          }
+
+                        })} */}
+
+                      </Table>
+
+
 
                     </TabsContent>
+
+
+
+                    <TabsContent value="pending">
+
+
+
+                      <Table>
+
+                        <TableHeader>
+
+                          <TableRow>
+
+                            <TableHead> Reservation Date </TableHead>
+                            <TableHead> Block and Lot </TableHead>
+                            <TableHead> Quantity </TableHead>
+                            <TableHead> Status </TableHead>
+
+                          </TableRow>
+
+                        </TableHeader>
+
+                        {/* {reservationsList && reservationsList.map((reservation: ReservationType) => {
+
+                          if (reservation.amenityName === amenity.amenityName && reservation.reservationStatus === "Pending") {
+
+                            return (
+
+                              <TableBody>
+
+                                <TableRow onClick={() => { reservationDetailsRoute(reservation._id) }}>
+
+                                  <TableCell>
+                                    {format(new Date(reservation.reservationDate), "dd MMM yyyy")}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {reservation.blkLt}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {reservation.reservationQuantity}
+                                  </TableCell>
+
+                                  <TableCell>
+
+                                    {reservation.reservationStatus === "Pending" &&
+                                      (
+                                        <Badge variant="warning">
+                                          Pending
+                                        </Badge>
+                                      )
+                                    }
+
+                                  </TableCell>
+
+                                </TableRow>
+
+
+                              </TableBody>
+
+
+
+                            )
+                          }
+
+                        })} */}
+
+                      </Table>
+
+
+
+                    </TabsContent>
+
+
+
+                    <TabsContent value="accepted">
+
+
+
+                      <Table>
+
+                        <TableHeader>
+
+                          <TableRow>
+
+                            <TableHead> Reservation Date </TableHead>
+                            <TableHead> Block and Lot </TableHead>
+                            <TableHead> Quantity </TableHead>
+                            <TableHead> Status </TableHead>
+
+                          </TableRow>
+
+                        </TableHeader>
+
+                        {/* {reservationsList && reservationsList.map((reservation: ReservationType) => {
+
+                          if (reservation.amenityName === amenity.amenityName && reservation.reservationStatus === "Approved") {
+
+                            return (
+
+                              <TableBody>
+
+                                <TableRow onClick={() => { reservationDetailsRoute(reservation._id) }}>
+
+                                  <TableCell>
+                                    {format(new Date(reservation.reservationDate), "dd MMM yyyy")}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {reservation.blkLt}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {reservation.reservationQuantity}
+                                  </TableCell>
+
+                                  <TableCell>
+
+                                    {reservation.reservationStatus === "Approved" &&
+                                      (
+                                        <Badge variant="default">
+                                          Approved
+                                        </Badge>
+                                      )
+                                    }
+
+                                  </TableCell>
+
+                                </TableRow>
+
+
+                              </TableBody>
+
+
+
+                            )
+                          }
+
+                        })} */}
+
+                      </Table>
+
+
+
+                    </TabsContent>
+
+
+
+                    <TabsContent value="rejected">
+
+
+
+                      <Table>
+
+                        <TableHeader>
+
+                          <TableRow>
+
+                            <TableHead> Reservation Date </TableHead>
+                            <TableHead> Block and Lot </TableHead>
+                            <TableHead> Quantity </TableHead>
+                            <TableHead> Status </TableHead>
+
+                          </TableRow>
+
+                        </TableHeader>
+
+                        {reservationsList && reservationsList.map((reservation: ReservationType) => {
+
+                          if (reservation.amenityName === amenity.amenityName && reservation.reservationStatus === "Rejected") {
+
+                            return (
+
+                              <TableBody>
+
+                                <TableRow onClick={() => { reservationDetailsRoute(reservation._id) }}>
+
+                                  <TableCell>
+                                    {format(new Date(reservation.reservationDate), "dd MMM yyyy")}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {reservation.blkLt}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {reservation.reservationQuantity}
+                                  </TableCell>
+
+                                  <TableCell>
+
+                                    {reservation.reservationStatus === "Rejected" &&
+                                      (
+                                        <Badge variant="destructive">
+                                          Rejected
+                                        </Badge>
+                                      )
+                                    }
+
+                                  </TableCell>
+
+                                </TableRow>
+
+
+                              </TableBody>
+
+
+
+                            )
+                          }
+
+                        })}
+
+                      </Table>
+
+
+
+                    </TabsContent>
+
+
+
+                    <TabsContent value="archived">
+
+
+
+                      <Table>
+
+                        <TableHeader>
+
+                          <TableRow>
+
+                            <TableHead> Reservation Date </TableHead>
+                            <TableHead> Block and Lot </TableHead>
+                            <TableHead> Quantity </TableHead>
+                            <TableHead> Status </TableHead>
+
+                          </TableRow>
+
+                        </TableHeader>
+
+                        {archivedReservationsList && archivedReservationsList.map((archivedReservation: ReservationType) => {
+
+                          if (archivedReservation.amenityName === amenity.amenityName && archivedReservation.stat === "Archived") {
+
+                            return (
+
+                              <TableBody>
+
+                                <TableRow onClick={() => { reservationDetailsRoute(archivedReservation._id) }}>
+
+                                  <TableCell>
+                                    {format(new Date(archivedReservation.reservationDate), "dd MMM yyyy")}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {archivedReservation.blkLt}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {archivedReservation.reservationQuantity}
+                                  </TableCell>
+
+                                  <TableCell>
+
+                                    {archivedReservation.reservationStatus === "Archived" &&
+                                      (
+                                        <Badge variant="default">
+                                          Completed
+                                        </Badge>
+                                      )
+                                    }
+
+                                  </TableCell>
+
+                                </TableRow>
+
+
+                              </TableBody>
+
+
+
+                            )
+                          }
+
+                        })}
+
+                      </Table>
+
+
+
+                    </TabsContent>
+
+
+
+                    <TabsContent value="completed">
+
+
+
+                      <Table>
+
+                        <TableHeader>
+
+                          <TableRow>
+
+                            <TableHead> Reservation Date </TableHead>
+                            <TableHead> Block and Lot </TableHead>
+                            <TableHead> Quantity </TableHead>
+                            <TableHead> Status </TableHead>
+
+                          </TableRow>
+
+                        </TableHeader>
+
+                        {archivedReservationsList && archivedReservationsList.map((archivedReservation: ReservationType) => {
+
+                          if (archivedReservation.amenityName === amenity.amenityName && archivedReservation.reservationStatus === "Completed") {
+
+                            return (
+
+                              <TableBody>
+
+                                <TableRow onClick={() => { reservationDetailsRoute(archivedReservation._id) }}>
+
+                                  <TableCell>
+                                    {format(new Date(archivedReservation.reservationDate), "dd MMM yyyy")}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {archivedReservation.blkLt}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {archivedReservation.reservationQuantity}
+                                  </TableCell>
+
+                                  <TableCell>
+
+                                    {archivedReservation.reservationStatus === "Completed" &&
+                                      (
+                                        <Badge variant="default">
+                                          Completed
+                                        </Badge>
+                                      )
+                                    }
+
+                                  </TableCell>
+
+                                </TableRow>
+
+
+                              </TableBody>
+
+
+
+                            )
+                          }
+
+                        })}
+
+                      </Table>
+
+
+
+                    </TabsContent>
+
+
+
+                    <TabsContent value="expired">
+
+
+
+                      <Table>
+
+                        <TableHeader>
+
+                          <TableRow>
+
+                            <TableHead> Reservation Date </TableHead>
+                            <TableHead> Block and Lot </TableHead>
+                            <TableHead> Quantity </TableHead>
+                            <TableHead> Status </TableHead>
+
+                          </TableRow>
+
+                        </TableHeader>
+
+                        {archivedReservationsList && archivedReservationsList.map((archivedReservation: ReservationType) => {
+
+                          if (archivedReservation.amenityName === amenity.amenityName && archivedReservation.reservationStatus === "Expired") {
+
+                            return (
+
+                              <TableBody>
+
+                                <TableRow onClick={() => { reservationDetailsRoute(archivedReservation._id) }}>
+
+                                  <TableCell>
+                                    {format(new Date(archivedReservation.reservationDate), "dd MMM yyyy")}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {archivedReservation.blkLt}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {archivedReservation.reservationQuantity}
+                                  </TableCell>
+
+                                  <TableCell>
+
+                                    {archivedReservation.reservationStatus === "Expired" &&
+                                      (
+                                        <Badge variant="default">
+                                          Expired
+                                        </Badge>
+                                      )
+                                    }
+
+                                  </TableCell>
+
+                                </TableRow>
+
+
+                              </TableBody>
+
+
+
+                            )
+                          }
+
+                        })}
+
+                      </Table>
+
+
+
+                    </TabsContent>
+
 
 
 
@@ -398,13 +1178,13 @@ const AmenityDetails = () => {
 
 
 
-                {amenity[0] && (
+                {amenity && (
 
                   <CardHeader>
 
-                    <CardTitle> {amenity[0].amenityName} Images </CardTitle>
+                    <CardTitle> {amenity.amenityName} Images </CardTitle>
                     <CardDescription>
-                      Attached images of the {amenity[0].amenityType}. You can upload up to 3 images.
+                      Attached images of {amenity.amenityName}. You can upload up to 3 images.
                     </CardDescription>
 
                   </CardHeader>
@@ -418,28 +1198,66 @@ const AmenityDetails = () => {
 
                   <div className="grid gap-2">
 
-                    <Skeleton
-                      className="aspect-square w-full rounded-md object-cover h-[300] w-[300]"
-                    />
+                    {amenity && amenity.amenityImages.length! > 0 && (
+                      <Dialog>
+                        <DialogTrigger onClick={ () => setCurrentIndex(rotatingIndex) }>
+                          <img
+                            src={amenity.amenityImages[rotatingIndex].url} className="aspect-video w-full rounded-md object-cover"
+                          />
+                        </DialogTrigger>
+
+                        <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
+
+                          <Button
+                            className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
+                            type="button"
+                            onClick={() => {
+                              if (currentIndex === 0) {
+                                setCurrentIndex(amenity.amenityImages.length - 1)
+                              } else {
+                                setCurrentIndex(currentIndex - 1)
+                              }
+                            }}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+
+                          <Button
+                            className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
+                            type="button"
+                            onClick={() => {
+                              if (currentIndex === amenity.amenityImages.length - 1) {
+                                setCurrentIndex(0)
+                              } else {
+                                setCurrentIndex(currentIndex + 1)
+                              }
+                            }}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+
+                          <img
+                            src={amenity.amenityImages[currentIndex].url} className="aspect-video rounded-md object-contain"
+                          />
+                        </DialogContent>
+
+                      </ Dialog>
+                    )}
 
                     <div className="grid grid-cols-3 gap-2">
 
-                      <button>
-                        <Skeleton
-                          className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"
-                        />
-                      </button>
-
-                      <button>
-                        <Skeleton
-                          className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"
-                        />
-                      </button>
-
-                      <button className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
-                        <Upload className="h-4 w-4 text-muted-foreground" />
-                        <span className="sr-only"> Upload </span>
-                      </button>
+                      {amenity && amenity.amenityImages.length! > 0 && amenity.amenityImages.map((image, index) => (
+                        <div className="group relative">
+                          <img
+                            src={image.url} className="cursor-pointer aspect-video w-full rounded-md object-cover h-[84] w-[84]" onClick={() => setRotatingIndex(index)}
+                          />
+                        </div>
+                      )
+                      )}
 
                     </div>
 
@@ -458,13 +1276,13 @@ const AmenityDetails = () => {
 
 
 
-                {amenity[0] && (
+                {amenity && (
 
                   <CardHeader>
 
-                    <CardTitle> {amenity[0].amenityName} Status </CardTitle>
+                    <CardTitle> {amenity.amenityName} Status </CardTitle>
                     <CardDescription>
-                      The {amenity[0].amenityType}'s visibility to the unit owners.
+                      The {amenity.amenityType}'s visibility to the unit owners.
                     </CardDescription>
 
                   </CardHeader>
@@ -480,10 +1298,10 @@ const AmenityDetails = () => {
 
                     <div className="grid gap-3">
 
-                      {amenity[0] &&
+                      {amenity &&
                         (
                           <>
-                            <Select defaultValue={amenity[0].stat} disabled>
+                            <Select defaultValue={amenity.stat} disabled>
 
                               <SelectTrigger id="stat" aria-label="Select status">
                                 <SelectValue placeholder="Select status" />
@@ -496,18 +1314,18 @@ const AmenityDetails = () => {
 
                             </Select>
 
-                            {amenity[0].stat === "Unarchived" &&
+                            {amenity.stat === "Unarchived" &&
                               (
                                 <CardDescription>
-                                  Unarchived {amenity[0].amenityType} are shown to the unit owners.
+                                  Unarchived {amenity.amenityType} are shown to the unit owners.
                                 </CardDescription>
                               )
                             }
 
-                            {amenity[0].stat === "Archived" &&
+                            {amenity.stat === "Archived" &&
                               (
                                 <CardDescription>
-                                  Archived {amenity[0].amenityType} are hidden from the unit owners.
+                                  Archived {amenity.amenityType} are hidden from the unit owners.
                                 </CardDescription>
                               )
                             }
@@ -535,11 +1353,11 @@ const AmenityDetails = () => {
                 <CardHeader className="pb-4">
 
                   <CardTitle>
-                    {amenity[0].amenityName} Stock
+                    {amenity.amenityName} Stock
                   </CardTitle>
 
                   <CardDescription>
-                    The maximum amount per reservation and the total amount of {amenity[0].amenityType}.
+                    The maximum amount per reservation and the total amount of {amenity.amenityType}.
                   </CardDescription>
 
                 </CardHeader>
@@ -556,7 +1374,7 @@ const AmenityDetails = () => {
 
                         <TableCell className="flex flex-col gap-2">
                           <span className="font-semibold"> Current Stocks </span>
-                          <Input id="amenityQuantity" type="number" value={amenity[0].amenityStock} disabled />
+                          <Input id="amenityQuantity" type="number" value={amenity.amenityStock} disabled />
                         </TableCell>
 
                       </TableRow>
@@ -565,7 +1383,7 @@ const AmenityDetails = () => {
 
                         <TableCell className="flex flex-col gap-2">
                           <span className="font-semibold"> Maximum Stocks </span>
-                          <Input id="amenityQuantity" type="number" value={amenity[0].amenityStockMax} disabled />
+                          <Input id="amenityQuantity" type="number" value={amenity.amenityStockMax} disabled />
                         </TableCell>
 
                       </TableRow>
@@ -574,7 +1392,7 @@ const AmenityDetails = () => {
 
                         <TableCell className="flex flex-col gap-2">
                           <span className="font-semibold"> Minimum amount per reservation </span>
-                          <Input id="amenityQuantity" type="number" value={amenity[0].amenityQuantityMin} disabled />
+                          <Input id="amenityQuantity" type="number" value={amenity.amenityQuantityMin} disabled />
                         </TableCell>
 
                       </TableRow>
@@ -583,7 +1401,7 @@ const AmenityDetails = () => {
 
                         <TableCell className="flex flex-col gap-2">
                           <span className="font-semibold"> Maximum amount per reservation </span>
-                          <Input id="amenityQuantity" type="number" value={amenity[0].amenityQuantityMax} disabled />
+                          <Input id="amenityQuantity" type="number" value={amenity.amenityQuantityMax} disabled />
                         </TableCell>
 
                       </TableRow>
