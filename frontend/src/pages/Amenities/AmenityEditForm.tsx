@@ -170,7 +170,7 @@ const AmenityEditForm = () => {
 
     // States
     // State for amenity
-    const [amenity, setAmenity] = useState<AmenityType[]>([]);
+    const [amenity, setAmenity] = useState<AmenityType>();
 
     // State for errors
     const [error, setError] = useState<any>();
@@ -223,7 +223,7 @@ const AmenityEditForm = () => {
         const fetchAmenity = async () => {
 
             // Fetch amenity
-            const amenityResponse = await fetch("http://localhost:4000/api/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "));
+            const amenityResponse = await fetch("http://localhost:4000/api/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length));
 
             // Parse the response to JSON
             const amenityData = await amenityResponse.json();
@@ -232,7 +232,7 @@ const AmenityEditForm = () => {
             if (amenityResponse.ok) {
                 console.log("Fetching amenity successful.");
                 setAmenity(amenityData);
-                setImages(amenityData[0].amenityImages);
+                setImages(amenityData.amenityImages);
                 setLoading(false);
             } else if (!amenityResponse.ok) {
                 console.log("Fetching amenity failed.");
@@ -296,7 +296,7 @@ const AmenityEditForm = () => {
         resolver: zodResolver(facilityEditFormSchema),
         defaultValues: async () => {
 
-            const facilityDataResponse = await fetch("http://localhost:4000/api/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "));
+            const facilityDataResponse = await fetch("http://localhost:4000/api/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length));
 
             const facilityData = await facilityDataResponse.json();
 
@@ -308,14 +308,14 @@ const AmenityEditForm = () => {
 
             return {
 
-                amenityName: facilityData[0].amenityName,
-                amenityType: facilityData[0].amenityType,
-                amenityDescription: facilityData[0].amenityDescription,
-                amenityAddress: facilityData[0].amenityAddress,
-                amenityReminder: facilityData[0].amenityReminder,
-                amenityCreator: facilityData[0].amenityCreator,
-                initialAmenityName: facilityData[0].amenityName,
-                stat: facilityData[0].stat,
+                amenityName: facilityData.amenityName,
+                amenityType: facilityData.amenityType,
+                amenityDescription: facilityData.amenityDescription,
+                amenityAddress: facilityData.amenityAddress,
+                amenityReminder: facilityData.amenityReminder,
+                amenityCreator: facilityData.amenityCreator,
+                initialAmenityName: facilityData.amenityName,
+                stat: facilityData.stat,
 
             }
         }
@@ -338,17 +338,17 @@ const AmenityEditForm = () => {
 
             return {
 
-                amenityName: equipmentData[0].amenityName,
-                amenityType: equipmentData[0].amenityType,
-                amenityDescription: equipmentData[0].amenityDescription,
-                amenityStockMax: equipmentData[0].amenityStockMax,
-                amenityStock: equipmentData[0].amenityStock,
-                amenityQuantityMin: equipmentData[0].amenityQuantityMin,
-                amenityQuantityMax: equipmentData[0].amenityQuantityMax,
-                amenityReminder: equipmentData[0].amenityReminder,
-                amenityCreator: equipmentData[0].amenityCreator,
-                initialAmenityName: equipmentData[0].amenityName,
-                stat: equipmentData[0].stat,
+                amenityName: equipmentData.amenityName,
+                amenityType: equipmentData.amenityType,
+                amenityDescription: equipmentData.amenityDescription,
+                amenityStockMax: equipmentData.amenityStockMax,
+                amenityStock: equipmentData.amenityStock,
+                amenityQuantityMin: equipmentData.amenityQuantityMin,
+                amenityQuantityMax: equipmentData.amenityQuantityMax,
+                amenityReminder: equipmentData.amenityReminder,
+                amenityCreator: equipmentData.amenityCreator,
+                initialAmenityName: equipmentData.amenityName,
+                stat: equipmentData.stat,
 
             }
         },
@@ -475,7 +475,7 @@ const AmenityEditForm = () => {
 
             <Toaster />
 
-            {amenity[0] && amenity[0].amenityType === "Equipment" &&
+            {amenity && amenity.amenityType === "Equipment" &&
 
                 (
 
@@ -498,7 +498,7 @@ const AmenityEditForm = () => {
                                 </Button>
 
                                 <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                                    Edit {amenity[0].amenityName}
+                                    Edit {amenity.amenityName}
                                 </h1>
 
                                 <div className="hidden items-center gap-2 md:ml-auto md:flex">
@@ -529,7 +529,7 @@ const AmenityEditForm = () => {
 
                                         <CardHeader>
 
-                                            <CardTitle> {amenity[0].amenityName} Details </CardTitle>
+                                            <CardTitle> {amenity.amenityName} Details </CardTitle>
                                             <CardDescription>
                                                 Enter the appropriate details for the new equipment.
                                             </CardDescription>
@@ -674,7 +674,7 @@ const AmenityEditForm = () => {
 
                                         <CardHeader>
 
-                                            <CardTitle> {amenity[0].amenityName} Stock</CardTitle>
+                                            <CardTitle> {amenity.amenityName} Stock</CardTitle>
                                             <CardDescription>
                                                 Enter the maximum amount per reservation and the total amount of the equipment.
                                             </CardDescription>
@@ -692,7 +692,7 @@ const AmenityEditForm = () => {
                                                     <TableRow>
 
                                                         <TableCell className="font-semibold">
-                                                            Maximum {amenity[0].amenityName} Stock
+                                                            Maximum {amenity.amenityName} Stock
                                                             <CardDescription className="font-normal"> Changes in the maximum stock will affect the number of current stocks. </CardDescription>
 
                                                         </TableCell>
@@ -735,7 +735,7 @@ const AmenityEditForm = () => {
 
                                                         <TableCell className="font-semibold">
 
-                                                            Current {amenity[0].amenityName} Stock
+                                                            Current {amenity.amenityName} Stock
                                                             <CardDescription className="font-normal"> This cannot be lower than 0 or higher than the maximum stock. </CardDescription>
 
                                                         </TableCell>
@@ -751,7 +751,7 @@ const AmenityEditForm = () => {
 
                                                                         <FormItem>
 
-                                                                            <FormLabel className="hidden"> Current {amenity[0].amenityName} Stocks </FormLabel>
+                                                                            <FormLabel className="hidden"> Current {amenity.amenityName} Stocks </FormLabel>
 
                                                                             <FormControl>
 
@@ -874,7 +874,7 @@ const AmenityEditForm = () => {
 
                                         <CardHeader>
 
-                                            <CardTitle> {amenity[0].amenityName} Images </CardTitle>
+                                            <CardTitle> {amenity.amenityName} Images </CardTitle>
                                             <CardDescription>
                                                 Attach images of the equipment. You can upload up to 3 images.
                                             </CardDescription>
@@ -1021,7 +1021,7 @@ const AmenityEditForm = () => {
 
                                         <CardHeader>
 
-                                            <CardTitle> {amenity[0].amenityName} Status </CardTitle>
+                                            <CardTitle> {amenity.amenityName} Status </CardTitle>
                                             <CardDescription> The equipment's visibility to the unit owners. </CardDescription>
 
                                         </CardHeader>
@@ -1043,7 +1043,7 @@ const AmenityEditForm = () => {
 
                                                                 <FormControl>
 
-                                                                    <Select onValueChange={field.onChange} defaultValue={amenity[0].stat}>
+                                                                    <Select onValueChange={field.onChange} defaultValue={amenity.stat}>
 
                                                                         <SelectTrigger id="stat" aria-label="Select stsatus">
                                                                             <SelectValue placeholder="Select status" />
@@ -1084,7 +1084,7 @@ const AmenityEditForm = () => {
 
 
 
-            {amenity[0] && amenity[0].amenityType === "Facility" &&
+            {amenity && amenity.amenityType === "Facility" &&
 
                 (
 
@@ -1107,7 +1107,7 @@ const AmenityEditForm = () => {
                                 </Button>
 
                                 <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                                    Edit {amenity[0].amenityName}
+                                    Edit {amenity.amenityName}
                                 </h1>
 
                                 <div className="hidden items-center gap-2 md:ml-auto md:flex">
@@ -1138,7 +1138,7 @@ const AmenityEditForm = () => {
 
                                         <CardHeader>
 
-                                            <CardTitle> {amenity[0].amenityName} Details </CardTitle>
+                                            <CardTitle> {amenity.amenityName} Details </CardTitle>
                                             <CardDescription>
                                                 Enter the appropriate details for the new facility.
                                             </CardDescription>
@@ -1325,7 +1325,7 @@ const AmenityEditForm = () => {
 
                                         <CardHeader>
 
-                                            <CardTitle> {amenity[0].amenityName} Images </CardTitle>
+                                            <CardTitle> {amenity.amenityName} Images </CardTitle>
                                             <CardDescription>
                                                 Attach images of the facility. You can upload up to 3 imagess.
                                             </CardDescription>
@@ -1373,7 +1373,7 @@ const AmenityEditForm = () => {
 
                                         <CardHeader>
 
-                                            <CardTitle> {amenity[0].amenityName} Status </CardTitle>
+                                            <CardTitle> {amenity.amenityName} Status </CardTitle>
                                             <CardDescription> The facility's visibility to the unit owners. </CardDescription>
 
                                         </CardHeader>
@@ -1395,7 +1395,7 @@ const AmenityEditForm = () => {
 
                                                                 <FormControl>
 
-                                                                    <Select onValueChange={field.onChange} defaultValue={amenity[0].stat}>
+                                                                    <Select onValueChange={field.onChange} defaultValue={amenity.stat}>
 
                                                                         <SelectTrigger id="stat" aria-label="Select stsatus">
                                                                             <SelectValue placeholder="Select status" />

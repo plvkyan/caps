@@ -2,7 +2,7 @@ import './index.css'
 import App from './App.tsx'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { ThemeProvider } from './components/custom/theme-provider.tsx'
+import { ThemeProvider } from './components/custom/ThemeProvider.tsx'
 
 
 
@@ -27,6 +27,7 @@ import { ReservationsContextProvider } from '@/context/ReservationContext.tsx'
 import { UsersContextProvider } from '@/context/UserContext.tsx'
 
 
+import { Toaster } from "@/components/ui/sonner"
 
 
 
@@ -40,6 +41,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <AnnouncementsContextProvider>
               <ReservationsContextProvider>
                 <UsersContextProvider>
+                  <Toaster />
                   <App />
                 </UsersContextProvider>
               </ReservationsContextProvider>

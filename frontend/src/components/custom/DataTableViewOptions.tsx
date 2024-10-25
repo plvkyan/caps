@@ -34,7 +34,8 @@ import { Table } from "@tanstack/react-table"
 
 
 interface DataTableViewOptionsProps<TData> {
-    table: Table<TData>
+    table: Table<TData>,
+    label: string
 }
 
 
@@ -43,6 +44,7 @@ interface DataTableViewOptionsProps<TData> {
 
 export function DataTableViewOptions<TData>({
     table,
+    label,
 }: DataTableViewOptionsProps<TData>) {
 
 
@@ -60,7 +62,7 @@ export function DataTableViewOptions<TData>({
                     className="hidden lg:flex"
                 >
                     <Eye className="h-4 w-4" />
-                    View
+                    { label }
                 </Button>
 
             </DropdownMenuTrigger>

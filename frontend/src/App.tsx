@@ -89,7 +89,7 @@ import ReservationPage from '@/pages/Reservations/ReservationPage.tsx';
 import AdminUsers from './pages/Admin/Users/UsersList.tsx';
 import { useEffect, useState } from 'react';
 import Settings from './pages/Settings.tsx';
-
+import ReservationForm from './pages/Reservations/ReservationForm.tsx';
 
 
 
@@ -116,6 +116,7 @@ function App() {
             <BrowserRouter>
 
                 <div className='Pages'>
+
 
                     <Routes>
 
@@ -190,11 +191,11 @@ function App() {
                                     </Route>
 
                                     {/* Reservation Form Page */}
-                                    {/* <Route
+                                    <Route
                                         path="/reservations/form"
-                                        element={!user ? <Login /> : <Reservations />}
+                                        element={!user ? <Login /> : <ReservationForm />}
                                     >
-                                    </Route> */}
+                                    </Route>
 
                                     {/* Reservation Details Page */}
                                     {/* <Route

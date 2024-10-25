@@ -105,8 +105,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // Hooks
 // AuthContext Hooks for Users
 import { useAuthContext } from "@/hooks/useAuthContext"
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DialogTrigger } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 
 

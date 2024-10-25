@@ -31,7 +31,7 @@ import {
 // Data table column definitions imports
 import { ReservationTableColumns } from "@/pages/Reservations/ReservationColumns";
 // Data table component import
-import { ReservationTable } from "@/pages/Reservations/ReservationTable";
+import ReservationTable from "@/pages/Reservations/ReservationTable";
 
 
 

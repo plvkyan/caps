@@ -30,26 +30,34 @@ const reservationSchema = new Schema({
         type: String,
         required: false
     },
-    amenityId: {
+    reservationType: {
         type: String,
         required: true
     },
-    amenityName: {
-        type: String,
-        required: true
-    },
-    amenityType: {  
-        type: String,
-        required: true
-    },
-    amenityAddress: {
-        type: String,
-        required: false
-    },
-    amenityQuantity: {
-        type: Number,
-        required: false
-    },
+    reservationAmenities: [
+        {
+            amenityId: {
+                type: String,
+                required: true
+            },
+            amenityName: {
+                type: String,
+                required: true
+            },
+            amenityType: {
+                type: String,
+                required: true
+            },
+            amenityAddress: {
+                type: String,
+                required: false
+            },
+            amenityQuantity: {
+                type: Number,
+                required: false
+            },
+        }
+    ],
     reservationDate: {
         type: Date,
         required: true
@@ -76,6 +84,18 @@ const reservationSchema = new Schema({
                 type: String,
                 required: false
             }
+        }
+    ],
+    reservationImages: [
+        {
+            url: {
+                type: String,
+                required: false
+            },
+            public_id: {
+                type: String,
+                required: false
+            },
         }
     ],
     reservationStatus: {
@@ -173,7 +193,7 @@ const reservationSchema = new Schema({
     //     default: "Unarchived"
     // }
 
-}, {timestamps: true });
+}, { timestamps: true });
 
 
 

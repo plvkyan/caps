@@ -6,11 +6,16 @@ export type ReservationType = {
     reserveeBlkLt: string,
     reserveePosition: string,
     reserveeEmail: string,
-    amenityId: string,
-    amenityName: string,
-    amenityType: string,
-    amenityAddress: string,
-    amenityQuantity: string,
+    reservationType: string,
+    reservationAmenities: [
+        {
+            amenityId: string,
+            amenityName: string,
+            amenityType: string,
+            amenityAddress: string,
+            amenityQuantity: string,
+        }
+    ]
     reservationDate: Date,
     reservationReason: string,
     reservationComments: [
@@ -19,6 +24,12 @@ export type ReservationType = {
             commentDate: Date,
             commentAuthor: string,
             commentAuthorPosition: string,
+        }
+    ],
+    reservationImages: [
+        {
+            url?: string,
+            public_id?: string,
         }
     ],
     reservationStatus: string,

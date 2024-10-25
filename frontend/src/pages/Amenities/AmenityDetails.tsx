@@ -500,7 +500,7 @@ const AmenityDetails = () => {
                   }
 
                   {/* Edit button */}
-                  <DropdownMenuItem onClick={() => { navigate("/amenities/edit/" + amenity.amenityName) }}> Edit </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { navigate("/amenities/edit/" + amenity._id) }}> Edit </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
 

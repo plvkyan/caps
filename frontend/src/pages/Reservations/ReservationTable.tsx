@@ -37,6 +37,8 @@ import {
 import { BottomDataTablePagination } from "@/components/custom/BottomDataTablePagination";
 // Custom Data Table Faceted Filter
 import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
+// Custom Data Table View Options
+import { DataTableViewOptions } from "@/components/custom/DataTableViewOptions";
 
 
 
@@ -58,12 +60,16 @@ import {
 // Utility Imports
 // React Import
 import { useState } from "react";
+// React Router Imports
+// React Router Navigate Hook Import
+import { useNavigate } from "react-router-dom";
 
 
 
 // Types
 import { RESERVATION_DATA } from "@/data/reservation-data";
-import { DataTableViewOptions } from "@/components/custom/DataTableViewOptions";
+
+
 
 
 
@@ -80,10 +86,18 @@ interface ReservationTableProps<TData, TValue> {
 
 
 
-export function ReservationTable<TData, TValue>({
+export default function ReservationTable<TData, TValue>({
     columns,
     data,
 }: ReservationTableProps<TData, TValue>) {
+
+
+
+    // Hooks
+    // useNavigate Hook
+    const navigate = useNavigate();
+
+
 
     // States
     // Column Visibility State
@@ -117,7 +131,17 @@ export function ReservationTable<TData, TValue>({
         },
     })
 
+    // Check filtered State
     const isFiltered = table.getState().columnFilters.length > 0;
+
+
+
+    // onClick Functions
+    // Redirect to Reservation Form Function
+    const navToReservationForm = () => {
+        const reservationFormPath = "/reservations/form";
+        navigate(reservationFormPath);
+    }
 
 
 
@@ -132,7 +156,7 @@ export function ReservationTable<TData, TValue>({
                 <div className="flex flex-col">
 
                     <h1 className="font-semibold text-2xl"> Reservations </h1>
-                    <h3 className="font-light"> Looking for a specific reservation? </h3>
+                    <h3 className="font-light text-muted-foreground"> Looking for a specific reservation? </h3>
 
                 </div>
 
@@ -152,7 +176,7 @@ export function ReservationTable<TData, TValue>({
                         Mark as Approved
                     </Button>
 
-                    <Button className="green-500" onClick={ () => { } } size="sm" variant="default" >
+                    <Button className="" onClick={ navToReservationForm } size="sm" variant="default" >
                         <CirclePlus className="h-4 w-4" />
                         Create Reservation
                     </Button>
@@ -169,9 +193,9 @@ export function ReservationTable<TData, TValue>({
                     placeholder="Search..."
                 />
   
-                <DataTableViewOptions table={table} />
+                <DataTableViewOptions table={table} label="Toggle Columns" />
 
-                <DataTableFacetedFilter column={table.getColumn("reservationStatus")} title="Status" options={RESERVATION_DATA} />
+                <DataTableFacetedFilter column={table.getColumn("reservationStatus")} title="Filter" options={RESERVATION_DATA} />
 
                 {isFiltered && (
                     <Button
@@ -230,7 +254,7 @@ export function ReservationTable<TData, TValue>({
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No results.
+                                    No reservations found.
                                 </TableCell>
                             </TableRow>
                         )}
