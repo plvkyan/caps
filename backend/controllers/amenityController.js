@@ -14,7 +14,7 @@ const getAmenities = async (req, res) => {
     const initAmenities = await Amenity.find({}).sort({ createdAt: -1 })
 
     const amenities = initAmenities.filter(function (amenity) {
-        return amenity.stat === "Unarchived";
+        return amenity.amenityVisibility === "Unarchived";
     });
 
     res.status(200).json(amenities)
@@ -26,7 +26,7 @@ const getArchivedAmenities = async (req, res) => {
     const initAmenities = await Amenity.find({}).sort({ createdAt: -1 })
 
     const amenities = initAmenities.filter(function (amenity) {
-        return amenity.stat === "Archived";
+        return amenity.amenityVisibility === "Archived";
     });
 
     res.status(200).json(amenities)
@@ -59,9 +59,9 @@ const getSpecificAmenity = async (req, res) => {
 
 
 // CREATE new amenity
-const createAmenity = async (req, res) => {S
+const createAmenity = async (req, res) => {
 
-    const { amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, stat } = req.body
+    const { amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility } = req.body
 
     try {
 
@@ -72,9 +72,9 @@ const createAmenity = async (req, res) => {S
             throw Error('Amenity already exists')
         }
         
-        const amenityData = await Amenity.createAmenity( amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, stat )
+        const amenityData = await Amenity.createAmenity( amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility )
         // Add amenity to database
-        // const amenity = await Amenity.create({ amenityName, amenityType, amenityCreator, amenityDescription, amenityAddress, amenityStockMax, amenityStock, amenityQuantityMin, amenityQuantityMax, amenityReminder, stat })
+        // const amenity = await Amenity.create({ amenityName, amenityType, amenityCreator, amenityDescription, amenityAddress, amenityStockMax, amenityStock, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityVisibility })
         res.status(200).json(amenityData)
 
     } catch (error) {
@@ -90,13 +90,13 @@ const createAmenity = async (req, res) => {S
 
 // DELETE an amenity
 const deleteAmenity = async (req, res) => {
-    const { amenityName } = req.params
+    const { id } = req.params
 
     // if (!mongoose.Types.ObjectId.isValid(id)) {
     //     return res.status(400).json({ error: 'No such amenity' })
     // }
 
-    const amenity = await Amenity.findOneAndDelete({ amenityName: amenityName })
+    const amenity = await Amenity.findOneAndDelete({ _id: id })
 
     if (!amenity) {
         return res.status(400).json({ error: 'No such amenity' })
@@ -118,12 +118,12 @@ const updateAmenity = async (req, res) => {
     //     return res.status(400).json({ error: 'No such amenity' })
     // }
 
-    const { initialAmenityName, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, stat } = req.body
+    const { initialAmenityName, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility } = req.body
 
     try {
 
-        const amenity = await Amenity.editEquipment(
-            initialAmenityName, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, stat
+        const amenity = await Amenity.editAmenity(
+            initialAmenityName, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility
         )
 
         res.status(200).json(amenity)

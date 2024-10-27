@@ -134,7 +134,7 @@ const equipmentEditFormSchema = zod.object({
     amenityCreator: zod.string(),
     initialAmenityName: zod.string(),
     amenityImages: zod.any().optional(),
-    stat: zod.string(),
+    amenityVisibility: zod.string(),
 })
 
 // Facility Edit Form Schema
@@ -156,7 +156,7 @@ const facilityEditFormSchema = zod.object({
     amenityCreator: zod.string(),
     initialAmenityName: zod.string(),
     amenityImages: zod.any().optional(),    
-    stat: zod.string().optional(),
+    amenityVisibility: zod.string().optional(),
 
 })
 
@@ -315,7 +315,7 @@ const AmenityEditForm = () => {
                 amenityReminder: facilityData.amenityReminder,
                 amenityCreator: facilityData.amenityCreator,
                 initialAmenityName: facilityData.amenityName,
-                stat: facilityData.stat,
+                amenityVisibility: facilityData.amenityVisibility,
 
             }
         }
@@ -348,7 +348,7 @@ const AmenityEditForm = () => {
                 amenityReminder: equipmentData.amenityReminder,
                 amenityCreator: equipmentData.amenityCreator,
                 initialAmenityName: equipmentData.amenityName,
-                stat: equipmentData.stat,
+                amenityVisibility: equipmentData.amenityVisibility,
 
             }
         },
@@ -1032,7 +1032,7 @@ const AmenityEditForm = () => {
 
                                                 <FormField
                                                     control={equipmentEditForm.control}
-                                                    name="stat"
+                                                    name="amenityVisibility"
                                                     render={({ field }) => {
 
                                                         return (
@@ -1043,9 +1043,9 @@ const AmenityEditForm = () => {
 
                                                                 <FormControl>
 
-                                                                    <Select onValueChange={field.onChange} defaultValue={amenity.stat}>
+                                                                    <Select onValueChange={field.onChange} defaultValue={amenity.amenityVisibility}>
 
-                                                                        <SelectTrigger id="stat" aria-label="Select stsatus">
+                                                                        <SelectTrigger id="amenityVisibility" aria-label="Select stsatus">
                                                                             <SelectValue placeholder="Select status" />
                                                                         </SelectTrigger>
 
@@ -1384,7 +1384,7 @@ const AmenityEditForm = () => {
 
                                                 <FormField
                                                     control={facilityEditForm.control}
-                                                    name="stat"
+                                                    name="amenityVisibility"
                                                     render={({ field }) => {
 
                                                         return (
@@ -1395,9 +1395,9 @@ const AmenityEditForm = () => {
 
                                                                 <FormControl>
 
-                                                                    <Select onValueChange={field.onChange} defaultValue={amenity.stat}>
+                                                                    <Select onValueChange={field.onChange} defaultValue={amenity.amenityVisibility}>
 
-                                                                        <SelectTrigger id="stat" aria-label="Select stsatus">
+                                                                        <SelectTrigger id="amenityVisibility" aria-label="Select stsatus">
                                                                             <SelectValue placeholder="Select status" />
                                                                         </SelectTrigger>
 

@@ -36,25 +36,66 @@ const reservationSchema = new Schema({
     },
     reservationAmenities: [
         {
-            amenityId: {
-                type: String,
-                required: true
-            },
             amenityName: {
                 type: String,
-                required: true
+                required: true,
             },
             amenityType: {
                 type: String,
-                required: true
+                required: true,
             },
             amenityAddress: {
                 type: String,
                 required: false
             },
-            amenityQuantity: {
+            amenityDescription: {
+                type: String,
+                required: false
+            },
+            amenityStock: {
                 type: Number,
                 required: false
+            },
+            amenityStockMax: {
+                type: Number,
+                required: false
+            },
+            amenityQuantity: {
+                type: Number,
+                required: false,
+            },
+            amenityQuantityMin: {
+                type: Number,
+                required: false
+            },
+            amenityQuantityMax: {
+                type: Number,
+                required: false
+            },
+            amenityReminder: {
+                type: String,
+                required: false
+            },
+            amenityCreator: {
+                type: String,
+                required: true
+            },
+            amenityImages: [
+                {
+                    public_id: {
+                        type: String,
+                        required: false
+                    },
+                    url: {
+                        type: String,
+                        required: false
+                    }
+                }
+            ],
+            amenityVisibility: {
+                type: String,
+                required: true,
+                default: "Unarchived"
             },
         }
     ],

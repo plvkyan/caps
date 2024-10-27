@@ -13,14 +13,14 @@ import {
 
 // shadcn Component Imports
 // shadcn Alert Dialog Imports
-import { 
-    AlertDialog, 
-    AlertDialogCancel, 
-    AlertDialogContent, 
-    AlertDialogDescription, 
-    AlertDialogFooter, 
-    AlertDialogHeader, 
-    AlertDialogTitle 
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 
 // shadcn Badge Imports
@@ -70,8 +70,7 @@ import {
 } from "@/components/ui/tabs"
 
 // shadcn Toast Import
-import { useToast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
+import { toast } from "sonner";
 
 
 
@@ -95,6 +94,8 @@ import { useEffect, useState } from "react";
 // Types
 // Amenity Type Import
 import { AmenityType } from "@/types/amenity-type";
+import { deleteAmenity } from "@/data/amenities-api";
+import { set } from "date-fns";
 
 
 
@@ -106,16 +107,32 @@ const AmenitiesList = () => {
 
     // States
     // Specific Amenity State
-    const [deletedAmenity, setDeletedAmenity] = useState<AmenityType | null>(null);
+    const [deletedAmenity, setDeletedAmenity] = useState<AmenityType>({
+        _id: "",
+        amenityName: "",
+        amenityType: "",
+        amenityAddress: "",
+        amenityDescription: "",
+        amenityStock: 0,
+        amenityStockMax: 0,
+        amenityQuantityMin: 0,
+        amenityQuantityMax: 0,
+        amenityReminder: "",
+        amenityCreator: "",
+        amenityImages: [
+            {
+                url: "",
+                public_id: ""
+            }
+        ],
+        amenityVisibility: ""
+    });
 
     // Amenity List State
     const [amenityList, setAmenityList] = useState<AmenityType[] | null>(null);
 
     // Delete Dialog State
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-
-    // Toast Confirmations
-    const { toast } = useToast()
 
     // React Router Dom Navigate
     const navigate = useNavigate();
@@ -125,7 +142,7 @@ const AmenitiesList = () => {
     // Use Effect for API calls
     // Use Effect for Fetching Amenities
     useEffect(() => {
-        
+
         document.title = "Amenities | GCTMS";
 
         const fetchAmenities = async () => {
@@ -171,7 +188,7 @@ const AmenitiesList = () => {
     // Archive Function
     const setArchive = async (amenity) => {
 
-        amenity.stat = "Archived"
+        amenity.amenityVisibility = "Archived"
 
         const response = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName, {
             method: 'PATCH',
@@ -183,10 +200,7 @@ const AmenitiesList = () => {
 
         if (response.ok) {
 
-            toast({
-                title: "Amenity archived",
-                description: amenity.amenityName + " is archived",
-            })
+            console.log("archive amenity successful", json);
         }
 
     }
@@ -194,7 +208,7 @@ const AmenitiesList = () => {
     // Unarchive Function
     const setUnarchive = async (amenity) => {
 
-        amenity.stat = "Unarchived"
+        amenity.amenityVisibility = "Unarchived"
 
         const response = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName, {
             method: 'PATCH',
@@ -206,38 +220,47 @@ const AmenitiesList = () => {
 
         if (response.ok) {
 
-            toast({
-                title: "Amenity archived",
-                description: amenity.amenityName + " is unarchived",
-            })
+            console.log("unarchive amenity successful", json);
 
         }
 
     }
 
-    const deleteReservation = async (amenity) => {
-
-        const response = await fetch('http://localhost:4000/api/amenities/' + amenity.amenityName, {
-            method: 'DELETE'
-        })
-
-        const json = await response.json()
-
-        console.log(json)
-
-        if (response.ok) {
-
-            window.location.reload();
-
-            toast({
-
-                title: "Amenity deleted",
-                description: amenity.amenityName + " is deleted successfully",
-
-            })
+    const deleteReservation = async (amenity: AmenityType) => {
+        if (!amenity || !amenity._id) {
+            console.error("Invalid amenity data");
+            toast.error("Invalid amenity data.");
+            return;
         }
 
-    }
+        try {
+            const response = await deleteAmenity(amenity._id);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Failed to delete amenity:", errorData);
+                toast.error("Failed to delete amenity.");
+                return;
+            }
+
+            // Update the amenity list state
+            setAmenityList((prevList) => prevList?.filter((item) => item._id !== amenity._id) || null);
+
+            toast.success("Amenity deleted successfully."),
+            {
+                closeButton: true,
+            }
+        } catch (error) {
+            console.error("Error deleting amenity:", error);
+            toast.error("An error occurred while deleting the amenity.",
+                {
+                    closeButton: true,
+                }
+            );
+        } finally {
+            setShowDeleteDialog(false);
+        }
+    };
 
 
 
@@ -248,8 +271,6 @@ const AmenitiesList = () => {
 
 
         <LayoutWrapper>
-
-            <Toaster />
 
             {/* Delete dialog for deleting the reservation */}
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -277,7 +298,7 @@ const AmenitiesList = () => {
                         {/* Delete dialog delete button */}
                         <Button
                             variant={"destructive"}
-                            onClick={ ()=> {deleteReservation(deletedAmenity)}}
+                            onClick={() => { setShowDeleteDialog(false); deleteReservation(deletedAmenity) }}
                         >
                             Delete
                         </Button>
@@ -368,7 +389,7 @@ const AmenitiesList = () => {
                                         return (
 
                                             <TableRow key={amenity._id}>
-                                            {/* <TableRow> */}
+                                                {/* <TableRow> */}
 
                                                 <TableCell className="flex flex-row items-center gap-4" onClick={() => { amenityDetailsRoute(amenity._id); }}>
                                                     <Skeleton className="h-24 w-24 " />
@@ -389,54 +410,54 @@ const AmenitiesList = () => {
 
                                                 <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity._id); }}>
                                                     <Badge className="text-xs" variant="secondary">
-                                                        {amenity.stat}
+                                                        {amenity.amenityVisibility}
                                                     </Badge>
                                                 </TableCell>
 
                                                 <TableCell className="items-end">
 
-                                                        <DropdownMenu>
+                                                    <DropdownMenu>
 
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button
-                                                                    aria-haspopup="true"
-                                                                    size="icon"
-                                                                    type="button"
-                                                                    variant="ghost"
-                                                                >
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                    <span className="sr-only">Toggle menu</span>
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button
+                                                                aria-haspopup="true"
+                                                                size="icon"
+                                                                type="button"
+                                                                variant="ghost"
+                                                            >
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                                <span className="sr-only">Toggle menu</span>
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
 
-                                                            <DropdownMenuContent align="end">
-                                                                
-                                                                <DropdownMenuLabel> Actions </DropdownMenuLabel>
+                                                        <DropdownMenuContent align="end">
 
-                                                                <DropdownMenuSeparator />
+                                                            <DropdownMenuLabel> Actions </DropdownMenuLabel>
 
-                                                                {
-                                                                    (amenity.stat == "Unarchived") &&
-                                                                    (
-                                                                        <DropdownMenuItem onClick={() => { setArchive(amenity) }}> Archive </DropdownMenuItem>
-                                                                    )
-                                                                }
+                                                            <DropdownMenuSeparator />
 
-                                                                {
-                                                                    (amenity.stat == "Archived") &&
-                                                                    (
-                                                                        <DropdownMenuItem onClick={() => { setUnarchive(amenity) }}> Unarchive </DropdownMenuItem>
-                                                                    )
-                                                                }
+                                                            {
+                                                                (amenity.amenityVisibility == "Unarchived") &&
+                                                                (
+                                                                    <DropdownMenuItem onClick={() => { setArchive(amenity) }}> Archive </DropdownMenuItem>
+                                                                )
+                                                            }
 
-                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setDeletedAmenity(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
+                                                            {
+                                                                (amenity.amenityVisibility == "Archived") &&
+                                                                (
+                                                                    <DropdownMenuItem onClick={() => { setUnarchive(amenity) }}> Unarchive </DropdownMenuItem>
+                                                                )
+                                                            }
+
+                                                            <DropdownMenuItem onClick={() => { setShowDeleteDialog(true); setDeletedAmenity(amenity) }} className="text-destructive"> Delete </DropdownMenuItem>
 
 
-                                                            </DropdownMenuContent>
+                                                        </DropdownMenuContent>
 
-                                                        </DropdownMenu>
+                                                    </DropdownMenu>
 
-                                                    </TableCell>
+                                                </TableCell>
 
                                             </TableRow>
 
@@ -523,13 +544,13 @@ const AmenitiesList = () => {
                                             return (
 
                                                 <TableRow key={amenity._id}>
-                                                {/* <TableRow> */}
+                                                    {/* <TableRow> */}
 
-                                                    <TableCell className="flex flex-row items-center gap-4" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
+                                                    <TableCell className="flex flex-row items-center gap-4" onClick={() => { amenityDetailsRoute(amenity._id) }}>
                                                         <Skeleton className="h-24 w-24 " />
                                                     </TableCell>
 
-                                                    <TableCell onClick={ () => { amenityDetailsRoute(amenity._id) }}>
+                                                    <TableCell onClick={() => { amenityDetailsRoute(amenity._id) }}>
                                                         <div>
                                                             <div className="font-medium"> {amenity.amenityName} </div>
                                                             <div className="hidden text-sm text-muted-foreground md:inline">
@@ -538,13 +559,13 @@ const AmenitiesList = () => {
                                                         </div>
                                                     </TableCell>
 
-                                                    <TableCell className="hidden sm:table-cell" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
+                                                    <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity._id) }}>
                                                         {amenity.amenityType}
                                                     </TableCell>
 
-                                                    <TableCell className="hidden sm:table-cell" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
+                                                    <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity._id) }}>
                                                         <Badge className="text-xs" variant="secondary">
-                                                            {amenity.stat}
+                                                            {amenity.amenityVisibility}
                                                         </Badge>
                                                     </TableCell>
 
@@ -567,20 +588,20 @@ const AmenitiesList = () => {
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                                                                 {
-                                                                    (amenity.stat == "Unarchived") &&
+                                                                    (amenity.amenityVisibility == "Unarchived") &&
                                                                     (
                                                                         <DropdownMenuItem onClick={() => { setArchive(amenity) }}> Archive </DropdownMenuItem>
                                                                     )
                                                                 }
 
                                                                 {
-                                                                    (amenity.stat == "Archived") &&
+                                                                    (amenity.amenityVisibility == "Archived") &&
                                                                     (
                                                                         <DropdownMenuItem onClick={() => { setUnarchive(amenity) }}> Unarchive </DropdownMenuItem>
                                                                     )
                                                                 }
 
-                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setDeletedAmenity(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => { setShowDeleteDialog(true); setDeletedAmenity(amenity) }} className="text-destructive"> Delete </DropdownMenuItem>
 
 
                                                             </DropdownMenuContent>
@@ -678,13 +699,13 @@ const AmenitiesList = () => {
                                             return (
 
                                                 <TableRow key={amenity._id}>
-                                                {/* <TableRow> */}
+                                                    {/* <TableRow> */}
 
-                                                    <TableCell className="flex flex-row items-center gap-4" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
+                                                    <TableCell className="flex flex-row items-center gap-4" onClick={() => { amenityDetailsRoute(amenity._id) }}>
                                                         <Skeleton className="h-24 w-24 " />
                                                     </TableCell>
 
-                                                    <TableCell onClick={ () => { amenityDetailsRoute(amenity._id) }}>
+                                                    <TableCell onClick={() => { amenityDetailsRoute(amenity._id) }}>
                                                         <div>
                                                             <div className="font-medium"> {amenity.amenityName} </div>
                                                             <div className="hidden text-sm text-muted-foreground md:inline">
@@ -693,13 +714,13 @@ const AmenitiesList = () => {
                                                         </div>
                                                     </TableCell>
 
-                                                    <TableCell className="hidden sm:table-cell" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
+                                                    <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity._id) }}>
                                                         {amenity.amenityType}
                                                     </TableCell>
 
-                                                    <TableCell className="hidden sm:table-cell" onClick={ () => { amenityDetailsRoute(amenity._id) }}>
+                                                    <TableCell className="hidden sm:table-cell" onClick={() => { amenityDetailsRoute(amenity._id) }}>
                                                         <Badge className="text-xs" variant="secondary">
-                                                            {amenity.stat}
+                                                            {amenity.amenityVisibility}
                                                         </Badge>
                                                     </TableCell>
 
@@ -726,20 +747,20 @@ const AmenitiesList = () => {
                                                                 <DropdownMenuSeparator />
 
                                                                 {
-                                                                    (amenity.stat == "Unarchived") &&
+                                                                    (amenity.amenityVisibility == "Unarchived") &&
                                                                     (
                                                                         <DropdownMenuItem onClick={() => { setArchive(amenity) }}> Archive </DropdownMenuItem>
                                                                     )
                                                                 }
 
                                                                 {
-                                                                    (amenity.stat == "Archived") &&
+                                                                    (amenity.amenityVisibility == "Archived") &&
                                                                     (
                                                                         <DropdownMenuItem onClick={() => { setUnarchive(amenity) }}> Unarchive </DropdownMenuItem>
                                                                     )
                                                                 }
 
-                                                                <DropdownMenuItem onClick={() => {setShowDeleteDialog(true); setDeletedAmenity(amenity)}} className="text-destructive"> Delete </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => { setShowDeleteDialog(true); setDeletedAmenity(amenity) }} className="text-destructive"> Delete </DropdownMenuItem>
 
 
                                                             </DropdownMenuContent>

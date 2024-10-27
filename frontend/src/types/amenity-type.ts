@@ -16,10 +16,10 @@ export type AmenityType = {
     amenityCreator: string;
     amenityImages: [
         {
-            url?: string;
-            public_id?: string;
+            url: string;
+            public_id: string;
         }
     ];
-    stat: string;
+    amenityVisibility: string;
 
 };

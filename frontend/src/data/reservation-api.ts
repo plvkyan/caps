@@ -2,6 +2,17 @@
 const apiBaseUrl = 'http://localhost:4000/api/';
 const apiReservationsUrl = apiBaseUrl + 'reservations';
 
+// POST request to create a new reservation
+export const createReservation = async (reservationData) => {
+    return (await fetch(apiReservationsUrl, {
+        body: JSON.stringify(reservationData),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'POST',
+    }));
+}
+
 export const getAllReservations = async () => {
     return (await fetch(apiReservationsUrl)).json();
 }

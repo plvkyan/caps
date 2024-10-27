@@ -68,7 +68,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Toaster } from "@/components/ui/toaster";
 
 // shadcn Toast Import
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from "sonner";
 
 
 
@@ -95,7 +95,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 // Zod Imports
-import * as zod from "zod";
+import * as z from "zod";
 
 // Zod Resolver Import
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -106,6 +106,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // AuthContext Hooks for Users
 import { useAuthContext } from "@/hooks/useAuthContext"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { createAmenity } from "@/data/amenities-api";
 
 
 
@@ -120,28 +121,28 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"];
 
 
 // Zod Schema for Form Validation
-const formSchema = zod.object({
-    amenityName: zod.string().min(1,
+const formSchema = z.object({
+    amenityName: z.string().min(1,
         { message: "Equipment name cannot be empty." }
     ),
-    amenityType: zod.string().optional(),
-    amenityDescription: zod.string().min(1,
+    amenityType: z.string().optional(),
+    amenityDescription: z.string().min(1,
         { message: "Equipment description cannot be empty." }
     ),
-    amenityStock: zod.coerce.number().min(1).optional(),
-    amenityStockMax: zod.coerce.number().min(1,
+    amenityStock: z.coerce.number().min(1).optional(),
+    amenityStockMax: z.coerce.number().min(1,
         { message: "Equipment stock cannot be zero." }
     ),
-    amenityQuantityMin: zod.coerce.number().min(1,
+    amenityQuantityMin: z.coerce.number().min(1,
         { message: "Minimum equipment reservation quantity cannot be zero." }
     ),
-    amenityQuantityMax: zod.coerce.number().min(1,
+    amenityQuantityMax: z.coerce.number().min(1,
         { message: "Maximum equipment reservation quantity cannot be zero." }
     ),
-    amenityCreator: zod.string(),
-    amenityImages: zod.any().optional(),
-    amenityReminder: zod.string().optional(),
-    stat: zod.string().optional(),
+    amenityImages: z.any().optional(),
+    amenityReminder: z.string().optional(),
+    amenityCreator: z.string(),
+    amenityVisibility: z.string().optional(),
 });
 
 
@@ -152,8 +153,6 @@ const AmenityEquipmentForm = () => {
 
 
 
-    // For toast confirmation
-    const { toast } = useToast();
 
     // Contexts
     // Use AuthContext to get user data
@@ -175,78 +174,58 @@ const AmenityEquipmentForm = () => {
 
     // Functions
     // Create Form Function
-    const form = useForm<zod.infer<typeof formSchema>>({
+    const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            amenityDescription: "",
             amenityName: "",
             amenityType: "Equipment",
+            amenityDescription: "",
             amenityStock: 1,
             amenityStockMax: 0,
-            amenityQuantityMax: 0,
             amenityQuantityMin: 1,
+            amenityQuantityMax: 0,
             amenityReminder: "",
             amenityCreator: user.blkLt,
-            stat: "Unarchived",
+            amenityVisibility: "Unarchived",
         }
     });
 
     // Handle Submit Function for CREATING an amenity
-    const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
-        // Set the stock to the maximum stock
-        values.amenityStock = values.amenityStockMax;
-        // Set the images state value to the images array
-        values.amenityImages = images;
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        try {
+            // Set the stock to the maximum stock
+            values.amenityStock = values.amenityStockMax;
+            // Set the images state value to the images array
+            values.amenityImages = images;
 
-        // Post the data to the server
-        const equipmentDataResponse = await fetch('http://localhost:4000/api/amenities', {
-            method: 'POST',
-            body: JSON.stringify(values, null, 2),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+            // Post the data to the server
+            const response = await createAmenity(values);
 
-        const equipmentData = await equipmentDataResponse.json();
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Error creating new equipment amenity.');
+            }
 
-        if (!equipmentDataResponse.ok) {
-            setError(equipmentData.error);
-            console.log('Error creating new equipment amenity: ', equipmentData);
-        }
+            toast.success("New equipment amenity created.", {
+                description: "The new equipment amenity has been successfully created.",
+                closeButton: true,
+            });
 
-        if (equipmentDataResponse.ok) {
-            console.log('New equipment amenity created: ', equipmentData);
-            // Set the new amenity to local storage
-            localStorage.setItem("newAmenity", JSON.stringify(equipmentData))
-            // Set the images state to an empty array for a new amenity
+            // Clear the form and reset states
+            form.reset();
             setImages([]);
+        } catch (error: any) {
+            setError(error.message);
+            toast.error("Error creating new equipment amenity.", {
+                description: error.message,
+                closeButton: true,
+            });
         }
-
-    }
+    };
 
 
 
     // useEffects
-    // Use Effect for toast confirmation about the creation of a new equipment amenity
-    useEffect(() => {
-        // Check if there is a new amenity in local storage
-        if (localStorage.getItem("newAmenity")) {
-
-            // Parse the new amenity from local storage
-            const newAmenity = JSON.parse(localStorage.getItem("newAmenity") as any)
-
-            // Show a toast confirmation that the new equipment amenity was created
-            toast({
-                // Set the title of the toast
-                title: "Equipment amenity created",
-                // Set the description of the toast
-                description: `Equipment ${newAmenity.amenityName} was successfully created.`,
-            })
-            // Remove the new amenity from local storage after confirmation
-            localStorage.removeItem("newAmenity")
-        }
-    }, []);
-
     // Use Effect for image preview
     useEffect(() => {
         // const imageCheck = () => {
@@ -798,7 +777,7 @@ const AmenityEquipmentForm = () => {
 
                                             <FormField
                                                 control={form.control}
-                                                name="stat"
+                                                name="amenityVisibility"
                                                 render={({ field }) => {
                                                     return (
                                                         <FormItem>
@@ -809,7 +788,7 @@ const AmenityEquipmentForm = () => {
 
                                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
 
-                                                                    <SelectTrigger id="stat" aria-label="Select status">
+                                                                    <SelectTrigger id="amenityVisibility" aria-label="Select status">
                                                                         <SelectValue placeholder="Select status" />
                                                                     </SelectTrigger>
 
@@ -825,14 +804,14 @@ const AmenityEquipmentForm = () => {
                                                             <FormMessage />
 
                                                             {/* If Equipment Status is currently archived, show this */}
-                                                            {form.getValues("stat") === "Archived" &&
+                                                            {form.getValues("amenityVisibility") === "Archived" &&
                                                                 <CardDescription>
                                                                     Archived equipments are hidden from the unit owners.
                                                                 </CardDescription>
                                                             }
 
                                                             {/* If Equipment Status is currently unarchived, show this */}
-                                                            {form.getValues("stat") === "Unarchived" &&
+                                                            {form.getValues("amenityVisibility") === "Unarchived" &&
                                                                 <CardDescription>
                                                                     Unarchived equipments are shown to the unit owners.
                                                                 </CardDescription>

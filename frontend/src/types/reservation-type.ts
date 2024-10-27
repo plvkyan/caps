@@ -13,7 +13,21 @@ export type ReservationType = {
             amenityName: string,
             amenityType: string,
             amenityAddress: string,
+            amenityDescription: string,
+            amenityStock: string,
+            amenityStockMax: string,
             amenityQuantity: string,
+            amenityQuantityMin: string,
+            amenityQuantityMax: string,
+            amenityReminder: string,
+            amenityCreator: string,
+            amenityImages: [
+                {
+                    url?: string,
+                    public_id?: string,
+                }
+            ], 
+            amenityVisibility: string,
         }
     ]
     reservationDate: Date,

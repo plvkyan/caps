@@ -6,7 +6,10 @@
 // Lucide Icon Imports
 import {
     ChevronLeft,
+    ChevronRight,
     PlusCircle,
+    Upload,
+    X,
 } from "lucide-react";
 
 
@@ -74,7 +77,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 // Zod Imports
-import * as zod from "zod";
+import * as z from "zod";
 
 // Zod Resolver Import
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -83,6 +86,7 @@ import { useEffect, useState } from "react";
 // Hooks
 // AuthContext Hooks for Users
 import { useAuthContext } from "@/hooks/useAuthContext"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 
 const MAX_FILE_SIZE = 500000;
@@ -90,32 +94,22 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/web
 
 
 // 
-const formSchema = zod.object({
-
-    profileImage: zod
-    .any()
-    .refine((files) => files?.length == 1, "Image is required.")
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-      ".jpg, .jpeg, .png and .webp files are accepted."
-    ).optional(),
-    amenityName: zod.string().min(1,
+const formSchema = z.object({
+    amenityName: z.string().min(1,
         { message: "Facility name cannot be empty." }
     ),
-    amenityType: zod.string(
+    amenityType: z.string(
     ).optional(),
-    amenityDescription: zod.string().min(1,
+    amenityDescription: z.string().min(1,
         { message: "Facility description cannot be empty." }
     ),
-    amenityAddress: zod.string().min(1,
+    amenityAddress: z.string().min(1,
         { message: "Facility address cannot be empty." }
     ),
-    amenityCreator: zod.string(),
-    amenityReminder: zod.string().min(1,
-        { message: "Facility reminder cannot be empty." }
-    ),
-    stat: zod.string(
+    amenityImages: z.any().optional(),
+    amenityReminder: z.string().optional(),
+    amenityCreator: z.string(),
+    amenityVisibility: z.string(
     ).optional(),
 
 });
@@ -134,12 +128,19 @@ const AmenityFacilityForm = () => {
     // React Router Dom Navigate
     const navigate = useNavigate();
 
-    //
-    const [error, setError] = useState<string | null>(null);
 
-    // 
-    const [image, setImage] = useState<File | undefined | null>();
-    console.log(image, 12);
+
+    // States
+    // State for rotating index of images for image preview
+    const [rotatingIndex, setRotatingIndex] = useState(0);
+    // State for current index of images for image preview
+    const [currentIndex, setCurrentIndex] = useState(0);
+    // State for form error message
+    const [error, setError] = useState<any>();
+    // State for current images uploaded
+    const [images, setImages] = useState<any>([]);
+
+
 
     // Functions
     // Function to navigate to the facility form page
@@ -151,7 +152,7 @@ const AmenityFacilityForm = () => {
     }
 
     // Create Form Function
-    const form = useForm<zod.infer<typeof formSchema>>({
+    const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             amenityName: "",
@@ -160,12 +161,16 @@ const AmenityFacilityForm = () => {
             amenityAddress: "",
             amenityReminder: "",
             amenityCreator: user.blkLt,
-            stat: "Unarchived",
+            amenityVisibility: "Unarchived",
         }
     });
 
+
+
     // 
-    const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+
+        values.amenityImages = images;
 
         const response = await fetch('http://localhost:4000/api/amenities', {
             method: 'POST',
@@ -188,6 +193,7 @@ const AmenityFacilityForm = () => {
 
             console.log('New facility amenity created: ', json);
             localStorage.setItem("newAmenity", JSON.stringify(json))
+            setImages([]);
             window.location.reload();
 
         }
@@ -216,7 +222,84 @@ const AmenityFacilityForm = () => {
 
     }, []);
 
+    // Use Effect for image preview
+    useEffect(() => {
+        // const imageCheck = () => {
+        //     if (rotatingIndex < 0) {
+        //         setRotatingIndex(0);
+        //     }
+        //     if (rotatingIndex >= images.length) {
+        //         setRotatingIndex(images.length - 1);
+        //     }
+        // }
+        const intervalId = setInterval(() => {
 
+            if (images.length <= 0 || images.length === 1) {
+                setRotatingIndex(0);
+            } else if (rotatingIndex === images.length - 1) {
+                setRotatingIndex(0);
+            } else if (rotatingIndex >= images.length) {
+                setRotatingIndex(0);
+            }
+            else {
+                setRotatingIndex(rotatingIndex + 1);
+            }
+        }, 5000)
+        // imageCheck();
+        return () => clearInterval(intervalId);
+    });
+
+
+
+    const handleImages = (e) => {
+
+        const imageFiles = Array.from(e.target.files);
+
+        if (images.length + imageFiles.length > 3) {
+            setError("You can only upload up to 3 images. Please remove at least 1 image to upload a new one.");
+            return;
+        }
+
+        if (imageFiles.length > 3) {
+            setError("You can only upload up to 3 images.");
+            setImages([]);
+            return;
+        }
+
+        if (images.length > 3) {
+            setError("You can only upload up to 3 images.");
+            setImages([]);
+            return;
+        }
+
+        imageFiles.forEach(file => {
+            setFileToBase(file);
+        })
+    }
+
+    const setFileToBase = (file) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onloadend = () => {
+            setImages(oldArray => [...oldArray, reader.result]);
+        }
+    }
+
+    const removeImage = (index) => {
+
+        if ((index >= images.length - 1 && rotatingIndex >= images.length - 1) || rotatingIndex >= images.length - 1 && images.length > 1) {
+            if (rotatingIndex === 0) {
+                setRotatingIndex(0);
+            } else {
+                setRotatingIndex(rotatingIndex - 1);
+            }
+        }
+
+        const updatedImagesArray = Array.from(images); // make a separate copy of the array
+        updatedImagesArray.splice(index, 1);
+        setImages(updatedImagesArray);
+    }
 
 
     return (
@@ -294,7 +377,7 @@ const AmenityFacilityForm = () => {
                                                                     placeholder="Enter facility name"
                                                                     {...field}
                                                                 />
-                                                                
+
                                                             </div>
 
                                                         </FormControl>
@@ -411,88 +494,137 @@ const AmenityFacilityForm = () => {
                                 className="overflow-hidden" x-chunk="dashboard-07-chunk-4"
                             >
                                 <CardHeader>
-                                    <CardTitle> Facility Images</CardTitle>
+                                    <CardTitle> Equipment Images </CardTitle>
                                     <CardDescription>
-                                        Attach images of the new facility. You can upload up to 3 images.
+                                        Attach images of the new equipment. You can upload up to 3 images.
                                     </CardDescription>
                                 </CardHeader>
+
                                 <CardContent>
+
                                     <div className="grid gap-2">
-                                        <Input onChange={(e) => setImage((e.target as HTMLInputElement)?.files?.[0])} id="amenityImage" type="file" />
-                                    </div>
-                                </CardContent>
-                            </Card>
 
-                            <Card x-chunk="dashboard-07-chunk-3">
+                                        {images && images[0] && (
+                                            <Dialog>
+                                                <DialogTrigger onClick={() => setRotatingIndex(rotatingIndex)}>
+                                                    <img
+                                                        src={images[rotatingIndex]} className="aspect-video w-full rounded-md object-cover cursor-pointer"
+                                                    />
+                                                </DialogTrigger>
 
-                                <CardHeader>
+                                                <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
 
-                                    <CardTitle> Facility Status </CardTitle>
-                                    <CardDescription> 
-                                        The equipment's visibility to the unit owners. 
-                                    </CardDescription>
-
-                                </CardHeader>
-
-                                <CardContent>
-
-                                    <div className="grid gap-6">
-
-                                        <div className="grid gap-3">
-
-                                            <Label htmlFor="status"> Status </Label>
-
-                                            <FormField
-                                                control={form.control}
-                                                name="stat"
-                                                render={({ field }) => {
-                                                    return (
-
-                                                        <FormItem>
-
-                                                            <FormLabel className="hidden"> Facility Status </FormLabel>
-
-                                                            <FormControl>
-
-                                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-
-                                                                    <SelectTrigger id="stat" aria-label="Select status">
-                                                                        <SelectValue placeholder="Select status" />
-                                                                    </SelectTrigger>
-
-                                                                    <SelectContent>
-                                                                        <SelectItem value="Unarchived"> Unarchived </SelectItem>
-                                                                        <SelectItem value="Archived"> Archived </SelectItem>
-                                                                    </SelectContent>
-
-                                                                </Select>
-
-                                                            </FormControl>
-
-                                                            <FormMessage />
-
-                                                            {/* If Equipment Status is currently archived, show this */}
-                                                            { form.getValues("stat") === "Archived" &&
-                                                                <CardDescription>
-                                                                    Archived facilities aren't visible to the unit owners. 
-                                                                </CardDescription>
+                                                    <Button
+                                                        className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (currentIndex === 0) {
+                                                                setCurrentIndex(images.length - 1)
+                                                            } else {
+                                                                setCurrentIndex(currentIndex - 1)
                                                             }
+                                                        }}
+                                                        size="icon"
+                                                        variant="outline"
+                                                    >
+                                                        <ChevronLeft className="h-4 w-4" />
+                                                    </Button>
 
-                                                            {/* If Equipment Status is currently unarchived, show this */}
-                                                            { form.getValues("stat") === "Unarchived" &&
-                                                                <CardDescription>
-                                                                    Unarchived facilities are shown to the unit owners. 
-                                                                </CardDescription>
+                                                    <Button
+                                                        className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (currentIndex === images.length - 1) {
+                                                                setCurrentIndex(0)
+                                                            } else {
+                                                                setCurrentIndex(currentIndex + 1)
                                                             }
+                                                        }}
+                                                        size="icon"
+                                                        variant="outline"
+                                                    >
+                                                        <ChevronRight className="h-4 w-4" />
+                                                    </Button>
 
-                                                        </FormItem>
-                                                    )
-                                                }}
-                                            />
+                                                    <img
+                                                        src={images[currentIndex]} className="aspect-video rounded-md object-contain"
+                                                    />
+
+                                                </DialogContent>
+
+                                            </ Dialog>
+                                        )}
+
+                                        <div className="grid grid-cols-3 gap-2">
+
+                                            {images && images?.map((image, index) => (
+                                                <div className="group relative">
+                                                    <Button
+                                                        className="h-5 w-5 rounded-full absolute -top-2 -right-2 group-hover:flex hidden z-50"
+                                                        variant="destructive"
+                                                        size="icon"
+                                                        type="button"
+                                                        onClick={() => { removeImage(index) }}>
+                                                        <X className="h-3 w-3" />
+                                                    </Button>
+                                                    <img
+                                                        src={image} className="cursor-pointer aspect-video w-full rounded-md object-cover h-[84] w-[84]" onClick={() => setRotatingIndex(index)}
+                                                    />
+                                                </div>
+                                            )
+                                            )}
 
                                         </div>
 
+                                        {images.length !== 3 && images.length! <= 3 && (
+                                            <button type="button" className="relative flex flex-col gap-2 aspect-video w-full items-center justify-center rounded-md border border-dashed">
+
+                                                <Upload className="h-6 w-6 text-muted-foreground" />
+
+                                                <div className="flex flex-col">
+                                                    <span className="text-muted-foreground text-base font-medium"> Click here to upload images </span>
+                                                    <span className="text-muted-foreground text-xs font-normal"> The total file size should not exceed 15 MB. </span>
+                                                </div>
+
+                                                <span className="sr-only"> Upload </span>
+
+                                                <FormField
+                                                    control={form.control}
+                                                    name="amenityImages"
+                                                    render={({ field: { value, onChange, ...fieldProps } }) => {
+
+                                                        return (
+
+                                                            <FormItem>
+                                                                <FormLabel className="hidden"> Amenity Image </FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        accept="image/jpeg, image/png, image/jpg"
+                                                                        className="block absolute w-full h-full left-0 top-0 right-0 bottom-0 opacity-0 z-50 disabled:opacity-0 !mt-0 pointer"
+                                                                        disabled={images.length === 3 || images.length > 3}
+                                                                        id="amenityImages"
+                                                                        multiple
+                                                                        onChange={handleImages}
+                                                                        title="Drag and drop an image file or click here to upload."
+                                                                        type="file"
+                                                                        {...fieldProps}
+                                                                    />
+                                                                </FormControl>
+
+                                                                <FormMessage />
+
+                                                            </FormItem>
+                                                        )
+                                                    }}
+                                                />
+
+                                            </button>
+                                        )}
+
+
+
                                     </div>
+
                                 </CardContent>
                             </Card>
 

@@ -70,7 +70,7 @@ const amenitySchema = new Schema({
             }
         }
     ],
-    stat: {
+    amenityVisibility: {
         type: String,
         required: true,
         default: "Unarchived"
@@ -93,7 +93,7 @@ function amenityDataValidation(
     amenityReminder,
     amenityCreator,
     amenityImages,
-    stat
+    amenityVisibility
 ) {
 
     if (amenityType !== "Equipment" && amenityType !== "Facility") {
@@ -155,7 +155,7 @@ amenitySchema.statics.createAmenity = async function (
     amenityReminder,
     amenityCreator,
     amenityImages,
-    stat
+    amenityVisibility
 ) {
 
     // Check if amenity already exists
@@ -181,7 +181,7 @@ amenitySchema.statics.createAmenity = async function (
         amenityReminder,
         amenityCreator,
         amenityImages,
-        stat
+        amenityVisibility
     );
 
     // Loop to upload each image from amenityImages array to cloudinary
@@ -216,8 +216,10 @@ amenitySchema.statics.createAmenity = async function (
         amenityReminder,
         amenityCreator,
         amenityImages,
-        stat
+        amenityVisibility
     })
+
+    console.log("Amenity created successfully.");
 
     // Return the new amenity
     return newAmenity;
@@ -226,7 +228,7 @@ amenitySchema.statics.createAmenity = async function (
 
 
 // Static method to edit an amenity
-amenitySchema.statics.editEquipment = async function (
+amenitySchema.statics.editAmenity = async function (
     initialAmenityName,
     newAmenityName,
     amenityType,
@@ -239,7 +241,7 @@ amenitySchema.statics.editEquipment = async function (
     amenityReminder,
     amenityCreator,
     newAmenityImages,
-    stat
+    amenityVisibility
 ) {
 
     console.log("The new amenity name is: " + newAmenityName);
@@ -275,7 +277,7 @@ amenitySchema.statics.editEquipment = async function (
         amenityReminder,
         amenityCreator,
         newAmenityImages,
-        stat
+        amenityVisibility
     );
 
     // Check if the old amenity has no images and if there are new images
@@ -460,7 +462,7 @@ amenitySchema.statics.editEquipment = async function (
         amenityReminder,
         amenityCreator,
         amenityImages: newAmenityImages,
-        stat
+        amenityVisibility
     });
 
     console.log("\nAmenity edited successfully.\n");
