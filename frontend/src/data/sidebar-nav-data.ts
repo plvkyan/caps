@@ -35,7 +35,7 @@ export const BILLS = {
     items: [
         {
             title: "Create Bill",
-            url: "#",
+            url: "/bills/form",
         },
         {
             title: "Create Bill Type",
@@ -56,7 +56,7 @@ export const RESERVATIONS = {
     items: [
         {
             title: "Create Reservation",
-            url: "#",
+            url: "/reservations/form",
         },
         {
             title: "Export Reservations",

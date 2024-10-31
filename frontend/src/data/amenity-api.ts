@@ -13,7 +13,7 @@ export const createAmenity = async (amenityData: any) => {
 }
 
 export const getUnarchivedAmenities = async () => {
-    return (await fetch(apiAmenitiesUrl));
+    return (await fetch(apiAmenitiesUrl + '/all/unarchived'));
 }
 
 export const deleteAmenity = async (id: string) => {

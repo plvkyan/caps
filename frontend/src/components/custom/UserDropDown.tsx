@@ -15,13 +15,13 @@ import {
 
 // shadcn Component Imports
 // shadcn Alert Dialog Imports
-import { 
-    AlertDialog, 
-    AlertDialogCancel, 
-    AlertDialogContent, 
-    AlertDialogDescription, 
-    AlertDialogFooter, 
-    AlertDialogHeader, 
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
     AlertDialogTitle
 } from "../ui/alert-dialog";
 
@@ -77,7 +77,7 @@ export const UserDropdown = () => {
 
     }
 
-    
+
 
     let badgeColor = "default" as any;
     let badgeMessage = "Outstanding";
@@ -124,12 +124,12 @@ export const UserDropdown = () => {
                     <DropdownMenuLabel className="text-muted-foreground"> {user.role} </DropdownMenuLabel>
 
 
-                   
-                    
+
+
                     {user.memberStatus && (
                         <Badge variant={badgeColor}> {badgeMessage} </Badge>
                     )}
-                
+
                     <DropdownMenuSeparator />
 
                     {user.role != "Unit Owner" &&
@@ -187,7 +187,7 @@ export const UserDropdown = () => {
                     }
 
                     <DropdownMenuSeparator />
-                    
+
                     <DropdownMenuItem
                         className="text-destructive"
                         onSelect={() => setShowDeleteDialog(true)}>
@@ -200,36 +200,36 @@ export const UserDropdown = () => {
 
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
 
-                        <AlertDialogContent>
+                <AlertDialogContent>
 
-                            <AlertDialogHeader>
+                    <AlertDialogHeader>
 
-                                <AlertDialogTitle> Are you sure you want to logout? </AlertDialogTitle>
+                        <AlertDialogTitle> Are you sure you want to logout? </AlertDialogTitle>
 
-                                <AlertDialogDescription>
-                                    Any action unfinished won't be saved.
-                                </AlertDialogDescription>
+                        <AlertDialogDescription>
+                            Any action unfinished won't be saved.
+                        </AlertDialogDescription>
 
-                            </AlertDialogHeader>
-
-
-
-                            <AlertDialogFooter>
+                    </AlertDialogHeader>
 
 
-                                <AlertDialogCancel> Cancel </AlertDialogCancel>
-                                <Button
-                                    variant={"destructive"}
-                                    onClick={handleClick}
-                                >
-                                    Logout
-                                </Button>
 
-                            </AlertDialogFooter>
+                    <AlertDialogFooter>
 
-                        </AlertDialogContent>
 
-                    </AlertDialog>
+                        <AlertDialogCancel> Cancel </AlertDialogCancel>
+                        <Button
+                            variant={"destructive"}
+                            onClick={handleClick}
+                        >
+                            Logout
+                        </Button>
+
+                    </AlertDialogFooter>
+
+                </AlertDialogContent>
+
+            </AlertDialog>
 
         </>
 

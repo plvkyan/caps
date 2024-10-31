@@ -35,9 +35,9 @@ import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
 // Data table imports
 // Data table column definitions imports
-import { ReservationTableColumns } from "@/pages/Reservations/ReservationColumns";
+import { AmenityTableColumns } from "@/pages/Amenities/AmenityColumns";
 // Data table component import
-import ReservationTable from "@/pages/Reservations/ReservationTable";
+import AmenityTable from "@/pages/Amenities/AmenityTable";
 
 
 
@@ -58,28 +58,20 @@ import {
 
 // Types Imports
 // Reservation Type Import
-import { ReservationType } from "@/types/reservation-type"
+import { AmenityType } from "@/types/amenity-type"
 
 
 
 // Data Imports
-// All unarchived reservation data Import
-import { getUnarchivedReservations } from "@/data/reservation-api.ts";
-// All user unarchived reservation data Import
-import { getUserUnarchivedReservations } from "@/data/reservation-api.ts";
-
-
-const userData = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-}
+// All unarchived amenities API Import
+import { getUnarchivedAmenities } from "@/data/amenity-api.ts";
+import { toast } from "sonner"
 
 
 
-export default function BillPage() {
+
+
+export default function AmenityPage() {
 
 
     // Contexts
@@ -90,53 +82,46 @@ export default function BillPage() {
 
     // States
     // Reservations state
-    const [reservations, setReservations] = useState<ReservationType[]>([]);
+    const [amenities, setAmenities] = useState<AmenityType[]>([]);
 
 
 
     // Use Effects
     // Page title effect
     useEffect(() => {
-        document.title = "Reservations | GCTMS";
+        document.title = "Amenities | GCTMS";
     }, []);
 
-    // Fetching unarchived reservations effect
+    // Fetching unarchived amenities effect
     useEffect(() => {
-
-
-        async function fetchUnarchivedReservations() {
-
-            setReservations([]);
-
-            if (user.position === "Admin") {
-                const unarchivedReservationsResult = await getUnarchivedReservations();
-                const unarchivedReservations = await unarchivedReservationsResult.json();
-                if (!ignore && unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetched successfully: ", unarchivedReservations);
-                    setReservations(unarchivedReservations);
+        const fetchUnarchivedAmenities = async () => {
+            try {
+                const response = await getUnarchivedAmenities();
+                if (!ignore) {
+                    if (response.ok) {
+                        const data = await response.json();
+                        toast.success("Successfully fetched unarchived amenities.", {
+                            closeButton: true,
+                        });
+                        setAmenities(data);
+                    } else {
+                        toast.error("Failed to fetch unarchived amenities.", {
+                            closeButton: true,
+                        });
+                    }
                 }
-                if (!ignore && !unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetch failed.");
-                }
-            } else {
-                const userUnarchivedReservationsResult = await getUserUnarchivedReservations(user._id);
-                const userUnarchivedReservations = await userUnarchivedReservationsResult.json();
-                if (!ignore && userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetched successfully.");
-                    setReservations(userUnarchivedReservations);
-                }
-                if (!ignore && !userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetch failed.");
+            } catch (error) {
+                if (!ignore) {
+                    console.error("Error fetching unarchived amenities: ", error);
                 }
             }
-
-        }
+        };
 
         let ignore = false;
-        fetchUnarchivedReservations();
+        fetchUnarchivedAmenities();
         return () => {
             ignore = true;
-        }
+        };
     }, []);
 
 
@@ -182,7 +167,7 @@ export default function BillPage() {
 
                                     <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbPage>
-                                            Bills
+                                            Amenities
                                         </BreadcrumbPage>
                                     </BreadcrumbItem>
 
@@ -204,7 +189,7 @@ export default function BillPage() {
 
                 <main className="flex flex-col gap-4 p-8 pt-4">
 
-                    <ReservationTable columns={ReservationTableColumns} data={reservations} />
+                    <AmenityTable columns={AmenityTableColumns} data={amenities} />
 
                 </main>
 

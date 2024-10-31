@@ -27,6 +27,12 @@ import {
 
 
 
+// Custom Components Imports
+// Theme toggle component import
+import { ThemeToggle } from "@/components/custom/ThemeToggle";
+
+
+
 // Data table imports
 // Data table column definitions imports
 import { ReservationTableColumns } from "@/pages/Reservations/ReservationColumns";
@@ -43,7 +49,10 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 
 // Utility Imports
 // React Imports
-import { useEffect, useState } from "react"
+import { 
+    useEffect, 
+    useState 
+} from "react"
 
 
 
@@ -58,15 +67,9 @@ import { ReservationType } from "@/types/reservation-type"
 import { getUnarchivedReservations } from "@/data/reservation-api.ts";
 // All user unarchived reservation data Import
 import { getUserUnarchivedReservations } from "@/data/reservation-api.ts";
+import { useReservationsContext } from "@/hooks/useReservationsContext"
 
 
-const data = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-}
 
 
 
@@ -84,7 +87,6 @@ export default function ReservationPage() {
     const [reservations, setReservations] = useState<ReservationType[]>([]);
 
 
-
     // Use Effects
     // Page title effect
     useEffect(() => {
@@ -94,40 +96,34 @@ export default function ReservationPage() {
     // Fetching unarchived reservations effect
     useEffect(() => {
 
-
         async function fetchUnarchivedReservations() {
 
-            setReservations([]);
+            try {
+                const fetchFunction = user.position === "Admin" ? getUnarchivedReservations : () => getUserUnarchivedReservations(user._id);
+                const result = await fetchFunction();
+                const data = await result.json();
 
-            if (user.position === "Admin") {
-                const unarchivedReservationsResult = await getUnarchivedReservations();
-                const unarchivedReservations = await unarchivedReservationsResult.json();
-                if (!ignore && unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetched successfully: ", unarchivedReservations);
-                    setReservations(unarchivedReservations);
+                if (!ignore) {
+                    if (result.ok) {
+                        console.log(`${user.position === "Admin" ? "All" : "User"} unarchived reservations fetched successfully: `, data);
+                        setReservations(data);
+                    } else {
+                        console.log(`${user.position === "Admin" ? "All" : "User"} unarchived reservations fetch failed.`);
+                    }
                 }
-                if (!ignore && !unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetch failed.");
-                }
-            } else {
-                const userUnarchivedReservationsResult = await getUserUnarchivedReservations(user._id);
-                const userUnarchivedReservations = await userUnarchivedReservationsResult.json();
-                if (!ignore && userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetched successfully.");
-                    setReservations(userUnarchivedReservations);
-                }
-                if (!ignore && !userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetch failed.");
+            } catch (error) {
+                if (!ignore) {
+                    console.error("Error fetching reservations: ", error);
                 }
             }
-
         }
-
+        
         let ignore = false;
+
         fetchUnarchivedReservations();
         return () => {
             ignore = true;
-        }
+        };
     }, []);
 
 
@@ -154,7 +150,7 @@ export default function ReservationPage() {
                         {/* Container for breadcrumbs and sidebar trigger */}
                         <div className="flex items-center gap-2 p-4">
 
-                            <SidebarTrigger className="-ml-1" />
+                            <SidebarTrigger className="" />
 
                             <Separator orientation="vertical" className="mr-2 h-4" />
 
@@ -184,8 +180,9 @@ export default function ReservationPage() {
                         </div>
 
                         {/* Account navigation */}
-                        <div className="hidden md:block">
-                            <NavUser user={data.user} />
+                        <div className="hidden md:flex items-center gap-2">
+                            <ThemeToggle />
+                            <NavUser />
                         </div>
 
                     </div>

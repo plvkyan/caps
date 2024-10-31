@@ -139,11 +139,30 @@ const reservationSchema = new Schema({
             },
         }
     ],
-    reservationStatus: {
-        type: String,
-        required: true,
-        default: "Pending"
-    },
+    reservationStatus: [
+        {
+            status: {
+                type: String,
+                required: true,
+            },
+            statusDate: {
+                type: Date,
+                required: true,
+            },
+            statusAuthorId: {
+                type: String,
+                required: true,
+            },
+            statusAuthor: {
+                type: String,
+                required: true,
+            },
+            statusAuthorPosition: {
+                type: String,
+                required: true,
+            },
+        }
+    ],
     reservationVisibility: {
         type: String,
         required: true,

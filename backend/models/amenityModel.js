@@ -60,6 +60,10 @@ const amenitySchema = new Schema({
     },
     amenityImages: [
         {
+            _id: {
+                type: String,
+                required: false
+            },
             public_id: {
                 type: String,
                 required: false
@@ -102,41 +106,74 @@ function amenityDataValidation(
         );
     }
 
-    if (amenityStock < 0) {
-        throw Error('Current stock cannot be less than 0.');
+    if (!amenityReminder) {
+        throw Error('Amenity reminder cannot be empty.');
     }
 
-    if (amenityStockMax < 0) {
-        throw Error('Maximum stock cannot be less than 0.');
+    if (!amenityDescription) {
+        throw Error('Amenity description cannot be empty.');
     }
 
-    if (amenityStockMax < amenityStock) {
-        throw Error('Current stock cannot exceed the maximum stock. Set the maximum stock to a higher number or lower the current stock.');
+    if (amenityType === "Facility" && !amenityAddress) {
+        throw Error('Amenity address cannot be empty.');
     }
 
-    if (amenityQuantityMin < 0) {
-        throw Error('Minimum number of reserved equipment cannot be less than 0.');
-    }
+    if (amenityType === "Equipment") {
 
-    if (amenityQuantityMin > amenityStockMax) {
-        throw Error('Minimum number of reserved equipment cannot exceed the maximum stock.');
-    }
+        if (!amenityStock) {
+            throw Error('Current stock cannot be empty.');
+        }
 
-    if (amenityQuantityMax < 0) {
-        throw Error('Maximum number of reserved equipment cannot be less than 0.');
-    }
+        if (!amenityStockMax) {
+            throw Error('Maximum stock cannot be empty.');
+        }
 
-    if (amenityQuantityMax > amenityStockMax) {
-        throw Error('Maximum number of reserved equipment cannot exceed the maximum stock.');
-    }
+        if (!amenityQuantityMin) {
+            throw Error('Minimum quantity of reserved equipment cannot be empty.');
+        }
 
-    if (amenityQuantityMax < amenityQuantityMin) {
-        throw Error('Minimum number of reserved equipment cannot exceed the maximum number of reserved equipment.');
+        if (!amenityQuantityMax) {
+            throw Error('Maximum quantity of reserved equipment cannot be empty.');
+        }
+        
+        if (amenityStock <= 0) {
+            throw Error('Current stock cannot be equal to or less than 0.');
+        }
+
+        if (amenityStockMax <= 0) {
+            throw Error('Maximum stock cannot be equal to or less than 0.');
+        }
+
+        if (amenityStockMax < amenityStock) {
+            throw Error('Current stock cannot exceed the maximum stock. Set the maximum stock to a higher number or lower the current stock.');
+        }
+
+        if (amenityQuantityMin <= 0) {
+            throw Error('Minimum quantity of reserved equipment cannot be equal to or less than 0.');
+        }
+
+        if (amenityQuantityMin > amenityStockMax) {
+            throw Error('Minimum quantity of reserved equipment cannot exceed the maximum stock.');
+        }
+
+        if (amenityQuantityMax <= 0) {
+            throw Error('Maximum quantity of reserved equipment cannot be equal to or less than 0.');
+        }
+
+        if (amenityQuantityMax > amenityStockMax) {
+            throw Error('Maximum quantity of reserved equipment cannot exceed the maximum stock.');
+        }
+
+        if (amenityQuantityMax < amenityQuantityMin) {
+            throw Error('Minimum quantity of reserved equipment cannot exceed the maximum number of reserved equipment.');
+        }
     }
 
     if (amenityImages.length > 3) {
         throw Error('You can only upload up to 3 images.');
     }
+
+    console.log("You pass.");
 
 }
 
@@ -445,7 +482,7 @@ amenitySchema.statics.editAmenity = async function (
         // Set amenityImages to the imagesBuffer
         newAmenityImages = imagesBuffer;
 
-        
+
     }
 
     newAmenityImages = imagesBuffer;

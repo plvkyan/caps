@@ -8,8 +8,8 @@
 
 
 // shadcn Components Imports
-// shadcn Button Component Import
-import { Button } from "@/components/ui/button";
+// shadcn Badge Component Import
+import { Badge } from "@/components/ui/badge";
 // shadcn Checkbox Component Import
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -31,6 +31,14 @@ import { ColumnDef } from "@tanstack/react-table";
 // This can help prevent bugs and make your code easier to understand.
 // Type Imports
 import { ReservationType } from "@/types/reservation-type";
+
+
+
+// Utility imports
+// date-fns format function Import
+import { format } from "date-fns";
+
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -60,27 +68,65 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: "_id",
+        enableSorting: false,
+    },
+    {
         accessorKey: "reserveeBlkLt",
         header: ({ column }) => {
             return (
                 <DataTableColumnHeader column={column} title="Block and Lot" />
             )
         },
+        cell: ({ row }) => {
+            return (
+                <span>{row.original.reserveeBlkLt}</span>
+            )
+        }
     },
     {
-        accessorKey: "amenityName",
+        accessorKey: "reservationType",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Amenity" />
+                <DataTableColumnHeader column={column} title="Amenities" />
             )
         },
+        cell: ({ row }) => {
+            return (
+                <span>
+                    {row.original.reservationType}
+                </span>
+            )
+        }
     },
     {
         accessorKey: "reservationStatus",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Status" />
+                <DataTableColumnHeader column={column} title="Status" className="justify-center" />
             )
+        },
+        cell: ({ row }) => {
+
+            const lastIndex = row.original.reservationStatus.length;
+            const status = row.original.reservationStatus[lastIndex - 1].status;
+            console.log(status)
+
+            return (
+                <div className="flex items-center justify-center pr-4.5 w-full">
+                    <Badge variant={
+                        status === "Pending" ? "warning" :
+                            status === "Approved" ? "default" :
+                                status === "Rejected" ? "destructive" :
+                                    "outline"
+                    }>
+                        {status}
+                    </Badge>
+                </div>
+            )
+        },
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id));
         },
     },
     {
@@ -90,19 +136,12 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
                 <DataTableColumnHeader column={column} title="Reservation Date" />
             )
         },
-    },
-    {
-        id: "actions",
-        header: "Actions",
         cell: ({ row }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => console.log(row.original)}
-                >
-                    View
-                </Button>
-            )
+
+            const origDate = row.getValue("reservationDate") as any
+            const formattedDate = format(origDate, "PPP")
+
+            return <div className="font-regular"> {formattedDate} </div>
         }
-    }
+    },
 ]

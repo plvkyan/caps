@@ -79,7 +79,7 @@ const userData = {
 
 
 
-export default function BillPage() {
+export default function AnnouncementPage() {
 
 
     // Contexts
@@ -182,7 +182,7 @@ export default function BillPage() {
 
                                     <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbPage>
-                                            Bills
+                                            Reservations
                                         </BreadcrumbPage>
                                     </BreadcrumbItem>
 
@@ -195,7 +195,7 @@ export default function BillPage() {
                         {/* Account navigation */}
                         <div className="hidden md:flex items-center gap-2">
                             <ThemeToggle />
-                            <NavUser />
+                            <NavUser user={userData.user} />
                         </div>
 
                     </div>

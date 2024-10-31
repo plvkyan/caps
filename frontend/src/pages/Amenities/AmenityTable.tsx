@@ -10,6 +10,7 @@ import {
     CircleCheck,
     CirclePlus,
     CircleX,
+    SquarePen,
     X
 } from "lucide-react";
 
@@ -51,6 +52,7 @@ import {
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
+    getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table";
@@ -75,11 +77,11 @@ import { approveManyReservations, archiveManyReservations, rejectManyReservation
 
 
 
-interface ReservationData {
+interface AmenityData {
     _id: string;
 }
 
-interface BillTableProps<TData extends ReservationData, TValue> {
+interface AmenityTableProps<TData extends AmenityData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
 }
@@ -88,14 +90,29 @@ interface BillTableProps<TData extends ReservationData, TValue> {
 //     globalFilter: any;
 // }
 
+const EQUIPMENT = {
+    id: 1,
+    value: "Equipment",
+    label: "Equipment",
+}
+
+const FACILITY = {
+    id: 2,
+    value: "Facility",
+    label: "Facility",
+}
+const AMENITY_DATA = [
+    EQUIPMENT,
+    FACILITY
+];
 
 
 
 
-export default function BillTable<TData extends ReservationData, TValue>({
+export default function AmenityTable<TData extends AmenityData, TValue>({
     columns,
     data,
-}: BillTableProps<TData, TValue>) {
+}: AmenityTableProps<TData, TValue>) {
 
 
 
@@ -133,6 +150,7 @@ export default function BillTable<TData extends ReservationData, TValue>({
         onRowSelectionChange: setRowSelection,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         globalFilterFn: 'includesString',
     });
@@ -146,7 +164,7 @@ export default function BillTable<TData extends ReservationData, TValue>({
     // Handle Archive Button Function
     const handleArchiveButton = async () => {
         try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
+            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as AmenityData)._id);
             const response = await archiveManyReservations(selectedRowIds);
 
             if (response.ok) {
@@ -162,7 +180,7 @@ export default function BillTable<TData extends ReservationData, TValue>({
     // Handle Archive Button Function
     const handleApproveButton = async () => {
         try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
+            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as AmenityData)._id);
             const response = await approveManyReservations(selectedRowIds);
 
             if (response.ok) {
@@ -178,7 +196,7 @@ export default function BillTable<TData extends ReservationData, TValue>({
     // Handle Archive Button Function
     const handleRejectButton = async () => {
         try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
+            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as AmenityData)._id);
             const response = await rejectManyReservations(selectedRowIds);
 
             if (response.ok) {
@@ -192,8 +210,8 @@ export default function BillTable<TData extends ReservationData, TValue>({
         }
     };
     // Redirect to Reservation Form Function
-    const navToReservationForm = () => {
-        const reservationFormPath = "/reservations/new";
+    const navToAmenityForm = () => {
+        const reservationFormPath = "/amenities/create";
         navigate(reservationFormPath);
     }
 
@@ -236,8 +254,8 @@ export default function BillTable<TData extends ReservationData, TValue>({
             <div className="flex justify-between">
 
                 <div className="flex flex-col">
-                    <h1 className="font-semibold text-2xl"> Reservations </h1>
-                    <h3 className="font-light text-muted-foreground"> Looking for a specific reservation? </h3>
+                    <h1 className="font-semibold text-2xl"> Amenities </h1>
+                    <h3 className="font-light text-muted-foreground"> Looking for a specific amenity? </h3>
                 </div>
 
                 <div className="flex items-end gap-2">
@@ -252,28 +270,9 @@ export default function BillTable<TData extends ReservationData, TValue>({
                         Archive
                     </Button>
 
-                    <Button
-                        disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                        onClick={() => handleRejectButton()}
-                        variant="outline"
-                        size="sm"
-                    >
-                        <CircleX className="h-4 w-4 text-destructive" />
-                        Mark as Rejected
-                    </Button>
-                    <Button
-                        disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                        onClick={() => handleApproveButton()}
-                        variant="outline"
-                        size="sm"
-                    >
-                        <CircleCheck className="h-4 w-4 text-primary" />
-                        Mark as Approved
-                    </Button>
-
-                    <Button className="" onClick={navToReservationForm} size="sm" variant="default" >
+                    <Button className="" onClick={navToAmenityForm} size="sm" variant="default" >
                         <CirclePlus className="h-4 w-4" />
-                        Create Reservation
+                        Create Amenity
                     </Button>
 
                 </div>
@@ -290,7 +289,7 @@ export default function BillTable<TData extends ReservationData, TValue>({
 
                 <DataTableViewOptions table={table} label="Toggle Columns" />
 
-                <DataTableFacetedFilter column={table.getColumn("reservationStatus")} title="Filter" options={RESERVATION_DATA} />
+                <DataTableFacetedFilter column={table.getColumn("amenityType")} title="Filter" options={AMENITY_DATA} />
 
                 {isFiltered && (
                     <Button

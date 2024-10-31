@@ -255,26 +255,17 @@ const reservationFormSchema = z.object({
             amenityCreator: z.string(),
             amenityImages: z.array(z.object(
                 {
-                    _id: z.string().optional(),
-                    url: z.string().optional(),
-                    public_id: z.string().optional(),
+                    _id: z.string(),
+                    url: z.string(),
+                    public_id: z.string(),
                 }
             ).optional()),
             amenityVisibility: z.string().optional(),
         }
-    )),
+    ).optional()),
     // .refine((value) => value.some((amenity) => amenity), {
     //     message: "At least one amenity is required. Please select at least one amenity to reserve."
     // }),
-    reservationStatus: z.array(z.object(
-        {
-            status: z.string().optional(),
-            statusDate: z.date().optional(),
-            statusAuthorId: z.string().optional(),
-            statusAuthor: z.string().optional(),
-            statusAuthorPosition: z.string().optional(),
-        }
-    )),
     reservationDate: z.date(),
     reservationReason: z.string().min(3,
         { message: "A reason for the reservation is required. Please provide a reason for the reservation." }
@@ -304,15 +295,6 @@ export default function ReservationForm() {
             reservationAmenities: [],
             reservationReason: "",
             reserveeEmail: "",
-            reservationStatus: [
-                {
-                    status: "Pending",
-                    statusDate: new Date(),
-                    statusAuthorId: user.id,
-                    statusAuthor: user.blkLt,
-                    statusAuthorPosition: user.position,
-                }
-            ],
         }
     });
 
@@ -371,14 +353,6 @@ export default function ReservationForm() {
     // Effect to change document title
     useEffect(() => {
         document.title = "Create Reservation | GCTMS";
-
-        if (sessionStorage.getItem("reservationCreated")) {
-            toast.success("Reservation created successfully.", {
-                description: "The new reservation has been successfully created.",
-                closeButton: true,
-            });
-            sessionStorage.removeItem("reservationCreated");
-        }
     }, []);
 
     useEffect(() => {
@@ -468,7 +442,6 @@ export default function ReservationForm() {
         // Check if the step is less than or equal to 0
         // If true, navigate back to the previous page
         if (step <= 0) {
-            reservationForm.reset();
             history.back();
         }
 
@@ -476,12 +449,6 @@ export default function ReservationForm() {
             // Lagay ng warning dito na pag bumalik, babalik lahat sa umpisa
             setError("");
             setStep(0);
-            setCurrentAmenity(null);
-            setCurrentIndex(0);
-            setReservationType("Equipment");
-            setReservationFacilityId("");
-            setReservationEquipmentsIds([]);
-            reservationForm.reset();
         }
 
         if (step === 2) {
@@ -495,12 +462,6 @@ export default function ReservationForm() {
         if (step === 3 && reservationType === "Facility") {
             setError("");
             setStep(0);
-            setCurrentAmenity(null);
-            setCurrentIndex(0);
-            setReservationType("Equipment");
-            setReservationFacilityId("");
-            setReservationEquipmentsIds([]);
-            reservationForm.reset();
         }
 
         if (step === 3 && reservationType === "Equipment and Facility") {
@@ -562,15 +523,15 @@ export default function ReservationForm() {
         setStep(5);
     }
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        const currentAmenities = reservationForm.getValues("reservationAmenities");
-        const facilityAmenities = currentAmenities.filter(amenity => amenity.amenityType === "Facility");
-        const selectedEquipmentAmenities = filterAmenitiesByIds(amenityList, reservationEquipmentsIds);
+    //     const currentAmenities = reservationForm.getValues("reservationAmenities");
+    //     const facilityAmenities = currentAmenities.filter(amenity => amenity.amenityType === "Facility");
+    //     const selectedEquipmentAmenities = filterAmenitiesByIds(amenityList, reservationEquipmentsIds);
 
-        reservationForm.setValue("reservationAmenities", [...selectedEquipmentAmenities, ...facilityAmenities]);
+    //     reservationForm.setValue("reservationAmenities", [...selectedEquipmentAmenities, ...facilityAmenities]);
 
-    }, [reservationEquipmentsIds, reservationFacilityId]);
+    // }, [reservationEquipmentsIds, reservationFacilityId]);
 
     const filterAmenitiesByIds = (amenityList, selectedIds) => {
         return amenityList.filter((amenity) => selectedIds.includes(amenity._id));
@@ -640,14 +601,11 @@ export default function ReservationForm() {
         try {
             setLoading(true);
 
-
-
             const postReservationResponse = await createReservation(values);
 
             if (postReservationResponse.ok) {
-                sessionStorage.setItem("reservationCreated", "true");
-                reservationForm.reset();
-                window.location.reload()
+                console.log("Reservation created successfully.");
+                toast.success("Reservation created successfully.");
             } else {
                 throw new Error("Error creating reservation.");
             }
@@ -699,7 +657,7 @@ export default function ReservationForm() {
                         {/* Container for breadcrumbs and sidebar trigger */}
                         <div className="flex items-center gap-2 p-4">
 
-                            <SidebarTrigger className="" />
+                            <SidebarTrigger className="-ml-1" />
 
                             <Separator orientation="vertical" className="mr-2 h-4" />
 
@@ -794,7 +752,7 @@ export default function ReservationForm() {
                                     type="submit"
                                 >
                                     Create reservation
-                                    {loading ? <LoadingSpinner className="w-5 h-5 ml-2" /> : <CirclePlus className="w-5 h-5" />}
+                                    { loading ? <LoadingSpinner className="w-5 h-5 ml-2" /> : <CirclePlus className="w-5 h-5" /> }
                                 </Button>
 
                             </div>
@@ -1102,247 +1060,123 @@ export default function ReservationForm() {
 
 
                             {/* Equipment list */}
-
-                            {step === 1 && (reservationType === "Equipment" || reservationType === "Equipment and Facility") && (
+                            {step === 1 && (
 
                                 <div className="grid grid-cols-3 gap-6">
                                     {/* Equipment */}
-                                    <Card className="col-span-2 h-fit min-h-fit max-h-svh">
-                                        <CardContent className="flex flex-col gap-2 pt-5 max-h-svh">
-                                            {/* Amenity information header */}
-                                            <div className="flex flex-row justify-between items-center pb-2">
-                                                <div className="mr-12">
-                                                    <Breadcrumb>
-                                                        <BreadcrumbList>
-                                                            <BreadcrumbItem>
-                                                                <BreadcrumbPage className="flex items-center gap-2 text-lg font-semibold">
-                                                                    Equipment list
-                                                                </BreadcrumbPage>
-                                                            </BreadcrumbItem>
-                                                        </BreadcrumbList>
-                                                    </Breadcrumb>
-                                                    <p className="text-sm font-normal text-muted-foreground">
-                                                        Please select at least one equipment you want to reserve. You can choose multiple items.
-                                                    </p>
+                                    {(reservationType === "Equipment" || reservationType === "Equipment and Facility") && (
+                                        <Card className="col-span-2 max-h-svh">
+                                            <CardContent className="flex flex-col gap-2 pt-5 max-h-svh">
+                                                {/* Amenity information header */}
+                                                <div className="flex flex-row justify-between items-center pb-2">
+                                                    <div className="mr-12">
+                                                        <Breadcrumb>
+                                                            <BreadcrumbList>
+                                                                <BreadcrumbItem>
+                                                                    <BreadcrumbPage className="flex items-center gap-2 text-lg font-semibold">
+                                                                        Equipment list
+                                                                    </BreadcrumbPage>
+                                                                </BreadcrumbItem>
+                                                            </BreadcrumbList>
+                                                        </Breadcrumb>
+                                                        <p className="text-sm font-normal text-muted-foreground">
+                                                            Please select at least one equipment you want to reserve. You can choose multiple items.
+                                                        </p>
+                                                    </div>
+                                                    <Button
+                                                        className="pl-6 pr-3"
+                                                        disabled={reservationEquipmentsIds.length === 0}
+                                                        onClick={handleEquipmentContinueButton}
+                                                        size="sm"
+                                                        title="Continue to the next step"
+                                                    >
+                                                        Continue
+                                                        <ChevronRight className="h-4 w-4" />
+                                                    </Button>
                                                 </div>
-                                                <Button
-                                                    className="pl-6 pr-3"
-                                                    disabled={reservationEquipmentsIds.length === 0}
-                                                    onClick={handleEquipmentContinueButton}
-                                                    size="sm"
-                                                    title="Continue to the next step"
-                                                >
-                                                    Continue
-                                                    <ChevronRight className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                            {/* Amenity images */}
-                                            <Table className="table-fixed h-24 max-h-24 overflow-y-auto">
-                                                <TableBody className="h-24 max-h-24 overflow-y-auto">
-                                                    {amenityList
-                                                        .filter((amenity) => amenity.amenityType === "Equipment")
-                                                        .map((amenity) => (
-                                                            <TableRow
-                                                                key={amenity._id}
-                                                                className="grid grid-cols-7 w-full cursor-pointer"
-                                                            >
-                                                                <TableCell
-                                                                    className="col-span-2 flex items-center justify-center"
-                                                                    onClick={() => {
-                                                                        setStep(2);
-                                                                        setCurrentAmenity(amenity);
-                                                                    }}
-                                                                >
-                                                                    {amenity.amenityImages[0] ? (
-                                                                        <img
-                                                                            src={amenity.amenityImages[0].url}
-                                                                            className="min-w-24 max-w-52 max-h-52 rounded-md object-cover"
-                                                                        />
-                                                                    ) : (
-                                                                        <div className="flex flex-col items-center justify-center gap-2 w-52 min-w-24 max-w-52 bg-muted/50 text-muted-foreground rounded-md aspect-video object-cover">
-                                                                            <ImageOff className="w-5 h-5" />
-                                                                            No image available
-                                                                        </div>
-                                                                    )}
-                                                                </TableCell>
-                                                                <TableCell
-                                                                    className="col-span-4 flex flex-col justify-center gap-4 w-full max-w-full"
-                                                                    onClick={() => {
-                                                                        setStep(2);
-                                                                        setCurrentAmenity(amenity);
-                                                                    }}
-                                                                >
-                                                                    <div className="flex flex-col">
-                                                                        <span className="font-semibold">
-                                                                            {amenity.amenityName}
-                                                                        </span>
-                                                                        <span className="text-sm text-muted-foreground">
-                                                                            Stock remaining: {amenity.amenityStock}
-                                                                        </span>
-                                                                    </div>
-                                                                    <span className="text-sm text-muted-foreground w-full min-w-full line-clamp-2">
-                                                                        {amenity.amenityDescription}
-                                                                    </span>
-                                                                </TableCell>
-                                                                <TableCell className="flex items-center justify-center !px-4">
-                                                                    <FormControl>
-                                                                        <Checkbox
-                                                                            checked={reservationEquipmentsIds.includes(amenity._id)}
-                                                                            onCheckedChange={(checked) => {
-                                                                                setReservationEquipmentsIds((prev) =>
-                                                                                    checked
-                                                                                        ? [...prev, amenity._id]
-                                                                                        : prev.filter((id) => id !== amenity._id)
-                                                                                );
-                                                                            }}
-                                                                        />
-                                                                    </FormControl>
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                </TableBody>
-                                            </Table>
-                                        </CardContent>
-                                    </Card>
-
-                                    <Card className="max-h-fit col-span-1">
-                                        <CardHeader className="gap-0 space-y-0 bg-muted/50">
-                                            <CardTitle className="text-lg font-semibold leading-normal tracking-normal">
-                                                Reservation summary
-                                            </CardTitle>
-                                            <CardDescription className="m-0">
-                                                Review your reservation details before proceeding. Please go back to make changes.
-                                            </CardDescription>
-                                        </CardHeader>
-
-                                        <CardContent className="flex flex-col gap-2 mt-6">
-
-                                            <div className="flex flex-col p-4 mb-2 text-base rounded-md bg-muted/50">
-                                                <Label className="text-sm text-muted-foreground font-normal">
-                                                    Reserved by
-                                                </Label>
-                                                <div className="flex items-start justify-between">
-                                                    <span className="text-sm font-medium">
-                                                        {user.blkLt}
-                                                    </span>
-                                                    <Badge> {user.position} </Badge>
-                                                </div>
-
-                                                <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
-                                            </div>
-
-                                            <div className="">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Amenities </Label>
-                                            </div>
-
-                                            <Accordion className="w-full mt-0 mb-2" type="multiple">
-                                                <div className="flex flex-col gap-2">
-                                                    {reservationForm.watch("reservationAmenities")?.map((amenity, index) => (
-                                                        <AccordionItem key={index} className="border-b" value={index.toString()}>
-                                                            <AccordionTrigger className="hover:no-underline">
-                                                                <div className="flex items-center gap-4 w-full">
-                                                                    <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
-                                                                        <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
-                                                                                <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
-                                                                                    <ImageOff className="h-5 w-5 text-muted-foreground" />
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogTrigger>
-                                                                        <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
-                                                                            <DialogTitle className="sr-only">Image preview</DialogTitle>
-                                                                            <DialogDescription className="sr-only">Image preview</DialogDescription>
-                                                                            <Button
-                                                                                className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
-                                                                                type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === 0 ? amenity.amenityImages.length - 1 : prev - 1))}
-                                                                                size="icon"
-                                                                                variant="outline"
-                                                                            >
-                                                                                <ChevronLeft className="h-4 w-4" />
-                                                                            </Button>
-                                                                            <Button
-                                                                                className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
-                                                                                type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === amenity.amenityImages.length - 1 ? 0 : prev + 1))}
-                                                                                size="icon"
-                                                                                variant="outline"
-                                                                            >
-                                                                                <ChevronRight className="h-4 w-4" />
-                                                                            </Button>
-                                                                            <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
-                                                                        </DialogContent>
-                                                                    </Dialog>
-                                                                    <div className="flex flex-col items-start line-clamp-1">
-                                                                        <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
-                                                                        <span className="text-start text-sm text-muted-foreground line-clamp-1">
-                                                                            {amenity.amenityType === "Equipment"
-                                                                                ? `Quantity: ${amenity.amenityQuantity ?? 'N/A'}`
-                                                                                : amenity.amenityType}
-                                                                        </span>  </div>
-                                                                </div>
-                                                            </AccordionTrigger>
-                                                            <AccordionContent className="flex flex-col gap-2">
-                                                                {amenity.amenityType === "Facility" && (
-                                                                    <div>
-                                                                        <Label className="text-start text-muted-foreground">Facility Address</Label>
-                                                                        <p>{amenity.amenityAddress}</p>
-                                                                    </div>
-                                                                )}
-                                                                <div>
-                                                                    <Label className="text-start text-muted-foreground">{amenity.amenityType} Description</Label>
-                                                                    <p>{amenity.amenityDescription}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <Label className="text-start text-muted-foreground">{amenity.amenityType} Reminder</Label>
-                                                                    <p>{amenity.amenityReminder}</p>
-                                                                </div>
-                                                            </AccordionContent>
-                                                        </AccordionItem>
-                                                    ))}
-                                                </div>
-                                            </Accordion>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Type </Label>
-                                                {reservationForm.getValues("reservationType") && (
-                                                    <p className="text-sm text-end"> {reservationForm.getValues("reservationType")}</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Date </Label>
-                                                {reservationForm.getValues("reservationDate") ? (
-                                                    <p className="text-sm text-end break-words"> {format(reservationForm.getValues("reservationDate"), "PPp")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No date provided</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2 overflow-auto">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Reason </Label>
-                                                {reservationForm.watch("reservationReason") ? (
-                                                    <p className="text-sm text-end break-words"> {reservationForm.watch("reservationReason")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No reason provided</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2 overflow-auto">
-                                                <Label className="text-sm text-muted-foreground"> Reservee Email </Label>
-                                                {reservationForm.watch("reserveeEmail") ? (
-                                                    <p className="text-sm text-end break-words"> {reservationForm.watch("reserveeEmail")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No email provided</p>
-                                                )}
-                                            </div>
-
-                                        </CardContent>
-                                    </Card>
+                                                {/* Amenity images */}
+                                                <Table className="table-fixed h-24 max-h-24 overflow-y-auto">
+                                                    <TableBody className="h-24 max-h-24 overflow-y-auto">
+                                                        <FormField
+                                                            control={reservationForm.control}
+                                                            name="reservationAmenities"
+                                                            render={() => (
+                                                                <FormItem>
+                                                                    {amenityList
+                                                                        .filter((amenity) => amenity.amenityType === "Equipment")
+                                                                        .map((amenity) => (
+                                                                            <FormField
+                                                                                key={amenity._id}
+                                                                                control={reservationForm.control}
+                                                                                name="reservationAmenities"
+                                                                                render={({ field }) => (
+                                                                                    <FormItem key={amenity._id}>
+                                                                                        <TableRow className="grid grid-cols-7 w-full cursor-pointer">
+                                                                                            <TableCell
+                                                                                                className="col-span-2 flex items-center justify-center"
+                                                                                                onClick={() => {
+                                                                                                    setStep(2);
+                                                                                                    setCurrentAmenity(amenity);
+                                                                                                }}
+                                                                                            >
+                                                                                                {amenity.amenityImages[0] ? (
+                                                                                                    <img
+                                                                                                        src={amenity.amenityImages[0].url}
+                                                                                                        className="min-w-24 max-w-52 max-h-52 rounded-md object-cover"
+                                                                                                    />
+                                                                                                ) : (
+                                                                                                    <div className="flex flex-col items-center justify-center gap-2 w-52 min-w-24 max-w-52 text-muted-foreground rounded-md aspect-video object-cover">
+                                                                                                        <ImageOff className="w-5 h-5" />
+                                                                                                        No image available
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </TableCell>
+                                                                                            <TableCell
+                                                                                                className="col-span-4 flex flex-col justify-center gap-4 w-full max-w-full"
+                                                                                                onClick={() => {
+                                                                                                    setStep(2);
+                                                                                                    setCurrentAmenity(amenity);
+                                                                                                }}
+                                                                                            >
+                                                                                                <div className="flex flex-col">
+                                                                                                    <span className="font-semibold">
+                                                                                                        {amenity.amenityName}
+                                                                                                    </span>
+                                                                                                    <span className="text-sm text-muted-foreground">
+                                                                                                        Stock remaining: {amenity.amenityStock}
+                                                                                                    </span>
+                                                                                                </div>
+                                                                                                <span className="text-sm text-muted-foreground w-full min-w-full line-clamp-2">
+                                                                                                    {amenity.amenityDescription}
+                                                                                                </span>
+                                                                                            </TableCell>
+                                                                                            <TableCell className="flex items-center justify-center !px-4">
+                                                                                                <FormControl>
+                                                                                                    <Checkbox
+                                                                                                        checked={reservationEquipmentsIds.includes(amenity._id)}
+                                                                                                        onCheckedChange={(checked) => {
+                                                                                                            setReservationEquipmentsIds((prev) =>
+                                                                                                                checked
+                                                                                                                    ? [...prev, amenity._id]
+                                                                                                                    : prev.filter((id) => id !== amenity._id)
+                                                                                                            );
+                                                                                                        }}
+                                                                                                    />
+                                                                                                </FormControl>
+                                                                                            </TableCell>
+                                                                                        </TableRow>
+                                                                                    </FormItem>
+                                                                                )}
+                                                                            />
+                                                                        ))}
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </TableBody>
+                                                </Table>
+                                            </CardContent>
+                                        </Card>
+                                    )}
                                 </div>
                             )
                             }
@@ -1350,11 +1184,9 @@ export default function ReservationForm() {
                             {/* Equipment information */}
                             {step === 2 && currentAmenity && (
 
-
-
                                 <div className="grid grid-cols-3 gap-6">
 
-                                    <Card className="col-span-2 h-fit min-h-fit max-h-svh">
+                                    <Card className="col-span-2">
 
                                         <CardContent className="flex flex-col gap-2 pt-5 max-h-svh overflow-y-auto">
 
@@ -1616,360 +1448,80 @@ export default function ReservationForm() {
 
                                     </Card>
 
-
-
-
-                                    <Card className="max-h-fit col-span-1">
-                                        <CardHeader className="gap-0 space-y-0 bg-muted/50">
-                                            <CardTitle className="text-lg font-semibold leading-normal tracking-normal">
-                                                Reservation summary
-                                            </CardTitle>
-                                            <CardDescription className="m-0">
-                                                Review your reservation details before proceeding. Please go back to make changes.
-                                            </CardDescription>
-                                        </CardHeader>
-
-                                        <CardContent className="flex flex-col gap-2 mt-6">
-
-                                            <div className="flex flex-col p-4 mb-2 text-base rounded-md bg-muted/50">
-                                                <Label className="text-sm text-muted-foreground font-normal">
-                                                    Reserved by
-                                                </Label>
-                                                <div className="flex items-start justify-between">
-                                                    <span className="text-sm font-medium">
-                                                        {user.blkLt}
-                                                    </span>
-                                                    <Badge> {user.position} </Badge>
-                                                </div>
-
-                                                <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
-                                            </div>
-
-                                            <div className="">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Amenities </Label>
-                                            </div>
-
-                                            <Accordion className="w-full mt-0 mb-2" type="multiple">
-                                                <div className="flex flex-col gap-2">
-                                                    {reservationForm.watch("reservationAmenities")?.map((amenity, index) => (
-                                                        <AccordionItem key={index} className="border-b" value={index.toString()}>
-                                                            <AccordionTrigger className="hover:no-underline">
-                                                                <div className="flex items-center gap-4 w-full">
-                                                                    <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
-                                                                        <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
-                                                                                <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
-                                                                                    <ImageOff className="h-5 w-5 text-muted-foreground" />
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogTrigger>
-                                                                        <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
-                                                                            <DialogTitle className="sr-only">Image preview</DialogTitle>
-                                                                            <DialogDescription className="sr-only">Image preview</DialogDescription>
-                                                                            <Button
-                                                                                className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
-                                                                                type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === 0 ? amenity.amenityImages.length - 1 : prev - 1))}
-                                                                                size="icon"
-                                                                                variant="outline"
-                                                                            >
-                                                                                <ChevronLeft className="h-4 w-4" />
-                                                                            </Button>
-                                                                            <Button
-                                                                                className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
-                                                                                type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === amenity.amenityImages.length - 1 ? 0 : prev + 1))}
-                                                                                size="icon"
-                                                                                variant="outline"
-                                                                            >
-                                                                                <ChevronRight className="h-4 w-4" />
-                                                                            </Button>
-                                                                            <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
-                                                                        </DialogContent>
-                                                                    </Dialog>
-                                                                    <div className="flex flex-col items-start line-clamp-1">
-                                                                        <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
-                                                                        <span className="text-start text-sm text-muted-foreground line-clamp-1">
-                                                                            {amenity.amenityType === "Equipment"
-                                                                                ? `Quantity: ${amenity.amenityQuantity ?? 'N/A'}`
-                                                                                : amenity.amenityType}
-                                                                        </span>  </div>
-                                                                </div>
-                                                            </AccordionTrigger>
-                                                            <AccordionContent className="flex flex-col gap-2">
-                                                                {amenity.amenityType === "Facility" && (
-                                                                    <div>
-                                                                        <Label className="text-start text-muted-foreground">Facility Address</Label>
-                                                                        <p>{amenity.amenityAddress}</p>
-                                                                    </div>
-                                                                )}
-                                                                <div>
-                                                                    <Label className="text-start text-muted-foreground">{amenity.amenityType} Description</Label>
-                                                                    <p>{amenity.amenityDescription}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <Label className="text-start text-muted-foreground">{amenity.amenityType} Reminder</Label>
-                                                                    <p>{amenity.amenityReminder}</p>
-                                                                </div>
-                                                            </AccordionContent>
-                                                        </AccordionItem>
-                                                    ))}
-                                                </div>
-                                            </Accordion>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Type </Label>
-                                                {reservationForm.getValues("reservationType") && (
-                                                    <p className="text-sm text-end"> {reservationForm.getValues("reservationType")}</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Date </Label>
-                                                {reservationForm.getValues("reservationDate") ? (
-                                                    <p className="text-sm text-end break-words"> {format(reservationForm.getValues("reservationDate"), "PPp")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No date provided</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2 overflow-auto">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Reason </Label>
-                                                {reservationForm.watch("reservationReason") ? (
-                                                    <p className="text-sm text-end break-words"> {reservationForm.watch("reservationReason")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No reason provided</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2 overflow-auto">
-                                                <Label className="text-sm text-muted-foreground"> Reservee Email </Label>
-                                                {reservationForm.watch("reserveeEmail") ? (
-                                                    <p className="text-sm text-end break-words"> {reservationForm.watch("reserveeEmail")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No email provided</p>
-                                                )}
-                                            </div>
-
-                                        </CardContent>
-                                    </Card>
-
                                 </div>
 
                             )}
 
                             {/* Facility list */}
-                            {step === 3 && (reservationType === "Facility" || reservationType === "Equipment and Facility") &&  (
+                            {step === 3 && (
                                 <div className="grid grid-cols-3 gap-6">
                                     {/* Facility */}
-                                    <Card className="col-span-2 h-fit min-h-fit max-h-svh">
-                                        <CardContent className="flex flex-col gap-2 pt-5 max-h-svh">
-                                            {/* Amenity information header */}
-                                            <div className="pb-2">
-                                                <Breadcrumb>
-                                                    <BreadcrumbList>
-                                                        <BreadcrumbItem>
-                                                            <BreadcrumbPage className="text-lg font-semibold">
-                                                                Facility list
-                                                            </BreadcrumbPage>
-                                                        </BreadcrumbItem>
-                                                    </BreadcrumbList>
-                                                </Breadcrumb>
-                                                <p className="text-sm font-normal text-muted-foreground">
-                                                    Pick the facility you want to reserve. You can only choose one (1).
-                                                </p>
-                                            </div>
-                                            {/* Amenity images */}
-                                            <Table className="table-fixed h-24 max-h-24 overflow-y-auto">
-                                                <TableBody className="h-24 max-h-24 overflow-y-auto">
-                                                    {amenityList.filter((amenity) => amenity.amenityType === "Facility").map((amenity) => (
-                                                        <TableRow
-                                                            className="grid grid-cols-7 cursor-pointer"
-                                                            onClick={() => {
-                                                                setStep(4);
-                                                                setCurrentAmenity(amenity);
-                                                            }}
-                                                        >
-                                                            <TableCell className="col-span-2 flex items-center justify-center">
-                                                                {amenity.amenityImages[0] ? (
-                                                                    <img
-                                                                        src={amenity.amenityImages[0].url}
-                                                                        className="min-w-24 max-w-52 max-h-52 rounded-md object-cover"
-                                                                    />
-                                                                ) : (
-                                                                    <div className="flex flex-col items-center justify-center gap-2 w-52 min-w-24 max-w-52 text-muted-foreground rounded-md aspect-video object-cover">
-                                                                        <ImageOff className="w-5 h-5" />
-                                                                        No image available
-                                                                    </div>
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell className="col-span-4 flex flex-col justify-center gap-4 overflow-hidden">
-                                                                <div className="flex flex-col">
-                                                                    <span className="font-semibold"> {amenity.amenityName} </span>
-                                                                    <span className="text-sm text-muted-foreground">{amenity.amenityAddress}</span>
-                                                                </div>
-                                                                <span className="text-sm text-muted-foreground line-clamp-2">
-                                                                    {amenity.amenityDescription}
-                                                                </span>
-                                                            </TableCell>
-                                                            <TableCell className="flex items-center justify-center px-4">
-                                                                <ChevronRight />
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                    {amenityList.filter((amenity) => amenity.amenityType === "Facility").length === 0 && (
-                                                        <div className="flex h-54 w-full items-center justify-center">
-                                                            No facilities available.
-                                                        </div>
-                                                    )}
-                                                </TableBody>
-                                            </Table>
-                                        </CardContent>
-                                    </Card>
-
-                                    <Card className="max-h-fit col-span-1">
-                                        <CardHeader className="gap-0 space-y-0 bg-muted/50">
-                                            <CardTitle className="text-lg font-semibold leading-normal tracking-normal">
-                                                Reservation summary
-                                            </CardTitle>
-                                            <CardDescription className="m-0">
-                                                Review your reservation details before proceeding. Please go back to make changes.
-                                            </CardDescription>
-                                        </CardHeader>
-
-                                        <CardContent className="flex flex-col gap-2 mt-6">
-
-                                            <div className="flex flex-col p-4 mb-2 text-base rounded-md bg-muted/50">
-                                                <Label className="text-sm text-muted-foreground font-normal">
-                                                    Reserved by
-                                                </Label>
-                                                <div className="flex items-start justify-between">
-                                                    <span className="text-sm font-medium">
-                                                        {user.blkLt}
-                                                    </span>
-                                                    <Badge> {user.position} </Badge>
+                                    {(reservationType === "Facility" || reservationType === "Equipment and Facility") && (
+                                        <Card className="col-span-2 max-h-svh">
+                                            <CardContent className="flex flex-col gap-2 pt-5 max-h-svh">
+                                                {/* Amenity information header */}
+                                                <div className="pb-2">
+                                                    <Breadcrumb>
+                                                        <BreadcrumbList>
+                                                            <BreadcrumbItem>
+                                                                <BreadcrumbPage className="text-lg font-semibold">
+                                                                    Facility list
+                                                                </BreadcrumbPage>
+                                                            </BreadcrumbItem>
+                                                        </BreadcrumbList>
+                                                    </Breadcrumb>
+                                                    <p className="text-sm font-normal text-muted-foreground">
+                                                        Pick the facility you want to reserve. You can only choose one (1).
+                                                    </p>
                                                 </div>
-
-                                                <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
-                                            </div>
-
-                                            <div className="">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Amenities </Label>
-                                            </div>
-
-                                            <Accordion className="w-full mt-0 mb-2" type="multiple">
-                                                <div className="flex flex-col gap-2">
-                                                    {reservationForm.watch("reservationAmenities")?.map((amenity, index) => (
-                                                        <AccordionItem key={index} className="border-b" value={index.toString()}>
-                                                            <AccordionTrigger className="hover:no-underline">
-                                                                <div className="flex items-center gap-4 w-full">
-                                                                    <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
-                                                                        <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
-                                                                                <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
-                                                                                    <ImageOff className="h-5 w-5 text-muted-foreground" />
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogTrigger>
-                                                                        <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
-                                                                            <DialogTitle className="sr-only">Image preview</DialogTitle>
-                                                                            <DialogDescription className="sr-only">Image preview</DialogDescription>
-                                                                            <Button
-                                                                                className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
-                                                                                type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === 0 ? amenity.amenityImages.length - 1 : prev - 1))}
-                                                                                size="icon"
-                                                                                variant="outline"
-                                                                            >
-                                                                                <ChevronLeft className="h-4 w-4" />
-                                                                            </Button>
-                                                                            <Button
-                                                                                className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
-                                                                                type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === amenity.amenityImages.length - 1 ? 0 : prev + 1))}
-                                                                                size="icon"
-                                                                                variant="outline"
-                                                                            >
-                                                                                <ChevronRight className="h-4 w-4" />
-                                                                            </Button>
-                                                                            <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
-                                                                        </DialogContent>
-                                                                    </Dialog>
-                                                                    <div className="flex flex-col items-start line-clamp-1">
-                                                                        <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
-                                                                        <span className="text-start text-sm text-muted-foreground line-clamp-1">
-                                                                            {amenity.amenityType === "Equipment"
-                                                                                ? `Quantity: ${amenity.amenityQuantity ?? 'N/A'}`
-                                                                                : amenity.amenityType}
-                                                                        </span>  </div>
-                                                                </div>
-                                                            </AccordionTrigger>
-                                                            <AccordionContent className="flex flex-col gap-2">
-                                                                {amenity.amenityType === "Facility" && (
-                                                                    <div>
-                                                                        <Label className="text-start text-muted-foreground">Facility Address</Label>
-                                                                        <p>{amenity.amenityAddress}</p>
+                                                {/* Amenity images */}
+                                                <Table className="table-fixed h-24 max-h-24 overflow-y-auto">
+                                                    <TableBody className="h-24 max-h-24 overflow-y-auto">
+                                                        {amenityList.filter((amenity) => amenity.amenityType === "Facility").map((amenity) => (
+                                                            <TableRow
+                                                                className="grid grid-cols-7 cursor-pointer"
+                                                                onClick={() => {
+                                                                    setStep(4);
+                                                                    setCurrentAmenity(amenity);
+                                                                }}
+                                                            >
+                                                                <TableCell className="col-span-2 flex items-center justify-center">
+                                                                    {amenity.amenityImages[0] ? (
+                                                                        <img
+                                                                            src={amenity.amenityImages[0].url}
+                                                                            className="min-w-24 max-w-52 max-h-52 rounded-md object-cover"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="flex flex-col items-center justify-center gap-2 w-52 min-w-24 max-w-52 text-muted-foreground rounded-md aspect-video object-cover">
+                                                                            <ImageOff className="w-5 h-5" />
+                                                                            No image available
+                                                                        </div>
+                                                                    )}
+                                                                </TableCell>
+                                                                <TableCell className="col-span-4 flex flex-col justify-center gap-4 overflow-hidden">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="font-semibold"> {amenity.amenityName} </span>
+                                                                        <span className="text-sm text-muted-foreground">{amenity.amenityAddress}</span>
                                                                     </div>
-                                                                )}
-                                                                <div>
-                                                                    <Label className="text-start text-muted-foreground">{amenity.amenityType} Description</Label>
-                                                                    <p>{amenity.amenityDescription}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <Label className="text-start text-muted-foreground">{amenity.amenityType} Reminder</Label>
-                                                                    <p>{amenity.amenityReminder}</p>
-                                                                </div>
-                                                            </AccordionContent>
-                                                        </AccordionItem>
-                                                    ))}
-                                                </div>
-                                            </Accordion>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Type </Label>
-                                                {reservationForm.getValues("reservationType") && (
-                                                    <p className="text-sm text-end"> {reservationForm.getValues("reservationType")}</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Date </Label>
-                                                {reservationForm.getValues("reservationDate") ? (
-                                                    <p className="text-sm text-end break-words"> {format(reservationForm.getValues("reservationDate"), "PPp")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No date provided</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2 overflow-auto">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Reason </Label>
-                                                {reservationForm.watch("reservationReason") ? (
-                                                    <p className="text-sm text-end break-words"> {reservationForm.watch("reservationReason")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No reason provided</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2 overflow-auto">
-                                                <Label className="text-sm text-muted-foreground"> Reservee Email </Label>
-                                                {reservationForm.watch("reserveeEmail") ? (
-                                                    <p className="text-sm text-end break-words"> {reservationForm.watch("reserveeEmail")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No email provided</p>
-                                                )}
-                                            </div>
-
-                                        </CardContent>
-                                    </Card>
-
+                                                                    <span className="text-sm text-muted-foreground line-clamp-2">
+                                                                        {amenity.amenityDescription}
+                                                                    </span>
+                                                                </TableCell>
+                                                                <TableCell className="flex items-center justify-center px-4">
+                                                                    <ChevronRight />
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                        {amenityList.filter((amenity) => amenity.amenityType === "Facility").length === 0 && (
+                                                            <div className="flex h-54 w-full items-center justify-center">
+                                                                No facilities available.
+                                                            </div>
+                                                        )}
+                                                    </TableBody>
+                                                </Table>
+                                            </CardContent>
+                                        </Card>
+                                    )}
                                 </div>
                             )
                             }
@@ -1978,7 +1530,7 @@ export default function ReservationForm() {
                             {step === 4 && currentAmenity && (
                                 <div className="grid grid-cols-3 gap-6">
 
-                                    <Card className="col-span-2 h-fit min-h-fit max-h-svh">
+                                    <Card className="col-span-2">
 
                                         <CardContent className="flex flex-col gap-2 pt-5 max-h-svh overflow-y-auto">
 
@@ -2221,145 +1773,6 @@ export default function ReservationForm() {
 
                                         </CardContent>
 
-                                    </Card>
-
-                                    <Card className="max-h-fit col-span-1">
-                                        <CardHeader className="gap-0 space-y-0 bg-muted/50">
-                                            <CardTitle className="text-lg font-semibold leading-normal tracking-normal">
-                                                Reservation summary
-                                            </CardTitle>
-                                            <CardDescription className="m-0">
-                                                Review your reservation details before proceeding. Please go back to make changes.
-                                            </CardDescription>
-                                        </CardHeader>
-
-                                        <CardContent className="flex flex-col gap-2 mt-6">
-
-                                            <div className="flex flex-col p-4 mb-2 text-base rounded-md bg-muted/50">
-                                                <Label className="text-sm text-muted-foreground font-normal">
-                                                    Reserved by
-                                                </Label>
-                                                <div className="flex items-start justify-between">
-                                                    <span className="text-sm font-medium">
-                                                        {user.blkLt}
-                                                    </span>
-                                                    <Badge> {user.position} </Badge>
-                                                </div>
-
-                                                <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
-                                            </div>
-
-                                            <div className="">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Amenities </Label>
-                                            </div>
-
-                                            <Accordion className="w-full mt-0 mb-2" type="multiple">
-                                                <div className="flex flex-col gap-2">
-                                                    {reservationForm.watch("reservationAmenities")?.map((amenity, index) => (
-                                                        <AccordionItem key={index} className="border-b" value={index.toString()}>
-                                                            <AccordionTrigger className="hover:no-underline">
-                                                                <div className="flex items-center gap-4 w-full">
-                                                                    <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
-                                                                        <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
-                                                                                <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
-                                                                                    <ImageOff className="h-5 w-5 text-muted-foreground" />
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogTrigger>
-                                                                        <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
-                                                                            <DialogTitle className="sr-only">Image preview</DialogTitle>
-                                                                            <DialogDescription className="sr-only">Image preview</DialogDescription>
-                                                                            <Button
-                                                                                className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
-                                                                                type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === 0 ? amenity.amenityImages.length - 1 : prev - 1))}
-                                                                                size="icon"
-                                                                                variant="outline"
-                                                                            >
-                                                                                <ChevronLeft className="h-4 w-4" />
-                                                                            </Button>
-                                                                            <Button
-                                                                                className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
-                                                                                type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === amenity.amenityImages.length - 1 ? 0 : prev + 1))}
-                                                                                size="icon"
-                                                                                variant="outline"
-                                                                            >
-                                                                                <ChevronRight className="h-4 w-4" />
-                                                                            </Button>
-                                                                            <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
-                                                                        </DialogContent>
-                                                                    </Dialog>
-                                                                    <div className="flex flex-col items-start line-clamp-1">
-                                                                        <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
-                                                                        <span className="text-start text-sm text-muted-foreground line-clamp-1">
-                                                                            {amenity.amenityType === "Equipment"
-                                                                                ? `Quantity: ${amenity.amenityQuantity ?? 'N/A'}`
-                                                                                : amenity.amenityType}
-                                                                        </span>  </div>
-                                                                </div>
-                                                            </AccordionTrigger>
-                                                            <AccordionContent className="flex flex-col gap-2">
-                                                                {amenity.amenityType === "Facility" && (
-                                                                    <div>
-                                                                        <Label className="text-start text-muted-foreground">Facility Address</Label>
-                                                                        <p>{amenity.amenityAddress}</p>
-                                                                    </div>
-                                                                )}
-                                                                <div>
-                                                                    <Label className="text-start text-muted-foreground">{amenity.amenityType} Description</Label>
-                                                                    <p>{amenity.amenityDescription}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <Label className="text-start text-muted-foreground">{amenity.amenityType} Reminder</Label>
-                                                                    <p>{amenity.amenityReminder}</p>
-                                                                </div>
-                                                            </AccordionContent>
-                                                        </AccordionItem>
-                                                    ))}
-                                                </div>
-                                            </Accordion>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Type </Label>
-                                                {reservationForm.getValues("reservationType") && (
-                                                    <p className="text-sm text-end"> {reservationForm.getValues("reservationType")}</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Date </Label>
-                                                {reservationForm.getValues("reservationDate") ? (
-                                                    <p className="text-sm text-end break-words"> {format(reservationForm.getValues("reservationDate"), "PPp")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No date provided</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2 overflow-auto">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Reason </Label>
-                                                {reservationForm.watch("reservationReason") ? (
-                                                    <p className="text-sm text-end break-words"> {reservationForm.watch("reservationReason")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No reason provided</p>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2 overflow-auto">
-                                                <Label className="text-sm text-muted-foreground"> Reservee Email </Label>
-                                                {reservationForm.watch("reserveeEmail") ? (
-                                                    <p className="text-sm text-end break-words"> {reservationForm.watch("reserveeEmail")}</p>
-                                                ) : (
-                                                    <p className="text-sm text-end break-words"> No email provided</p>
-                                                )}
-                                            </div>
-
-                                        </CardContent>
                                     </Card>
 
                                 </div>
@@ -2728,6 +2141,13 @@ export default function ReservationForm() {
                                                 <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
                                             </div>
 
+                                            {reservationForm.getValues("reservationType") && (
+                                                <div className="grid grid-cols-2 gap-4 my-2">
+                                                    <Label className="text-sm text-muted-foreground"> Reservation Type </Label>
+                                                    <p className="text-sm text-end"> {reservationForm.getValues("reservationType")}</p>
+                                                </div>
+                                            )}
+
                                             <div className="">
                                                 <Label className="text-sm text-muted-foreground"> Reservation Amenities </Label>
                                             </div>
@@ -2803,13 +2223,6 @@ export default function ReservationForm() {
                                                     ))}
                                                 </div>
                                             </Accordion>
-
-                                            <div className="grid grid-cols-2 gap-4 my-2">
-                                                <Label className="text-sm text-muted-foreground"> Reservation Type </Label>
-                                                {reservationForm.getValues("reservationType") && (
-                                                    <p className="text-sm text-end"> {reservationForm.getValues("reservationType")}</p>
-                                                )}
-                                            </div>
 
                                             <div className="grid grid-cols-2 gap-4 my-2">
                                                 <Label className="text-sm text-muted-foreground"> Reservation Date </Label>

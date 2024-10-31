@@ -16,10 +16,12 @@ export type AmenityType = {
     amenityCreator: string;
     amenityImages: [
         {
+            _id: string;
             url: string;
             public_id: string;
         }
     ];
     amenityVisibility: string;
+    createdAt: Date;
 
 };

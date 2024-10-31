@@ -94,7 +94,7 @@ import { useEffect, useState } from "react";
 // Types
 // Amenity Type Import
 import { AmenityType } from "@/types/amenity-type";
-import { deleteAmenity } from "@/data/amenities-api";
+import { deleteAmenity } from "@/data/amenity-api";
 import { set } from "date-fns";
 
 

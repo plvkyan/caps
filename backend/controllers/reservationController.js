@@ -1,6 +1,7 @@
 
 
 
+const Amenity = require("../models/amenityModel")
 const Reservation = require("../models/reservationModel")
 const mongoose = require('mongoose')
 
@@ -297,7 +298,256 @@ const getAmenityExpiredReservations = async (req, res) => {
     }
 }
 
+// Get unavailable dates for a facility
+const getFacilityUnavailableDates = async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+        const approvedReservations = await Reservation.find({
+            "reservationAmenities._id": id,
+            "reservationStatus.status": "Approved"
+        }).select('reservationDate -_id');
+
+        const unavailableDates = approvedReservations.map(reservation => reservation.reservationDate);
+        console.log("Unavailable dates fetched successfully.");
+        res.status(200).json(unavailableDates);
+    } catch (error) {
+        console.log("Error fetching unavailable dates: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+// Get unavailable dates for an equipment
+const getEquipmentUnavailableDates = async (req, res) => {
+    // Extract the equipment ID from the request parameters
+    const { id } = req.params;
+
+    try {
+        // Fetch all approved reservations that include the specified equipment
+        const approvedReservations = await Reservation.find({
+            "reservationAmenities._id": id,
+            "reservationStatus.status": "Approved"
+        }).select('reservationDate reservationAmenities -_id');
+
+        // Initialize an object to track stock changes on each date
+        const stockChanges = {};
+
+        // Iterate over each approved reservation
+        approvedReservations.forEach(reservation => {
+            const reservationDate = reservation.reservationDate;
+            // Calculate the next day after the reservation date
+            const nextDay = new Date(reservationDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            // Iterate over each amenity in the reservation
+            reservation.reservationAmenities.forEach(amenity => {
+                if (amenity._id.toString() === id) {
+                    const quantity = amenity.amenityQuantity;
+
+                    // Initialize stock changes for the reservation date and the next day if not already done
+                    if (!stockChanges[reservationDate]) {
+                        stockChanges[reservationDate] = 0;
+                    }
+                    if (!stockChanges[nextDay]) {
+                        stockChanges[nextDay] = 0;
+                    }
+
+                    // Decrease stock on the reservation date and increase it the next day
+                    stockChanges[reservationDate] -= quantity;
+                    stockChanges[nextDay] += quantity;
+                }
+            });
+        });
+
+        // Fetch the maximum stock of the equipment
+        const reservationWithStock = await Reservation.findOne({
+            "reservationAmenities._id": id,
+            "reservationStatus.status": "Approved"
+        }).select('reservationAmenities -_id');
+
+        // If there are no reservations, return an empty array
+        if (!reservationWithStock) {
+            console.log("No reservations found.");
+            return res.status(200).json([]);
+        }
+
+        const amenity = reservationWithStock.reservationAmenities.find(a => a._id.toString() === id);
+        let currentStock = amenity.amenityStockMax; // Changed from const to let
+
+        // Initialize an array to store dates when the equipment is unavailable
+        const unavailableDates = [];
+
+        // Sort the dates in stockChanges in ascending order
+        const sortedDates = Object.keys(stockChanges).sort((a, b) => new Date(a) - new Date(b));
+
+        // Iterate over the sorted dates to calculate the stock on each date
+        sortedDates.forEach(date => {
+            currentStock += stockChanges[date];
+            // If the stock is zero or less, add the date to the unavailable dates array
+            if (currentStock <= 0) {
+                unavailableDates.push(date);
+            }
+        });
+
+        // Log success message and send the unavailable dates as a response
+        console.log("Unavailable dates fetched successfully.");
+        res.status(200).json(unavailableDates);
+    } catch (error) {
+        // Log error message and send the error as a response
+        console.log("Error fetching unavailable dates: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Get available stock for an equipment on a specific date
+const getEquipmentAvailableStock = async (req, res) => {
+    const { id, date } = req.params;
+
+    try {
+        // Parse the date from the request parameters and normalize to start of day
+        const targetDate = new Date(date);
+        targetDate.setHours(0, 0, 0, 0);
+
+        // Fetch all reservations that include the specified equipment
+        const reservations = await Reservation.find({
+            "reservationAmenities._id": id
+        }).select('reservationDate reservationAmenities reservationStatus -_id');
+
+        // Filter reservations where the latest status is "Approved"
+        const approvedReservations = reservations.filter(reservation => {
+            const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+            return latestStatus.status === "Approved";
+        });
+
+        // Fetch the maximum stock of the equipment from the Amenity model
+        const amenity = await Amenity.findById(id).select('amenityStockMax');
+
+        // If the amenity is not found, return an error
+        if (!amenity) {
+            console.log("Amenity not found.");
+            return res.status(404).json({ error: "Amenity not found" });
+        }
+
+        // Calculate total reserved quantity for the target date
+        let reservedQuantity = 0;
+        approvedReservations.forEach(reservation => {
+            const reservationDate = new Date(reservation.reservationDate);
+            reservationDate.setHours(0, 0, 0, 0);
+
+            if (reservationDate.getTime() === targetDate.getTime()) {
+                reservation.reservationAmenities.forEach(amenity => {
+                    if (amenity._id.toString() === id) {
+                        reservedQuantity += amenity.amenityQuantity;
+                    }
+                });
+            }
+        });
+
+        const availableStock = amenity.amenityStockMax - reservedQuantity;
+        
+        console.log("Available stock fetched successfully.");
+        res.status(200).json({ availableStock });
+    } catch (error) {
+        console.log("Error fetching available stock: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// const getEquipmentAvailableStock = async (req, res) => {
+//     const { id, date } = req.params;
+
+//     try {
+//         // Parse the date from the request parameters
+//         const targetDate = new Date(date);
+
+//         // Fetch all approved reservations that include the specified equipment
+//         const approvedReservations = await Reservation.aggregate([
+//             {
+//                 $match: {
+//                     "reservationAmenities._id": mongoose.Types.ObjectId(id),
+//                 }
+//             },
+//             {
+//                 $project: {
+//                     reservationDate: 1,
+//                     reservationAmenities: 1,
+//                     latestStatus: { $arrayElemAt: ["$reservationStatus", -1] }
+//                 }
+//             },
+//             {
+//                 $match: {
+//                     "latestStatus.status": "Approved"
+//                 }
+//             },
+//             {
+//                 $sort: { reservationDate: -1 }
+//             }
+//         ]);  
+//          // Initialize an object to track stock changes on each date
+//         const stockChanges = {};
+
+//         // Iterate over each approved reservation
+//         approvedReservations.forEach(reservation => {
+//             const reservationDate = reservation.reservationDate;
+//             // Calculate the next day after the reservation date
+//             const nextDay = new Date(reservationDate);
+//             nextDay.setDate(nextDay.getDate() + 1);
+
+//             // Iterate over each amenity in the reservation
+//             reservation.reservationAmenities.forEach(amenity => {
+//                 if (amenity._id.toString() === id) {
+//                     const quantity = amenity.amenityQuantity;
+
+//                     // Initialize stock changes for the reservation date and the next day if not already done
+//                     if (!stockChanges[reservationDate]) {
+//                         stockChanges[reservationDate] = 0;
+//                     }
+//                     if (!stockChanges[nextDay]) {
+//                         stockChanges[nextDay] = 0;
+//                     }
+
+//                     // Decrease stock on the reservation date and increase it the next day
+//                     stockChanges[reservationDate] -= quantity;
+//                     stockChanges[nextDay] += quantity;
+//                 }
+//             });
+//         });
+
+//         // Fetch the maximum stock of the equipment from the Amenity model
+//         const amenity = await Amenity.findById(id).select('amenityStockMax');
+
+//         // If the amenity is not found, return an error
+//         if (!amenity) {
+//             console.log("Amenity not found.");
+//             return res.status(404).json({ error: "Amenity not found" });
+//         }
+
+//         let currentStock = amenity.amenityStockMax;
+
+//         // Sort the dates in stockChanges in ascending order
+//         const sortedDates = Object.keys(stockChanges).sort((a, b) => new Date(a) - new Date(b));
+
+//         // Iterate over the sorted dates to calculate the stock on each date
+//         for (const date of sortedDates) {
+//             currentStock += stockChanges[date];
+//             // If the date matches the target date, return the current stock
+//             if (new Date(date).toDateString() === targetDate.toDateString()) {
+//                 console.log("Available stock fetched successfully.");
+//                 return res.status(200).json({ availableStock: currentStock });
+//             }
+//         }
+
+//         // If the target date is not found in the stock changes, return the current stock
+//         console.log("Available stock fetched successfully.");
+//         res.status(200).json({ availableStock: currentStock });
+//     } catch (error) {
+//         console.log("Error fetching available stock: ", error.message);
+//         res.status(400).json({ error: error.message });
+//     }
+// }
+
 // User all reservations
+
 const getUserReservations = async (req, res) => {
 
     const { id } = req.params
@@ -423,7 +673,7 @@ const deleteReservation = async (req, res) => {
 
 
 // PATCH controllers
-// Updated a reservation
+// Update a reservation
 const updateReservation = async (req, res) => {
 
     const { id } = req.params
@@ -437,6 +687,187 @@ const updateReservation = async (req, res) => {
     } catch (error) {
         console.log("Error updating reservation: ", error.message);
         res.status(400).json({ error: error.message });
+    }
+}
+
+// Batch approve reservations
+const batchApproveReservations = async (req, res) => {
+    const { reservationIds, updateData } = req.body;
+
+    // Input validation
+    if (!reservationIds?.length || !updateData) {
+        return res.status(400).json({
+            success: false,
+            error: "Missing required fields: reservationIds and updateData"
+        });
+    }
+
+    if (!Array.isArray(reservationIds)) {
+        return res.status(400).json({
+            success: false,
+            error: "reservationIds must be an array"
+        });
+    }
+
+    // Validate all reservations are in "Pending" status
+    const reservations = await Reservation.find({
+        _id: { $in: reservationIds }
+    });
+
+    const nonPendingReservations = reservations.filter(reservation => {
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+        return latestStatus.status !== "Pending";
+    });
+
+    if (nonPendingReservations.length > 0) {
+        return res.status(400).json({
+            success: false,
+            error: "Some reservations are not Pending",
+            description: "Reservations must be in \"Pending\" status to be approved."
+        });
+    }
+
+    // Validate all IDs are valid MongoDB ObjectIds
+    const validIds = reservationIds.every(id => mongoose.Types.ObjectId.isValid(id));
+    if (!validIds) {
+        return res.status(400).json({
+            success: false,
+            error: "One or more invalid reservation IDs",
+            description: "Please ensure all reservation IDs are valid."
+        });
+    }
+
+    try {
+        // First check if all reservations exist
+        const count = await Reservation.countDocuments({
+            _id: { $in: reservationIds }
+        });
+
+        if (count !== reservationIds.length) {
+            return res.status(404).json({
+                success: false,
+                error: "Some reservations were not found",
+                description: "Please ensure all reservations exist."
+            });
+        }
+
+        // Perform the update
+        const result = await Reservation.updateMany(
+            { _id: { $in: reservationIds } },
+            updateData,
+            { new: true, runValidators: true }
+        );
+
+        // Get updated documents
+        const updatedReservations = await Reservation.find({
+            _id: { $in: reservationIds }
+        });
+
+        console.log(`Successfully updated ${result.modifiedCount} reservations`);
+
+        return res.status(200).json({
+            success: true,
+            modifiedCount: result.modifiedCount,
+            updatedReservations
+        });
+
+    } catch (error) {
+        console.error("Batch update error:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Failed to update reservations",
+            details: error.message
+        });
+    }
+}
+
+
+// Batch reject reservations
+const batchRejectReservations = async (req, res) => {
+    const { reservationIds, updateData } = req.body;
+
+    // Input validation
+    if (!reservationIds?.length || !updateData) {
+        return res.status(400).json({
+            success: false,
+            error: "Missing required fields: reservationIds and updateData"
+        });
+    }
+
+    if (!Array.isArray(reservationIds)) {
+        return res.status(400).json({
+            success: false,
+            error: "reservationIds must be an array"
+        });
+    }
+
+    // Validate all reservations are in "Pending" status
+    const reservations = await Reservation.find({
+        _id: { $in: reservationIds }
+    });
+
+    const nonPendingReservations = reservations.filter(reservation => {
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+        return latestStatus.status !== "Pending";
+    });
+
+    if (nonPendingReservations.length > 0) {
+        return res.status(400).json({
+            success: false,
+            error: "Some reservations are not Pending",
+            description: "Reservations must be in \"Pending\" status to be rejected."
+        });
+    }
+
+    // Validate all IDs are valid MongoDB ObjectIds
+    const validIds = reservationIds.every(id => mongoose.Types.ObjectId.isValid(id));
+    if (!validIds) {
+        return res.status(400).json({
+            success: false,
+            error: "One or more invalid reservation IDs"
+        });
+    }
+
+    try {
+        // First check if all reservations exist
+        const count = await Reservation.countDocuments({
+            _id: { $in: reservationIds }
+        });
+
+        if (count !== reservationIds.length) {
+            return res.status(404).json({
+                success: false,
+                error: "Some reservations were not found"
+            });
+        }
+
+        // Perform the update
+        const result = await Reservation.updateMany(
+            { _id: { $in: reservationIds } },
+            updateData,
+            { new: true, runValidators: true }
+        );
+
+        // Get updated documents
+        const updatedReservations = await Reservation.find({
+            _id: { $in: reservationIds }
+        });
+
+        console.log(`Successfully updated ${result.modifiedCount} reservations`);
+
+        return res.status(200).json({
+            success: true,
+            modifiedCount: result.modifiedCount,
+            updatedReservations
+        });
+
+    } catch (error) {
+        console.error("Batch update error:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Failed to update reservations",
+            details: error.message
+        });
     }
 }
 
@@ -470,9 +901,16 @@ module.exports = {
     getUserApprovedReservations,
     getUserRejectedReservations,
 
+    //
+    getEquipmentUnavailableDates,
+    getEquipmentAvailableStock,
+    getFacilityUnavailableDates,
+
     // DELETE controllers
     deleteReservation,
 
     // PATCH controllers
-    updateReservation
+    batchApproveReservations,
+    batchRejectReservations,
+    updateReservation,
 }

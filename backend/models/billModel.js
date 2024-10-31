@@ -64,7 +64,7 @@ const billSchema = new Schema({
         required: true,
         default: new Date(),
     },
-    stat: {
+    billVisibility: {
         type: String,
         required: true,
         default: "Unarchived"

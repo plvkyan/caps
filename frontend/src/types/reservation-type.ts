@@ -46,7 +46,15 @@ export type ReservationType = {
             public_id?: string,
         }
     ],
-    reservationStatus: string,
+    reservationStatus: [
+        {
+            status: string,
+            statusDate: Date,
+            statusAuthorId: string,
+            statusAuthor: string,
+            statusAuthorPosition: string,
+        }
+    ],
     reservationVisiblity: string,
     interactedBy: string,
     interactedByPosition: string,

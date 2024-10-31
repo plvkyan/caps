@@ -106,7 +106,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // AuthContext Hooks for Users
 import { useAuthContext } from "@/hooks/useAuthContext"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { createAmenity } from "@/data/amenities-api";
+import { createAmenity } from "@/data/amenity-api";
 
 
 

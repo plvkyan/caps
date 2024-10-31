@@ -1,64 +1,52 @@
-
-
-
-import { useState } from 'react'
-import { useAuthContext } from '@/hooks/useAuthContext'
-import { useToast } from '@/components/ui/use-toast'
-
-
-
-
-
+import { useState } from 'react';
+import { useAuthContext } from '@/hooks/useAuthContext';
+import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export const useLogin = () => {
+    const { toast } = useToast();
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const { dispatch } = useAuthContext();
+    const navigate = useNavigate();
 
-    const { toast } = useToast()
+    const login = async (blkLt: string, password: string) => {
+        setIsLoading(true);
+        setError(null);
 
-    const [error, setError] = useState(null)
-    const [isLoading, setIsLoading] = useState<any | null>(null)
-    const { dispatch } = useAuthContext()
+        try {
+            const response = await fetch('http://localhost:4000/api/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ blkLt, password }),
+            });
 
-    const login = async (blkLt, password, role) => {
-        setIsLoading(true)
-        setError(null)
+            const json = await response.json();
 
-        const response = await fetch('http://localhost:4000/api/users/login', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ blkLt, password, role })
-        })
+            if (!response.ok) {
+                throw new Error(json.error);
+            }
 
-        const json = await response.json()
-
-        if (!response.ok) {
-            setIsLoading(false)
-            setError(json.error)
-        }
-
-        if (response.ok) {
-
-            toast({ 
+            // Show success toast
+            toast({
                 title: "You've logged in successfully.",
-                description: "Welcome, " + (blkLt) + "."
-            },)
+                description: `Welcome, ${blkLt}.`,
+            });
 
             // Save the user to local storage
-            localStorage.setItem('user', JSON.stringify(json))
+            localStorage.setItem('user', JSON.stringify(json));
 
             // Update the auth context
-            dispatch({ type: 'LOGIN', payload: json})
+            dispatch({ type: 'LOGIN', payload: json });
 
-            setIsLoading(false)
+            // Navigate to the dashboard
+            navigate('/dashboard');
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
-    }
+    };
 
-    return { login, isLoading, error}
-
-}
-
-
-
-
-
-
-
+    return { login, isLoading, error };
+};

@@ -35,7 +35,12 @@ const {
    deleteReservation,
 
    // PATCH controllers
-   updateReservation
+   updateReservation,
+   batchApproveReservations,
+   batchRejectReservations,
+   getFacilityUnavailableDates,
+   getEquipmentUnavailableDates,
+   getEquipmentAvailableStock
 } = require('../controllers/reservationController')
 
 
@@ -117,6 +122,13 @@ router.get('/user/rejected/:id', getUserRejectedReservations);
 
 
 
+// ASDFA
+router.get('/amenity/facility/unavailable/:id', getFacilityUnavailableDates)
+router.get('/amenity/equipment/stock/:id/:date', getEquipmentAvailableStock)
+router.get('/amenity/equipment/unavailable/:id', getEquipmentUnavailableDates)
+
+
+
 
 // DELETE routes
 // Delete a reservation
@@ -129,6 +141,10 @@ router.delete('/:id', deleteReservation)
 // PATCH routes
 // Update a reservation
 router.patch('/:id', updateReservation)
+
+// Batch update reservations
+router.patch('/update/batch/approve', batchApproveReservations)
+router.patch('/update/batch/reject',  batchRejectReservations)
 
 
 

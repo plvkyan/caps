@@ -33,10 +33,10 @@ const requireAuth = require('../middlewares/requireAuth')
 router.delete('/:id', deleteAmenity);
 
 // GET all unarchived amenities
-router.get('/', getAmenities);
+router.get('/all/unarchived', getAmenities);
 
 // GET all unarchived amenities
-router.get('/archived', getArchivedAmenities);
+router.get('/all/archived', getArchivedAmenities);
 
 // GET a specific amenity
 router.get('/:id', getSpecificAmenity);
