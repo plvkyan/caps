@@ -1,16 +1,31 @@
+
+
+
+// Imports
+// Utility Imports
+// useState React Import
 import { useState } from 'react';
-import { useAuthContext } from '@/hooks/useAuthContext';
-import { useToast } from '@/components/ui/use-toast';
+// useNavigate Hook Import
 import { useNavigate } from 'react-router-dom';
 
+
+
+// Custom Hooks Imports
+// useAuthContext Hook Import
+import { useAuthContext } from '@/hooks/useAuthContext';
+
+
+
+
+
 export const useLogin = () => {
-    const { toast } = useToast();
+
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const { dispatch } = useAuthContext();
     const navigate = useNavigate();
 
-    const login = async (blkLt: string, password: string) => {
+    const login = async (userBlkLt: string, userPassword: string) => {
         setIsLoading(true);
         setError(null);
 
@@ -18,7 +33,7 @@ export const useLogin = () => {
             const response = await fetch('http://localhost:4000/api/users/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ blkLt, password }),
+                body: JSON.stringify({ userBlkLt, userPassword }),
             });
 
             const json = await response.json();
@@ -26,12 +41,6 @@ export const useLogin = () => {
             if (!response.ok) {
                 throw new Error(json.error);
             }
-
-            // Show success toast
-            toast({
-                title: "You've logged in successfully.",
-                description: `Welcome, ${blkLt}.`,
-            });
 
             // Save the user to local storage
             localStorage.setItem('user', JSON.stringify(json));

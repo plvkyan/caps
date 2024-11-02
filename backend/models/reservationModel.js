@@ -117,6 +117,10 @@ const reservationSchema = new Schema({
                 type: Date,
                 required: false
             },
+            commentAuthorId: {
+                type: String,
+                required: false
+            },
             commentAuthor: {
                 type: String,
                 required: false
@@ -254,6 +258,9 @@ const reservationSchema = new Schema({
     // }
 
 }, { timestamps: true });
+
+
+
 
 
 

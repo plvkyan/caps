@@ -80,6 +80,10 @@ export function DataTableViewOptions<TData>({
                     )
                     .map((column) => {
 
+                        if (column.id === "_id") {
+                            return null;
+                        }
+
                         if (column.id === "reserveeBlkLt") {
                             return (
                                 <DropdownMenuCheckboxItem
@@ -139,7 +143,17 @@ export function DataTableViewOptions<TData>({
                                 checked={column.getIsVisible()}
                                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
                             >
-                                {column.id}
+                                {
+                                column.id === "reservationType" ? "Reservation Type" : 
+                                column.id === "amenityType" ? "Amenity Type" :
+                                column.id === "amenityVisibility" ? "Amenity Visibility" :
+                                column.id === "userBlkLt" ? "Block and Lot" :
+                                column.id === "userStatus" ? "Membership Status" :
+                                column.id === "userRole" ? "Role" :
+                                column.id === "userPosition" ? "Position" :
+                                column.id === "createdAt" ? "Created At" :
+                                column.id
+                                }
                             </DropdownMenuCheckboxItem>
                         )
                     })}

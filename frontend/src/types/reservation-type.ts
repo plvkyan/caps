@@ -9,16 +9,16 @@ export type ReservationType = {
     reservationType: string,
     reservationAmenities: [
         {
-            amenityId: string,
+            _id: string,
             amenityName: string,
             amenityType: string,
             amenityAddress: string,
             amenityDescription: string,
-            amenityStock: string,
-            amenityStockMax: string,
-            amenityQuantity: string,
-            amenityQuantityMin: string,
-            amenityQuantityMax: string,
+            amenityStock: number,
+            amenityStockMax: number,
+            amenityQuantity: number,
+            amenityQuantityMin: number,
+            amenityQuantityMax: number,
             amenityReminder: string,
             amenityCreator: string,
             amenityImages: [
@@ -34,6 +34,7 @@ export type ReservationType = {
     reservationReason: string,
     reservationComments: [
         {
+            _id: string,
             commentContent: string,
             commentDate: Date,
             commentAuthor: string,
@@ -59,5 +60,6 @@ export type ReservationType = {
     interactedBy: string,
     interactedByPosition: string,
     interactionDate: Date,
+    createdAt: Date,
 
 }

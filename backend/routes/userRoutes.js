@@ -1,10 +1,10 @@
 
 
 
+// Requires
+// The express module is used to create a new router
 const express = require('express')
-const router = express.Router()
-
-// Controller Function
+// The userController module is used to import the user controller functions
 const { 
     createUser, 
     deleteUser, 
@@ -13,25 +13,36 @@ const {
     getArchivedUsers, 
     getUnitOwners,
     loginUser, 
-    updateUser 
+    updateUser, 
+    bulkCreateUsers
 } = require('../controllers/userController')
 
-// Import checkOverdue Middleware
+
+
+// Variables
+// The router variable is used to create a new router
+const router = express.Router()
+
 
 
 
 
 // Middlewares
-// Check Overdue Middleware
 
 
 
-
+// Routes
+// POST routes
 // Login route
 router.post('/login', loginUser)
-
 // Create user route
 router.post('/signup', createUser)
+// Create multiple users route
+router.post('/signup/bulk', bulkCreateUsers)
+
+
+
+
 
 // GET all users
 router.get('/', getUsers)
@@ -43,7 +54,7 @@ router.get('/unitOwners', getUnitOwners)
 router.get('/archived', getArchivedUsers)
 
 // GET a single user
-router.get('/:id', getUser)
+router.get('/single/:id', getUser)
 
 // DELETE a new user
 router.delete('/:id', deleteUser)

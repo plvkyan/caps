@@ -1,6 +1,5 @@
 
 
-
 // Imports
 // react-router-dom Navigate Import
 import { Navigate } from "react-router-dom";
@@ -25,7 +24,7 @@ interface PrivateRouteProps {
 
 
 export default function PrivateRoute({ component: Component, ...rest }: PrivateRouteProps) {
-    
+
     // Contexts
     // Authentication Context
     const { user } = useAuthContext();
@@ -38,6 +37,12 @@ export default function PrivateRoute({ component: Component, ...rest }: PrivateR
     // If the user is archived, redirect to the error page
     if (user.userVisibility === "Archived") {
         return <Navigate to="/error" replace={true} />
+    }
+
+    // If the user is not an admin, redirect to the 403 page
+    // This is to prevent non-admin users from accessing admin pages
+    if (user.userRole !== "Admin") {
+        return <Navigate to="/403" replace={true} />
     }
 
     // Return the protected component

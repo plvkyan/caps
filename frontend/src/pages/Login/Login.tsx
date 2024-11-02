@@ -1,17 +1,8 @@
-// @ts-nocheck
 
 
-"use client";
 
+// Imports
 // shadcn Components Import
-
-// shadcn Alert Button Component Import
-import {
-    Alert,
-    AlertDescription,
-    AlertTitle
-} from "@/components/ui/alert"
-
 // shadcn Button Component Import
 import { Button } from "@/components/ui/button";
 
@@ -63,16 +54,17 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 // Hooks
 import { useLogin } from "@/hooks/useLogin"
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 
 
 
 
 const formSchema = zod.object({
 
-    blkLt: zod.string().min(1,
+    userBlkLt: zod.string().min(1,
         { message: "Block and Lot/Name cannot be empty." }
     ),
-    password: zod.string().min(1),
+    userPassword: zod.string().min(1),
 })
 
 
@@ -86,15 +78,15 @@ const Login = () => {
     const form = useForm<zod.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            blkLt: "",
-            password: "",
+            userBlkLt: "",
+            userPassword: "",
         }
     })
 
     // Call when form is submitted
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
 
-        await login(values.blkLt, values.password)
+        await login(values.userBlkLt, values.userPassword)
     }
 
 
@@ -131,7 +123,7 @@ const Login = () => {
                                     {/* First FormField */}
                                     <FormField
                                         control={form.control}
-                                        name="blkLt"
+                                        name="userBlkLt"
                                         render={({ field }) => {
                                             return (
 
@@ -144,7 +136,7 @@ const Login = () => {
                                                         <FormControl>
 
                                                             <Input
-                                                                id="blkLt"
+                                                                id="userBlkLt"
                                                                 placeholder="Example: Blk 24 Lt 1"
                                                                 type="text"
                                                                 {...field}
@@ -168,7 +160,7 @@ const Login = () => {
 
                                     <FormField
                                         control={form.control}
-                                        name="password"
+                                        name="userPassword"
                                         render={({ field }) => {
                                             return (
 
@@ -205,7 +197,7 @@ const Login = () => {
                                                         <FormControl>
 
                                                             <Input
-                                                                id="password"
+                                                                id="userPassword"
                                                                 placeholder="Password"
                                                                 type="password"
                                                                 {...field}
@@ -226,8 +218,10 @@ const Login = () => {
 
                                     <Button
                                         className="w-full"
+                                        disabled={isLoading}    
                                     >
                                         Login
+                                        {isLoading && <LoadingSpinner className="h-4 w-4" />}
                                     </Button>
 
                                 </div>

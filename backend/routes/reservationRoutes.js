@@ -40,8 +40,18 @@ const {
    batchRejectReservations,
    getFacilityUnavailableDates,
    getEquipmentUnavailableDates,
-   getEquipmentAvailableStock
-} = require('../controllers/reservationController')
+   getEquipmentAvailableStock,
+   getEquipmentsAvailableStock,
+   addReservationComment,
+   approveReservation,
+   rejectReservation,
+   setReservationOngoing,
+   setReservationForReturn,
+   setReservationReturned,
+   setReservationCompleted,
+   uploadReservationImages,
+} = require('../controllers/reservationController');
+const { set } = require('mongoose');
 
 
 
@@ -123,9 +133,10 @@ router.get('/user/rejected/:id', getUserRejectedReservations);
 
 
 // ASDFA
-router.get('/amenity/facility/unavailable/:id', getFacilityUnavailableDates)
+router.get('/amenity/facility/date/unavailable/:id', getFacilityUnavailableDates)
+router.get('/amenity/equipment/date/unavailable/:id', getEquipmentUnavailableDates)
 router.get('/amenity/equipment/stock/:id/:date', getEquipmentAvailableStock)
-router.get('/amenity/equipment/unavailable/:id', getEquipmentUnavailableDates)
+router.post('/amenity/equipment/stock/:date', getEquipmentsAvailableStock)
 
 
 
@@ -143,8 +154,17 @@ router.delete('/:id', deleteReservation)
 router.patch('/:id', updateReservation)
 
 // Batch update reservations
-router.patch('/update/batch/approve', batchApproveReservations)
-router.patch('/update/batch/reject',  batchRejectReservations)
+router.patch('/update/status/approve/:id', approveReservation);
+router.patch('/update/status/reject/:id', rejectReservation);
+router.patch('/update/status/ongoing/:id', setReservationOngoing);
+router.patch('/update/status/forreturn/:id', setReservationForReturn);
+router.patch('/update/status/returned/:id', setReservationReturned);
+router.patch('/update/status/completed/:id', setReservationCompleted);
+router.patch('/update/images/:id', uploadReservationImages);
+
+router.patch('/update/status/batch/approve', batchApproveReservations)
+router.patch('/update/status/batch/reject',  batchRejectReservations)
+router.patch('/update/comment/create/:id',  addReservationComment)
 
 
 

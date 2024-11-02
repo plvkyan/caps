@@ -4,7 +4,7 @@
 // Imports 
 
 // CSS Import
-import './index.css';
+import '@/index.css';
 
 
 
@@ -95,9 +95,13 @@ import ReservationPage from '@/pages/Reservations/ReservationPage.tsx';
 import AdminUsers from '@/pages/Admin/Users/UsersList.tsx';
 import Settings from '@/pages/Settings.tsx';
 import ReservationForm from '@/pages/Reservations/ReservationForm.tsx';
-import PrivateRoute from './PrivateRoute.tsx';
-import AmenityForm from './pages/Amenities/AmenityForm.tsx';
-import ReservationDetails from './pages/Reservations/ReservationDetails.tsx';
+import PrivateRoute from '@/PrivateRoute.tsx';
+import AmenityForm from '@/pages/Amenities/AmenityForm.tsx';
+import ReservationDetails from '@/pages/Reservations/ReservationDetails.tsx';
+import PrivateRouteAdmin from '@/pages/PrivateRouteAdmin.tsx';
+import UserPage from '@/pages/Users/UserPage.tsx';
+import UserForm from '@/pages/Users/UserForm';
+import UserBulkForm from './pages/Users/UserBulkForm';
 
 
 
@@ -153,7 +157,23 @@ function App() {
 
 
 
+
+
                         {/* Protected routes */}
+                        {/* Amenity routes */}
+                        <Route
+                            path="/amenities/create"
+                            element={<PrivateRoute component={AmenityForm} />}
+                        />
+                        <Route
+                            path="/amenities"
+                            element={<PrivateRoute component={AmenityPage} />}
+                        />
+
+
+
+
+
                         {/* Reservation routes */}
                         <Route
                             path="/reservations"
@@ -167,14 +187,23 @@ function App() {
                             path="/reservations/:id"
                             element={<PrivateRoute component={ReservationDetails} />}
                         />
-                        {/* Amenity routes */}
+
+
+
+
+
+                        {/* User routes */}
                         <Route
-                            path="/amenities/create"
-                            element={<PrivateRoute component={AmenityForm} />}
+                            path="/users"
+                            element={<PrivateRoute component={UserPage} />}
                         />
                         <Route
-                            path="/amenities"
-                            element={<PrivateRoute component={AmenityPage} />}
+                            path="/users/create"
+                            element={<PrivateRoute component={UserForm} />}
+                        />
+                        <Route
+                            path="/users/bulk-create"
+                            element={<PrivateRoute component={UserBulkForm} />}
                         />
 
 

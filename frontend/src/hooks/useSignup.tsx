@@ -1,63 +1,64 @@
 
 
 
+// Imports
+// Utility Imports
+// React Imports
 import { useState } from 'react'
-import { useToast } from '@/components/ui/use-toast'
+
+
+
+// Context Imports
 import { useUsersContext } from './useUsersContext'
 
 
 
+// API Call Imports
+import { createUser } from '@/data/user-api'
 
 
 
+// 
 export const useSignup = () => {
 
-    const { toast } = useToast()
+    // States
+    // Error State
+    const [error, setError] = useState<String | null>(null);
+    // Loading State
+    const [isLoading, setIsLoading] = useState<Boolean>(false);
+    // Dispatch
+    const { dispatch } = useUsersContext();
 
-    const [error, setError] = useState(null)
-    const [isLoading, setIsLoading] = useState<any | null>(null)
-    const { users, dispatch } = useUsersContext()
 
-    const signup = async (blkLt, password, role, position, stat) => {
+
+    // Functions
+    // Signup Function
+    const signup = async (userBlkLt: String, userPassword: String, userEmail: String, userMobileNo: String, userRole: String, userPosition: String, userStatus: String, userVisibility: String) => {
         
-        setIsLoading(true)
-        setError(null)
+        // Set Loading to true
+        setIsLoading(true);
+        // Set Error to null
+        setError(null);
 
-        const response = await fetch('http://localhost:4000/api/users/signup', {
-            method: 'POST',
-            body: JSON.stringify({ blkLt, password, role, position, stat }, null, 2),
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        })
+        try {
+            // Create User
+            const response = await createUser(userBlkLt, userPassword, userEmail, userMobileNo, userRole, userPosition, userStatus, userVisibility);
+            // Get JSON
+            const json = await response.json();
 
-        const json = await response.json()
+            // Check if response is not ok
+            if (!response.ok) {
+                throw new Error(json.error);
+            }
 
-        if (!response.ok) {
-            setIsLoading(false)
-            setError(json.error)
-            toast({ 
-                title: "Account Creation Failed",
-                description: json.error
-            },)
-
+            // Dispatch
+            dispatch({ type: "CREATE_USER", payload: json });
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
+    };
 
-        if (response.ok) {
-
-            toast({ 
-                title: "Account Created Succesfully",
-                description: (blkLt) + " was added to the database."
-            },)
-
-            dispatch({ type: "CREATE_USER", payload: json })
-            console.log(users)
-
-
-            setIsLoading(false)
-        }
-    }
-
-    return { signup, isLoading, error}
-
-}
+    return { signup, isLoading, error };
+};

@@ -49,6 +49,10 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/components/ui/sidebar"
+
+// shadcn Sonner Component Import
+import { toast } from "sonner"
+
 // shadcn Table Component Imports
 import {
     Table,
@@ -106,7 +110,6 @@ import { AmenityType } from "@/types/amenity-type"
 // Data Imports
 // All unarchived amenities API Import
 import { createAmenity, getUnarchivedAmenities } from "@/data/amenity-api.ts";
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, CirclePlus, TriangleAlert, Upload, X } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -432,7 +435,7 @@ export default function AmenityForm() {
 
                             {/* Error message */}
                             {error !== "" && (
-                                <div className="flex bg-red-500/20 border border-red-500 text-red-500 items-center gap-2 rounded-md px-4 py-3">
+                                <div className="flex bg-red-500/20 border border-red-500 text-red-500 items-center gap-3 rounded-md px-4 py-3">
                                     <TriangleAlert className="w-5 h-5" />
                                     {error}
                                 </div>
@@ -823,7 +826,7 @@ export default function AmenityForm() {
                                                             <Upload className="h-6 w-6 text-muted-foreground" />
                                                             <div className="flex flex-col">
                                                                 <span className="text-muted-foreground text-base font-medium"> Click here to upload images </span>
-                                                                <span className="text-muted-foreground text-xs font-normal"> The total file size should not exceed 15 MB. </span>
+                                                                <span className="text-muted-foreground text-xs font-normal"> The total file size should not exceed 30 MB. </span>
                                                             </div>
                                                             <span className="sr-only"> Upload </span>
                                                             <FormField

@@ -1,3 +1,6 @@
+
+
+
 const apiBaseUrl = 'http://localhost:4000/api/';
 const apiAmenitiesUrl = apiBaseUrl + 'amenities';
 

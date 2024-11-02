@@ -4,6 +4,7 @@
 const Amenity = require("../models/amenityModel")
 const Reservation = require("../models/reservationModel")
 const mongoose = require('mongoose')
+const cloudinary = require('../utils/cloudinary');
 
 
 
@@ -317,6 +318,7 @@ const getFacilityUnavailableDates = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 }
+
 // Get unavailable dates for an equipment
 const getEquipmentUnavailableDates = async (req, res) => {
     // Extract the equipment ID from the request parameters
@@ -444,7 +446,7 @@ const getEquipmentAvailableStock = async (req, res) => {
         });
 
         const availableStock = amenity.amenityStockMax - reservedQuantity;
-        
+
         console.log("Available stock fetched successfully.");
         res.status(200).json({ availableStock });
     } catch (error) {
@@ -452,6 +454,70 @@ const getEquipmentAvailableStock = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 }
+
+// Get available stock for multiple equipments on a specific date
+const getEquipmentsAvailableStock = async (req, res) => {
+    const { date } = req.params;
+    const { amenityIds } = req.body;
+
+    try {
+        // Parse the date and normalize to start of day
+        const targetDate = new Date(date);
+        targetDate.setHours(0, 0, 0, 0);
+
+        // Fetch all approved reservations for the specified equipments
+        const reservations = await Reservation.find({
+            "reservationAmenities._id": { $in: amenityIds }
+        }).select('reservationDate reservationAmenities reservationStatus -_id');
+
+        // Filter reservations where the latest status is "Approved"
+        const approvedReservations = reservations.filter(reservation => {
+            const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+            return latestStatus.status === "Approved";
+        });
+
+        // Fetch the maximum stock of all equipments
+        const amenities = await Amenity.find({
+            _id: { $in: amenityIds }
+        }).select('_id amenityStockMax');
+
+        // Create a map of reserved quantities for each equipment
+        const reservedQuantities = {};
+        amenityIds.forEach(id => reservedQuantities[id] = 0);
+
+        // Calculate total reserved quantity for each equipment on the target date
+        approvedReservations.forEach(reservation => {
+            const reservationDate = new Date(reservation.reservationDate);
+            reservationDate.setHours(0, 0, 0, 0);
+
+            if (reservationDate.getTime() === targetDate.getTime()) {
+                reservation.reservationAmenities.forEach(amenity => {
+                    if (amenityIds.includes(amenity._id.toString())) {
+                        reservedQuantities[amenity._id.toString()] += amenity.amenityQuantity;
+                    }
+                });
+            }
+        });
+
+        // Create a map of amenities for easier lookup
+        const amenityMap = new Map(amenities.map(amenity => [amenity._id.toString(), amenity]));
+
+        // Calculate available stock maintaining the original order
+        const availableStock = amenityIds.map(id => ({
+            amenityId: id,
+            availableStock: amenityMap.get(id).amenityStockMax - (reservedQuantities[id] || 0)
+        }));
+
+        console.log("Available stock fetched successfully for multiple equipments.");
+        res.status(200).json(availableStock);
+    } catch (error) {
+        console.log("Error fetching available stock: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+
+
 
 // const getEquipmentAvailableStock = async (req, res) => {
 //     const { id, date } = req.params;
@@ -672,7 +738,644 @@ const deleteReservation = async (req, res) => {
 
 
 
+
+
 // PATCH controllers
+// Add a new comment to a reservation
+// Add a new comment to a reservation
+const addReservationComment = async (req, res) => {
+    const { id } = req.params;
+    const { commentContent, commentAuthor, commentAuthorId, commentAuthorPosition } = req.body;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            })
+        }
+
+        // Check if the reservation is completed
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+        if (latestStatus && latestStatus.status === "Completed") {
+            return res.status(400).json({
+                error: 'Cannot add comments to completed reservations.'
+            })
+        }
+
+        // Create new comment object
+        const newComment = {
+            commentContent,
+            commentDate: new Date(),
+            commentAuthorId,
+            commentAuthor,
+            commentAuthorPosition
+        };
+
+        // Add comment to reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { $push: { reservationComments: newComment } },
+            { new: true }
+        );
+
+        console.log("Comment added successfully.");
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        console.log("Error adding comment: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Approve a single reservation
+const approveReservation = async (req, res) => {
+    const { id } = req.params;
+    const { statusAuthorId, statusAuthor, statusAuthorPosition } = req.body;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            });
+        }
+
+        // Get the latest status
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+
+        // Check if the reservation is pending
+        if (!latestStatus || latestStatus.status !== "Pending") {
+            return res.status(400).json({
+                error: 'Only pending reservations can be approved',
+                description: 'Reservation status of type ' + latestStatus.status + ' cannot be approved.'
+            });
+        }
+
+        // For Equipment or Equipment and Facility reservations, check stock availability
+        if (['Equipment', 'Equipment and Facility'].includes(reservation.reservationType)) {
+            for (const amenity of reservation.reservationAmenities) {
+                // Get all approved reservations for this equipment on the same date
+                const approvedReservations = await Reservation.find({
+                    'reservationAmenities._id': amenity._id,
+                    'reservationDate': reservation.reservationDate,
+                    'reservationStatus.status': 'Approved'
+                });
+
+                // Calculate total reserved quantity
+                const reservedQuantity = approvedReservations.reduce((total, res) => {
+                    const equipment = res.reservationAmenities.find(a => a._id.toString() === amenity._id.toString());
+                    return total + (equipment ? equipment.amenityQuantity : 0);
+                }, 0);
+
+                // Get the equipment's maximum stock
+                const equipmentDoc = await Amenity.findById(amenity._id);
+                const availableStock = equipmentDoc.amenityStockMax - reservedQuantity;
+
+                // Check if there's enough stock
+                if (amenity.amenityQuantity > availableStock) {
+                    return res.status(400).json({
+                        error: 'Insufficient stock',
+                        description: `Not enough stock available for ${amenity.amenityName}. Available: ${availableStock}, Requested: ${amenity.amenityQuantity}`
+                    });
+                }
+            }
+        }
+
+        // Create new status object
+        const newStatus = {
+            status: "Approved",
+            statusDate: new Date(),
+            statusAuthorId,
+            statusAuthor,
+            statusAuthorPosition
+        };
+
+        // Add status to reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { $push: { reservationStatus: newStatus } },
+            { new: true }
+        );
+
+        console.log("Reservation approved successfully.");
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        console.log("Error approving reservation: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+
+// Reject a single reservation
+const rejectReservation = async (req, res) => {
+    const { id } = req.params;
+    const { statusAuthorId, statusAuthor, statusAuthorPosition } = req.body;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            })
+        }
+
+        // Get the latest status
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+
+        // Check if the reservation is pending
+        if (!latestStatus || latestStatus.status !== "Pending") {
+            return res.status(400).json({
+                error: 'Only pending reservations can be rejected',
+                description: 'Reservation status of type ' + latestStatus.status + ' cannot be rejected.'
+            })
+        }
+
+        // Create new status object
+        const newStatus = {
+            status: "Rejected",
+            statusDate: new Date(),
+            statusAuthorId,
+            statusAuthor,
+            statusAuthorPosition
+        };
+
+        // Add status to reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { $push: { reservationStatus: newStatus } },
+            { new: true }
+        );
+
+        console.log("Reservation rejected successfully.");
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        console.log("Error rejecting reservation: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Mark a reservation as ongoing
+const setReservationOngoing = async (req, res) => {
+    const { id } = req.params;
+    const { statusAuthorId, statusAuthor, statusAuthorPosition } = req.body;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            })
+        }
+
+        // Get the latest status
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+
+        // Check if the reservation is approved
+        if (!latestStatus || latestStatus.status !== "Approved") {
+            return res.status(400).json({
+                error: 'Only accepted reservations can be set as ongoing',
+                description: 'Reservation status of type ' + latestStatus.status + ' cannot be ongoing.'
+            })
+        }
+
+        // Create new status object
+        const newStatus = {
+            status: "Ongoing",
+            statusDate: new Date(),
+            statusAuthorId,
+            statusAuthor,
+            statusAuthorPosition
+        };
+
+        // Add status to reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { $push: { reservationStatus: newStatus } },
+            { new: true }
+        );
+
+        console.log("Reservation set to ongoing successfully.");
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        console.log("Error setting reservation to ongoing: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Mark a reservation as for return
+const setReservationForReturn = async (req, res) => {
+    const { id } = req.params;
+    const { statusAuthorId, statusAuthor, statusAuthorPosition } = req.body;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            })
+        }
+
+        // Check if reservation type is valid for return
+        if (!['Equipment', 'Equipment and Facility'].includes(reservation.reservationType)) {
+            return res.status(400).json({
+                error: 'Only reservations with equipments can be set as for return',
+                description: 'Reservation of type ' + reservation.reservationType + ' cannot be for return.'
+            })
+        }
+
+        // Get the latest status
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+
+        // Check if the reservation is ongoing
+        if (!latestStatus || latestStatus.status !== "Ongoing") {
+            return res.status(400).json({
+                error: 'Only ongoing reservations can be set as for return',
+                description: 'Reservation status of type ' + latestStatus.status + ' cannot be for return.'
+            })
+        }
+
+        // Create new status object
+        const newStatus = {
+            status: "For Return",
+            statusDate: new Date(),
+            statusAuthorId,
+            statusAuthor,
+            statusAuthorPosition
+        };
+
+        // Add status to reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { $push: { reservationStatus: newStatus } },
+            { new: true }
+        );
+
+        console.log("Reservation set to for return successfully.");
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        console.log("Error setting reservation to for return: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Mark a reservation as returned
+const setReservationReturned = async (req, res) => {
+    const { id } = req.params;
+    const { statusAuthorId, statusAuthor, statusAuthorPosition } = req.body;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            })
+        }
+
+        // Check if reservation type is valid for return
+        if (!['Equipment', 'Equipment and Facility'].includes(reservation.reservationType)) {
+            return res.status(400).json({
+                error: 'Only reservations with equipments can be set as returned',
+                description: 'Reservation of type ' + reservation.reservationType + ' cannot be returned.'
+            })
+        }
+
+        // Get the latest status
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+
+        // Check if the reservation is for return
+        if (!latestStatus || latestStatus.status !== "For Return") {
+            return res.status(400).json({
+                error: 'Only for return reservations can be set as returned',
+                description: 'Reservation status of type ' + latestStatus.status + ' cannot be returned.'
+            })
+        }
+
+        // Create new status object
+        const newStatus = {
+            status: "Returned",
+            statusDate: new Date(),
+            statusAuthorId,
+            statusAuthor,
+            statusAuthorPosition
+        };
+
+        // Add status to reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { $push: { reservationStatus: newStatus } },
+            { new: true }
+        );
+
+        console.log("Reservation set to returned successfully.");
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        console.log("Error setting reservation to returned: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Mark a reservation as completed
+const setReservationCompleted = async (req, res) => {
+    const { id } = req.params;
+    const { statusAuthorId, statusAuthor, statusAuthorPosition } = req.body;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            })
+        }
+
+        // Get the latest status
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+
+        // Different validation based on reservation type
+        if (['Equipment', 'Equipment and Facility'].includes(reservation.reservationType)) {
+            // For Equipment or Equipment and Facility reservations
+            if (!latestStatus || latestStatus.status !== "Returned") {
+                return res.status(400).json({
+                    error: 'Only returned reservations can be set as completed',
+                    description: 'Reservation status of type ' + latestStatus.status + ' cannot be completed.'
+                })
+            }
+        } else if (reservation.reservationType === "Facility") {
+            // For Facility reservations
+            if (!latestStatus || latestStatus.status !== "Ongoing") {
+                return res.status(400).json({
+                    error: 'Only for ongoing reservations can be set as completed',
+                    description: 'Reservation status of type ' + latestStatus.status + ' cannot be completed.'
+                })
+            }
+        }
+
+        // Create new status object
+        const newStatus = {
+            status: "Completed",
+            statusDate: new Date(),
+            statusAuthorId,
+            statusAuthor,
+            statusAuthorPosition
+        };
+
+        // Add status to reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { $push: { reservationStatus: newStatus } },
+            { new: true }
+        );
+
+        console.log("Reservation set to completed successfully.");
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        console.log("Error setting reservation to completed: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+const uploadReservationImages = async (req, res) => {
+
+    const { id } = req.params;
+    let { reservationImages } = req.body;
+
+    try {
+        // Initialize imagesBuffer array
+        let imagesBuffer = [];
+
+        const oldReservation = await Reservation.findById(id);
+        const oldReservationImages = oldReservation.reservationImages;
+
+        // Loop to upload each image from reservationImages array to cloudinary
+        for (let i = 0; i < reservationImages.length; i++) {
+            // Upload each individual image to cloudinary
+
+            // Skip if the current image is already an object (has been uploaded)
+            if (typeof reservationImages[i] === 'object') {
+                imagesBuffer.push(reservationImages[i]);
+                continue;
+            }
+
+            const imageUploadData = await cloudinary.uploader.upload(reservationImages[i], {
+                folder: "gctms_imgs/reservations",
+            });
+
+            console.log(`Image ${i + 1} uploaded successfully.`);
+
+            // Push the uploaded image data to the imagesBuffer array
+            imagesBuffer.push({
+                public_id: imageUploadData.public_id,
+                url: imageUploadData.secure_url,
+            });
+        }
+
+        // Check if the old amenity has no images and if there are new images
+        if (oldReservationImages.length === 0 && reservationImages.length !== 0) {
+
+            console.log("\nThere are no old images, we'll upload the new ones.");
+
+            // Loop to upload each image from amenityImages array to cloudinary
+            for (let i = 0; i < reservationImages.length; i++) {
+
+                // Upload each individual image to cloudinary
+                const newImageUpload = await cloudinary.uploader.upload(reservationImages[i], {
+                    folder: "gctms_imgs/reservations",
+                });
+
+                // Push the uploaded image data to the imagesBuffer array
+                imagesBuffer.push({
+                    public_id: newImageUpload.public_id,
+                    url: newImageUpload.secure_url,
+                })
+
+                console.log("Picture " + i + " uploaded successfully.");
+            }
+
+            // Set amenityImages to the imagesBuffer
+            reservationImages = imagesBuffer;
+        }
+
+        // Check if the old amenity has images and if there are no new images
+        if (oldReservationImages.length !== 0 && reservationImages.length === 0) {
+
+            console.log("\nThere are no new images, we'll delete the old ones.");
+
+            // Since there are no new images, delete the old images
+            for (let i = 0; i < oldReservationImages.length; i++) {
+
+                // Get the public_id of each individual old image
+                const oldImageId = oldReservationImages[i].public_id;
+
+                // If the public_id exists, delete the old image from cloudinary
+                if (oldImageId) {
+                    await cloudinary.uploader.destroy(oldImageId);
+                }
+
+                console.log("Picture " + i + " deleted successfully.");
+            }
+
+            // Set amenityImages to the imagesBuffer
+            reservationImages = imagesBuffer;
+        }
+
+        // Check if the old amenity has images and if there are new images
+        if (oldReservationImages.length !== 0 && reservationImages.length !== 0) {
+
+            console.log("\nThere are old images and new images, we'll check if there are old images in the new images array.");
+
+            // Check if the new images array has no public_id
+            if (!Object.hasOwn(reservationImages[0], 'public_id')) {
+
+                console.log("\nIt's the first element and it's a new image. It means there are no old images and only new images to upload.");
+                console.log("\nLet's first delete the old images.");
+
+                for (let i = 0; i < oldReservationImages.length; i++) {
+
+                    // Get the public_id of each individual old image
+                    const oldImageId = oldReservationImages[i].public_id;
+
+                    // If the public_id exists, delete the old image from cloudinary
+                    if (oldImageId) {
+                        await cloudinary.uploader.destroy(oldImageId);
+                    }
+
+                    console.log("\nPicture " + i + " deleted successfully.");
+                }
+
+                console.log("\nNow, let's upload the new images.");
+
+                for (let i = 0; i < reservationImages.length; i++) {
+
+                    // Upload each individual image to cloudinary
+                    const newImageUpload = await cloudinary.uploader.upload(reservationImages[i].url, {
+                        folder: "gctms_imgs/reservations",
+                    });
+
+                    // Push the uploaded image data to the imagesBuffer array
+                    imagesBuffer.push({
+                        public_id: newImageUpload.public_id,
+                        url: newImageUpload.secure_url,
+                    })
+
+                    console.log("Picture " + i + " uploaded successfully.");
+                }
+
+                reservationImages = imagesBuffer;
+            }
+
+
+
+            // Check if the new images array has a public_id
+            if (Object.hasOwn(reservationImages[0], 'public_id')) {
+
+                console.log("\nIt's the first element and it's an old image. It means there are old images and new images to compare.");
+                console.log("\nLet's first compare the old images.");
+
+                // Outer loop for comparing the old images to the new ones
+                for (let i = 0; i < oldReservationImages.length; i++) {
+
+                    console.log(i);
+
+                    // Inner loop for comparing the new images to the old ones
+                    for (let j = 0; j < reservationImages.length; j++) {
+
+                        console.log(j)
+
+                        // Check if the new image is the same as the old image
+                        if (oldReservationImages[i].public_id === reservationImages[j].public_id) {
+
+                            console.log("\nIt's the same image. Let's add it to the buffer.");
+
+                            // Push the old image to the imagesBuffer array
+                            imagesBuffer.push({
+                                public_id: oldReservationImages[i].public_id,
+                                url: oldReservationImages[i].url,
+                            });
+
+                            break;
+                        }
+
+                        // Check if the new image is different from the old image
+                        if (j === reservationImages.length - 1) {
+
+                            console.log("It's a different image, bro. Let's delete the old one.");
+
+                            const oldImageId = oldReservationImages[i].public_id;
+
+                            if (oldImageId) {
+                                await cloudinary.uploader.destroy(oldImageId);
+                            }
+
+                            console.log("Picture " + i + " deleted successfully.");
+                        }
+
+                    }
+                }
+
+                console.log("\nNow, let's upload the rest of the new images.")
+                for (let k = imagesBuffer.length; k < reservationImages.length; k++) {
+
+                    // Upload each individual image to cloudinary
+                    const newImageUpload = await cloudinary.uploader.upload(reservationImages[k], {
+                        folder: "gctms_imgs/reservations",
+                    });
+
+                    // Push the uploaded image data to the imagesBuffer array
+                    imagesBuffer.push({
+                        public_id: newImageUpload.public_id,
+                        url: newImageUpload.secure_url,
+                    })
+
+                    console.log("Picture " + k + " uploaded successfully.");
+
+                }
+            }
+
+            // Set amenityImages to the imagesBuffer
+            reservationImages = imagesBuffer;
+
+
+        }
+
+        reservationImages = imagesBuffer;
+
+        // Update the reservation with new images
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { reservationImages: imagesBuffer },
+            { new: true }
+        );
+
+        console.log("Reservation images uploaded successfully.");
+        res.status(200).json(updatedReservation);
+
+    } catch (error) {
+        console.log("Error uploading reservation images: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+
+}
+
 // Update a reservation
 const updateReservation = async (req, res) => {
 
@@ -751,7 +1454,61 @@ const batchApproveReservations = async (req, res) => {
             });
         }
 
-        // Perform the update
+        // Create a map to track total requested quantities per amenity and date
+        const stockRequests = new Map();
+
+        // Check stock availability for equipment reservations
+        for (const reservation of reservations) {
+            if (['Equipment', 'Equipment and Facility'].includes(reservation.reservationType)) {
+                for (const amenity of reservation.reservationAmenities) {
+                    const key = `${amenity._id}-${reservation.reservationDate}`;
+
+                    // Initialize or update the stock request
+                    if (!stockRequests.has(key)) {
+                        stockRequests.set(key, {
+                            amenityId: amenity._id,
+                            date: reservation.reservationDate,
+                            totalRequested: 0,
+                            amenityName: amenity.amenityName
+                        });
+                    }
+                    // Add current reservation's quantity to total
+                    stockRequests.get(key).totalRequested += amenity.amenityQuantity;
+                }
+            }
+        }
+
+        // Validate stock availability for all requests
+        for (const [_, request] of stockRequests) {
+            // Get all approved reservations for this equipment on the same date
+            const approvedReservations = await Reservation.find({
+                'reservationAmenities._id': request.amenityId,
+                'reservationDate': request.date,
+                'reservationStatus.status': 'Approved'
+            });
+
+            // Calculate total reserved quantity
+            const reservedQuantity = approvedReservations.reduce((total, res) => {
+                const equipment = res.reservationAmenities.find(a =>
+                    a._id.toString() === request.amenityId.toString());
+                return total + (equipment ? equipment.amenityQuantity : 0);
+            }, 0);
+
+            // Get the equipment's maximum stock
+            const equipmentDoc = await Amenity.findById(request.amenityId);
+            const availableStock = equipmentDoc.amenityStockMax - reservedQuantity;
+
+            // Check if there's enough stock for the combined requests
+            if (request.totalRequested > availableStock) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Insufficient stock',
+                    description: `Not enough stock available for ${request.amenityName}. Available: ${availableStock}, Total Requested: ${request.totalRequested}`
+                });
+            }
+        }
+
+        // If stock validation passes, perform the update
         const result = await Reservation.updateMany(
             { _id: { $in: reservationIds } },
             updateData,
@@ -902,14 +1659,23 @@ module.exports = {
     getUserRejectedReservations,
 
     //
+    uploadReservationImages,
     getEquipmentUnavailableDates,
     getEquipmentAvailableStock,
+    getEquipmentsAvailableStock,
     getFacilityUnavailableDates,
 
     // DELETE controllers
     deleteReservation,
 
     // PATCH controllers
+    addReservationComment,
+    approveReservation,
+    rejectReservation,
+    setReservationOngoing,
+    setReservationForReturn,
+    setReservationReturned,
+    setReservationCompleted,
     batchApproveReservations,
     batchRejectReservations,
     updateReservation,

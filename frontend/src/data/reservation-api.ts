@@ -51,20 +51,44 @@ export const getUserUnarchivedReservations = async (userId: String) => {
 }
 
 export const getEquipmentUnavailableDates = async (equipmentId: String) => {
-    return (await fetch(apiReservationsUrl + '/amenity/equipment/unavailable/' + equipmentId));
+    return (await fetch(apiReservationsUrl + '/amenity/equipment/date/unavailable/' + equipmentId));
 }
 
 export const getFacilityUnavailableDates = async (facilityId: String) => {
-    return (await fetch(apiReservationsUrl + '/amenity/facility/unavailable/' + facilityId));
+    return (await fetch(apiReservationsUrl + '/amenity/facility/date/unavailable/' + facilityId));
 }
 
 export const getEquipmentAvailableStocks = async (equipmentId: String, reservationDate: Date) => {
     return (await fetch(apiReservationsUrl + '/amenity/equipment/stock/' + equipmentId + '/' + reservationDate));
 }
 
+export const getEquipmentsAvailableStocks = async (equipmentIds: Array<String>, reservationDate: Date) => {
+    return (await fetch(apiReservationsUrl + '/amenity/equipment/stock/' + reservationDate, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            amenityIds: equipmentIds,
+        })
+    }));
+}
+
+
 
 
 // PATCH requests
+// PATCH request to add a new comment
+export const addCommentToReservation = async (reservationId, commentData) => {
+    return (await fetch(apiReservationsUrl + '/update/comment/create/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(commentData)
+    }));
+}
+
 // PATCH request to archive many reservations
 export const archiveManyReservations = async (reservationIds) => {
     return (await fetch(apiReservationsUrl + "/update/batch", {
@@ -80,6 +104,8 @@ export const archiveManyReservations = async (reservationIds) => {
         })
     }));
 }
+
+
 
 // PATCH request to unarchive many reservations
 export const unarchiveManyReservations = async (reservationIds) => {
@@ -99,7 +125,7 @@ export const unarchiveManyReservations = async (reservationIds) => {
 
 // PATCH request to approve many reservations
 export const approveManyReservations = async (reservationIds, statusAuthorId, statusAuthor, statusAuthorPosition) => {
-    return (await fetch(apiReservationsUrl + "/update/batch/approve", {
+    return (await fetch(apiReservationsUrl + "/update/status/batch/approve", {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json'
@@ -123,7 +149,7 @@ export const approveManyReservations = async (reservationIds, statusAuthorId, st
 
 // PATCH request to approve many reservations
 export const rejectManyReservations = async (reservationIds, statusAuthorId, statusAuthor, statusAuthorPosition) => {
-    return (await fetch(apiReservationsUrl + "/update/batch/reject", {
+    return (await fetch(apiReservationsUrl + "/update/status/batch/reject", {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json'
@@ -169,3 +195,105 @@ export const updateReservationStatusToApproved = async (reservationId, statusAut
     }));
 }
 
+// PATCH request to update a reservation status to rejected
+export const setReservationApproved = async (reservationId, statusAuthorId, statusAuthor, statusAuthorPosition) => {
+    return (await fetch(apiReservationsUrl + '/update/status/approve/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            statusAuthorId: statusAuthorId,
+            statusAuthor: statusAuthor,
+            statusAuthorPosition: statusAuthorPosition
+        })
+    }));
+}
+
+
+// PATCH request to update a reservation status to rejected
+export const setReservationRejected = async (reservationId, statusAuthorId, statusAuthor, statusAuthorPosition) => {
+    return (await fetch(apiReservationsUrl + '/update/status/reject/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            statusAuthorId: statusAuthorId,
+            statusAuthor: statusAuthor,
+            statusAuthorPosition: statusAuthorPosition
+        })
+    }));
+}
+
+// PATCH request to update a reservation status to ongoing
+export const setReservationOngoing = async (reservationId, statusAuthorId, statusAuthor, statusAuthorPosition) => {
+    return (await fetch(apiReservationsUrl + '/update/status/ongoing/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            statusAuthorId: statusAuthorId,
+            statusAuthor: statusAuthor,
+            statusAuthorPosition: statusAuthorPosition
+        })
+    }));
+}
+
+// PATCH request to update a reservation status to for return
+export const setReservationForReturn = async (reservationId, statusAuthorId, statusAuthor, statusAuthorPosition) => {
+    return (await fetch(apiReservationsUrl + '/update/status/forreturn/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            statusAuthorId: statusAuthorId,
+            statusAuthor: statusAuthor,
+            statusAuthorPosition: statusAuthorPosition
+        })
+    }));
+}
+
+// PATCH request to update a reservation status to returned
+export const setReservationReturned = async (reservationId, statusAuthorId, statusAuthor, statusAuthorPosition) => {
+    return (await fetch(apiReservationsUrl + '/update/status/returned/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            statusAuthorId: statusAuthorId,
+            statusAuthor: statusAuthor,
+            statusAuthorPosition: statusAuthorPosition
+        })
+    }));
+}
+
+// PATCH request to update a reservation status to completed
+export const setReservationCompleted = async (reservationId, statusAuthorId, statusAuthor, statusAuthorPosition) => {
+    return (await fetch(apiReservationsUrl + '/update/status/completed/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            statusAuthorId: statusAuthorId,
+            statusAuthor: statusAuthor,
+            statusAuthorPosition: statusAuthorPosition
+        })
+    }));
+}
+
+export const updateReservationImages = async (reservationId, reservationImages) => {
+    return (await fetch(apiReservationsUrl + '/update/images/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            reservationImages: reservationImages
+        })
+    }));
+}

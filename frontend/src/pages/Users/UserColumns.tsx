@@ -30,7 +30,7 @@ import { ColumnDef } from "@tanstack/react-table";
 // Type definitions are a great way to ensure that your data is always in the shape you expect.
 // This can help prevent bugs and make your code easier to understand.
 // Type Imports
-import { ReservationType } from "@/types/reservation-type";
+import { UserType } from "@/types/user-type";
 
 
 
@@ -38,13 +38,11 @@ import { ReservationType } from "@/types/reservation-type";
 // date-fns format function Import
 import { format } from "date-fns";
 
-import { useNavigate } from "react-router-dom";
 
 
 
 
-
-export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
+export const UserTableColumns: ColumnDef<UserType>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -72,7 +70,7 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         enableSorting: false,
     },
     {
-        accessorKey: "reserveeBlkLt",
+        accessorKey: "userBlkLt",
         header: ({ column }) => {
             return (
                 <DataTableColumnHeader column={column} title="Block and Lot" />
@@ -80,69 +78,83 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         },
         cell: ({ row }) => {
             return (
-                <span>{row.original.reserveeBlkLt}</span>
+                <span>{row.original.userBlkLt}</span>
             )
         }
     },
     {
-        accessorKey: "reservationType",
+        accessorKey: "userStatus",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Amenities" />
+                <DataTableColumnHeader column={column} title="Membership Status" />
+            )
+        },
+        cell: ({ row }) => {
+
+            // Get the status of the user
+            const status = row.original.userStatus;
+
+            // Return a badge based on the status
+            if (status === "Outstanding") {
+                return <Badge variant="default"> {status} </Badge>
+            }
+
+            if (status === "Delinquent") {
+                return <Badge variant="warning"> {status} </Badge>
+            }
+
+        },
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id));
+        },
+    },
+    {
+        accessorKey: "userRole",
+        header: ({ column }) => {
+            return (
+                <DataTableColumnHeader column={column} title="Role" />
             )
         },
         cell: ({ row }) => {
             return (
                 <span>
-                    {row.original.reservationType}
+                    {row.original.userRole}
                 </span>
             )
         }
     },
     {
-        accessorKey: "reservationStatus",
+        accessorKey: "userPosition",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Status" className="justify-center" />
+                <DataTableColumnHeader column={column} title="Position" />
+            )
+        },
+        cell: ({ row }) => {
+            return (
+                <span>
+                    {row.original.userPosition}
+                </span>
+            )
+        },
+    },
+    {
+        accessorKey: "createdAt",
+        header: ({ column }) => {
+            return (
+                <DataTableColumnHeader column={column} title="Creation date" />
             )
         },
         cell: ({ row }) => {
 
-            const lastIndex = row.original.reservationStatus.length;
-            const status = row.original.reservationStatus[lastIndex - 1].status;
-            console.log(status)
+            const date = row.getValue("createdAt") as any;
+            const formattedDate = format(date, "PPP");
 
             return (
-                <div className="flex items-center justify-center pr-4.5 w-full">
-                    <Badge variant={
-                        status === "Pending" ? "warning" :
-                            status === "Approved" ? "default" :
-                                status === "Rejected" ? "destructive" :
-                                    "outline"
-                    }>
-                        {status}
-                    </Badge>
-                </div>
+                <span>
+                    {formattedDate}
+                </span>
             )
-        },
-        filterFn: (row, id, value) => {
-            const lastStatus = row.original.reservationStatus[row.original.reservationStatus.length - 1].status;
-            return value.includes(lastStatus);
-        },
-        },
-        {
-        accessorKey: "reservationDate",
-        header: ({ column }) => {
-            return (
-                <DataTableColumnHeader column={column} title="Reservation Date" />
-            )
-        },
-        cell: ({ row }) => {
-
-            const origDate = row.getValue("reservationDate") as any
-            const formattedDate = format(origDate, "PPP")
-
-            return <div className="font-regular"> {formattedDate} </div>
         }
     },
 ]

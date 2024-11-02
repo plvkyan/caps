@@ -1242,15 +1242,11 @@ export default function ReservationForm() {
                                                             <AccordionTrigger className="hover:no-underline">
                                                                 <div className="flex items-center gap-4 w-full">
                                                                     <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
-                                                                        <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
+                                                                        {amenity.amenityImages.length > 0 && (
+                                                                            <DialogTrigger>
                                                                                 <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
-                                                                                    <ImageOff className="h-5 w-5 text-muted-foreground" />
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogTrigger>
+                                                                            </DialogTrigger>
+                                                                        )}
                                                                         <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
                                                                             <DialogTitle className="sr-only">Image preview</DialogTitle>
                                                                             <DialogDescription className="sr-only">Image preview</DialogDescription>
@@ -1277,6 +1273,11 @@ export default function ReservationForm() {
                                                                             <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
                                                                         </DialogContent>
                                                                     </Dialog>
+                                                                    {amenity.amenityImages.length == 0 && (
+                                                                        <div className="flex px-0 items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
+                                                                            <ImageOff className="h-5 w-5 text-muted-foreground" />
+                                                                        </div>
+                                                                    )}
                                                                     <div className="flex flex-col items-start line-clamp-1">
                                                                         <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
                                                                         <span className="text-start text-sm text-muted-foreground line-clamp-1">
@@ -1656,15 +1657,11 @@ export default function ReservationForm() {
                                                             <AccordionTrigger className="hover:no-underline">
                                                                 <div className="flex items-center gap-4 w-full">
                                                                     <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
-                                                                        <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
+                                                                        {amenity.amenityImages.length > 0 && (
+                                                                            <DialogTrigger>
                                                                                 <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
-                                                                                    <ImageOff className="h-5 w-5 text-muted-foreground" />
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogTrigger>
+                                                                            </DialogTrigger>
+                                                                        )}
                                                                         <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
                                                                             <DialogTitle className="sr-only">Image preview</DialogTitle>
                                                                             <DialogDescription className="sr-only">Image preview</DialogDescription>
@@ -1691,6 +1688,11 @@ export default function ReservationForm() {
                                                                             <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
                                                                         </DialogContent>
                                                                     </Dialog>
+                                                                    {amenity.amenityImages.length == 0 && (
+                                                                        <div className="flex px-0 items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
+                                                                            <ImageOff className="h-5 w-5 text-muted-foreground" />
+                                                                        </div>
+                                                                    )}
                                                                     <div className="flex flex-col items-start line-clamp-1">
                                                                         <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
                                                                         <span className="text-start text-sm text-muted-foreground line-clamp-1">
@@ -1763,7 +1765,7 @@ export default function ReservationForm() {
                             )}
 
                             {/* Facility list */}
-                            {step === 3 && (reservationType === "Facility" || reservationType === "Equipment and Facility") &&  (
+                            {step === 3 && (reservationType === "Facility" || reservationType === "Equipment and Facility") && (
                                 <div className="grid grid-cols-3 gap-6">
                                     {/* Facility */}
                                     <Card className="col-span-2 h-fit min-h-fit max-h-svh">
@@ -1868,15 +1870,11 @@ export default function ReservationForm() {
                                                             <AccordionTrigger className="hover:no-underline">
                                                                 <div className="flex items-center gap-4 w-full">
                                                                     <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
-                                                                        <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
+                                                                        {amenity.amenityImages.length > 0 && (
+                                                                            <DialogTrigger>
                                                                                 <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
-                                                                                    <ImageOff className="h-5 w-5 text-muted-foreground" />
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogTrigger>
+                                                                            </DialogTrigger>
+                                                                        )}
                                                                         <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
                                                                             <DialogTitle className="sr-only">Image preview</DialogTitle>
                                                                             <DialogDescription className="sr-only">Image preview</DialogDescription>
@@ -1903,6 +1901,11 @@ export default function ReservationForm() {
                                                                             <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
                                                                         </DialogContent>
                                                                     </Dialog>
+                                                                    {amenity.amenityImages.length == 0 && (
+                                                                        <div className="flex px-0 items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
+                                                                            <ImageOff className="h-5 w-5 text-muted-foreground" />
+                                                                        </div>
+                                                                    )}
                                                                     <div className="flex flex-col items-start line-clamp-1">
                                                                         <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
                                                                         <span className="text-start text-sm text-muted-foreground line-clamp-1">
@@ -2260,15 +2263,12 @@ export default function ReservationForm() {
                                                             <AccordionTrigger className="hover:no-underline">
                                                                 <div className="flex items-center gap-4 w-full">
                                                                     <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
-                                                                        <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
+                                                                        {amenity.amenityImages.length > 0 && (
+                                                                            <DialogTrigger>
                                                                                 <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
-                                                                                    <ImageOff className="h-5 w-5 text-muted-foreground" />
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogTrigger>
+
+                                                                            </DialogTrigger>
+                                                                        )}
                                                                         <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
                                                                             <DialogTitle className="sr-only">Image preview</DialogTitle>
                                                                             <DialogDescription className="sr-only">Image preview</DialogDescription>
@@ -2295,6 +2295,11 @@ export default function ReservationForm() {
                                                                             <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
                                                                         </DialogContent>
                                                                     </Dialog>
+                                                                    {amenity.amenityImages.length == 0 && (
+                                                                        <div className="flex px-0 items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
+                                                                            <ImageOff className="h-5 w-5 text-muted-foreground" />
+                                                                        </div>
+                                                                    )}
                                                                     <div className="flex flex-col items-start line-clamp-1">
                                                                         <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
                                                                         <span className="text-start text-sm text-muted-foreground line-clamp-1">
@@ -2739,15 +2744,12 @@ export default function ReservationForm() {
                                                             <AccordionTrigger className="hover:no-underline">
                                                                 <div className="flex items-center gap-4 w-full">
                                                                     <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
-                                                                        <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
+                                                                        {amenity.amenityImages.length > 0 && (
+                                                                            <DialogTrigger>
                                                                                 <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
-                                                                                    <ImageOff className="h-5 w-5 text-muted-foreground" />
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogTrigger>
+
+                                                                            </DialogTrigger>
+                                                                        )}
                                                                         <DialogContent className="p-0 max-w-[80%] min-h-[80%] items-center justify-center">
                                                                             <DialogTitle className="sr-only">Image preview</DialogTitle>
                                                                             <DialogDescription className="sr-only">Image preview</DialogDescription>
@@ -2774,6 +2776,11 @@ export default function ReservationForm() {
                                                                             <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
                                                                         </DialogContent>
                                                                     </Dialog>
+                                                                    {amenity.amenityImages.length == 0 && (
+                                                                        <div className="flex px-0 items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
+                                                                            <ImageOff className="h-5 w-5 text-muted-foreground" />
+                                                                        </div>
+                                                                    )}
                                                                     <div className="flex flex-col items-start line-clamp-1">
                                                                         <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
                                                                         <span className="text-start text-sm text-muted-foreground line-clamp-1">
