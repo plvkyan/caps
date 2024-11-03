@@ -1,0 +1,27 @@
+// import { useEffect } from "react";
+import { Link } from "react-router-dom";
+
+export default function ErrorArchivedAccount() {
+    // useEffect(() => {
+    //     const timer = setTimeout(() => {
+    //         window.location.replace('/bills');
+    //     }, 50000);
+
+    //     return () => clearTimeout(timer);
+    // }, []);
+
+    return (
+        <div className="flex flex-col text-center items-center bg-white h-screen w-full justify-center gap-4">
+            <h1 className="text-black text-5xl font-bold">Your account is archived.</h1>
+            <p className="text-black">
+                Accounts are archived after 3 months of delinquency.
+                <br /> Please pay your bills in person to reactivate your account.
+            </p>
+            <Link to="/home">
+                <button className="outline text-black font-semibold py-2 px-4 rounded-lg w-[250px]">
+                    Back to home
+                </button>
+            </Link>
+        </div>
+    );
+}
