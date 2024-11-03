@@ -42,7 +42,7 @@ const getSpecificAmenity = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({ error: "This amenity does not exist." });
+        return res.status(404).json({ error: "This ID is not valid." });
     }
 
     const amenity = await Amenity.findById(id);

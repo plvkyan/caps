@@ -412,7 +412,9 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </TableCell>
                                                 )
-                                            } else return (
+                                            }
+                                            
+                                            return (
                                                 <TableCell
                                                     className="cursor-pointer"
                                                     key={cell.id}

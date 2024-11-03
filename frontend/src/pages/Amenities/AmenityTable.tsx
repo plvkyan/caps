@@ -6,11 +6,7 @@
 
 // Lucide React Icons Imports
 import {
-    Archive,
-    CircleCheck,
     CirclePlus,
-    CircleX,
-    SquarePen,
     X
 } from "lucide-react";
 
@@ -19,8 +15,10 @@ import {
 // shadcn Components Imports
 // shadcn Button Component Import
 import { Button } from "@/components/ui/button";
+
 // shadcn Input Component Import
 import { Input } from "@/components/ui/input";
+
 // shadcn Table Imports
 import {
     Table,
@@ -31,13 +29,18 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
+// shadcn Sonner Import
+import { toast } from "sonner";
+
 
 
 // Custom Component Imports
 // Custom Data Table Pagination Import
 import { BottomDataTablePagination } from "@/components/custom/BottomDataTablePagination";
+
 // Custom Data Table Faceted Filter
 import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
+
 // Custom Data Table View Options
 import { DataTableViewOptions } from "@/components/custom/DataTableViewOptions";
 
@@ -61,17 +64,18 @@ import {
 
 // Utility Imports
 // React Import
-import { useEffect, useState } from "react";
-// React Router Imports
+import {
+    useEffect,
+    useState
+} from "react";
+
 // React Router Navigate Hook Import
 import { useNavigate } from "react-router-dom";
 
 
 
 // Types
-import { RESERVATION_DATA } from "@/data/reservation-data";
-import { toast } from "sonner";
-import { approveManyReservations, archiveManyReservations, rejectManyReservations } from "@/data/reservation-api";
+
 
 
 
@@ -86,9 +90,7 @@ interface AmenityTableProps<TData extends AmenityData, TValue> {
     data: TData[]
 }
 
-// interface GlobalFilter {
-//     globalFilter: any;
-// }
+
 
 const EQUIPMENT = {
     id: 1,
@@ -105,6 +107,7 @@ const AMENITY_DATA = [
     EQUIPMENT,
     FACILITY
 ];
+
 
 
 
@@ -160,91 +163,19 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
 
 
-    // onClick Functions
-    // Handle Archive Button Function
-    const handleArchiveButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as AmenityData)._id);
-            const response = await archiveManyReservations(selectedRowIds);
+    // Functions
 
-            if (response.ok) {
-                sessionStorage.setItem("archiveSuccessful", "true");
-                window.location.reload();
-            } else {
-                throw new Error("Error archiving reservations");
-            }
-        } catch (error) {
-            toast.error((error as Error).message, { closeButton: true });
-        }
-    };
-    // Handle Archive Button Function
-    const handleApproveButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as AmenityData)._id);
-            const response = await approveManyReservations(selectedRowIds);
-
-            if (response.ok) {
-                sessionStorage.setItem("approveSuccessful", "true");
-                window.location.reload();
-            } else {
-                throw new Error("Error approving reservations");
-            }
-        } catch (error) {
-            toast.error((error as Error).message, { closeButton: true });
-        }
-    };
-    // Handle Archive Button Function
-    const handleRejectButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as AmenityData)._id);
-            const response = await rejectManyReservations(selectedRowIds);
-
-            if (response.ok) {
-                sessionStorage.setItem("rejectedSuccessful", "true");
-                window.location.reload();
-            } else {
-                throw new Error("Error rejecting reservations");
-            }
-        } catch (error) {
-            toast.error((error as Error).message, { closeButton: true });
-        }
-    };
-    // Redirect to Reservation Form Function
+    // Redirect to Amenity Form Function
     const navToAmenityForm = () => {
         const reservationFormPath = "/amenities/create";
         navigate(reservationFormPath);
     }
 
-
-    useEffect(() => {
-
-        const intervalId = setInterval(() => {
-            console.log("Is some page rows selected:", table.getIsSomePageRowsSelected());
-            console.log("Selected rows:", table.getSelectedRowModel().rows);
-        }, 1000000);
-
-        return () => clearInterval(intervalId);
-
-    })
-
-    useEffect(() => {
-
-        if (sessionStorage.getItem("approveSuccessful")) {
-            toast.success("Reservation approved successfully", { closeButton: true });
-            sessionStorage.removeItem("approveSuccessful");
-        }
-
-        if (sessionStorage.getItem("rejectedSuccessful")) {
-            toast.success("Reservation rejected successfully", { closeButton: true });
-            sessionStorage.removeItem("rejectedSuccessful");
-        }
-
-        if (sessionStorage.getItem("archiveSuccessful")) {
-            toast.success("Reservation archived successfully", { closeButton: true });
-            sessionStorage.removeItem("archiveSuccessful");
-        }
-
-    }, [])
+    // Redirect to Amenity Details Function
+    const navToAmenityDetails = (id: String) => {
+        const amenityDetailsPath = "/amenities/" + id;
+        navigate(amenityDetailsPath);
+    }
 
 
     return (
@@ -259,16 +190,6 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                 </div>
 
                 <div className="flex items-end gap-2">
-
-                    <Button
-                        disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                        onClick={() => handleArchiveButton()}
-                        size="sm"
-                        variant="outline"
-                    >
-                        <Archive className="h-4 w-4" />
-                        Archive
-                    </Button>
 
                     <Button className="" onClick={navToAmenityForm} size="sm" variant="default" >
                         <CirclePlus className="h-4 w-4" />
@@ -338,11 +259,27 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
                                 >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
-                                    ))}
+                                    {row.getVisibleCells().map((cell) => {
+
+                                        if (cell.column.id === "select") {
+                                            return (
+                                                <TableCell
+                                                    key={cell.id}
+                                                >
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </TableCell>
+                                            )
+                                        } else return (
+                                            <TableCell
+                                                className="cursor-pointer"
+                                                key={cell.id}
+                                                onClick={() => navToAmenityDetails(row.original._id)}
+                                            >
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        )
+
+                                    })}
                                 </TableRow>
                             ))
                         ) : (

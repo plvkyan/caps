@@ -178,11 +178,12 @@ const getArchivedApprovedReservations = async (req, res) => {
 
 // Amenity all reservations
 const getAmenityReservations = async (req, res) => {
-
     const { id } = req.params
 
     try {
-        const amenityReservations = await Reservation.find({ amenityId: id }).sort({ createdAt: -1 });
+        const amenityReservations = await Reservation.find({
+            'reservationAmenities._id': id
+        }).sort({ createdAt: -1 });
         console.log("Amenity reservations fetched successfully.");
         res.status(200).json(amenityReservations);
     } catch (error) {

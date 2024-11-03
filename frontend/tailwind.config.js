@@ -70,6 +70,7 @@ module.exports = {
   				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
+		borderOpacity: ({theme}) => theme('opacity'),
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

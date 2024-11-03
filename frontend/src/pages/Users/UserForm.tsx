@@ -187,7 +187,11 @@ export default function UserForm() {
         document.title = "Create User | GCTMS";
     }, []);
 
-
+    useEffect(() => {
+        if (userForm.watch("userRole") === "Admin") {
+            userForm.setValue("userPosition", "Admin");
+        }
+    }, [userForm.watch("userRole")]);
 
 
 
@@ -285,7 +289,7 @@ export default function UserForm() {
 
                                     <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbPage>
-                                            Create User
+                                            Create user
                                         </BreadcrumbPage>
                                     </BreadcrumbItem>
 
@@ -339,7 +343,7 @@ export default function UserForm() {
 
                                         {/* Header title */}
                                         <h1 className="font-semibold text-2xl">
-                                            Create User
+                                            Create user
                                         </h1>
 
                                         {/* Header Description */}
@@ -362,7 +366,7 @@ export default function UserForm() {
                                     variant="default"
                                 >
                                     {loading ? <LoadingSpinner className="h-4 w-4" /> : <CirclePlus className="h-7 w-7" />}
-                                    Create User
+                                    Create user
                                 </Button>
 
                             </div>
@@ -400,7 +404,7 @@ export default function UserForm() {
                                                 return (
                                                     <FormItem className="flex flex-col gap-2">
                                                         <FormLabel className="font-normal">
-                                                            Block and Lot
+                                                            Block and lot
                                                             <span className="text-destructive"> * </span>
                                                         </FormLabel>
                                                         <FormControl>
@@ -454,7 +458,7 @@ export default function UserForm() {
                                                 return (
                                                     <FormItem className="flex flex-col gap-2">
                                                         <FormLabel className="font-normal">
-                                                            Confirm Password
+                                                            Confirm password
                                                             <span className="text-destructive"> * </span>
                                                         </FormLabel>
                                                         <FormControl>
@@ -517,7 +521,7 @@ export default function UserForm() {
                                                 return (
                                                     <FormItem className="flex flex-col gap-2">
                                                         <FormLabel className="flex gap-1 font-normal">
-                                                            Mobile Number
+                                                            Mobile number
                                                             <span className="text-muted-foreground"> (Optional) </span>
                                                             <TooltipProvider>
                                                                 <Tooltip>
@@ -562,7 +566,7 @@ export default function UserForm() {
                                                 return (
                                                     <FormItem className="flex flex-col gap-5 mb-2.5">
                                                         <FormLabel className="flex gap-1 font-normal">
-                                                            User Role
+                                                            User role
                                                             <span className="text-destructive"> * </span>
                                                             <TooltipProvider>
                                                                 <Tooltip>
@@ -583,9 +587,9 @@ export default function UserForm() {
                                                             >
                                                                 <FormItem className="flex items-center gap-3">
                                                                     <FormControl>
-                                                                        <RadioGroupItem value="Unit Owner" />
+                                                                        <RadioGroupItem value="Unit Owner"/>
                                                                     </FormControl>
-                                                                    <FormLabel>
+                                                                    <FormLabel className="font-normal">
                                                                         Unit Owner
                                                                     </FormLabel>
                                                                 </FormItem>
@@ -593,7 +597,7 @@ export default function UserForm() {
                                                                     <FormControl>
                                                                         <RadioGroupItem value="Admin" />
                                                                     </FormControl>
-                                                                    <FormLabel>
+                                                                    <FormLabel className="font-normal">
                                                                         Admin
                                                                     </FormLabel>
                                                                 </FormItem>
@@ -613,7 +617,7 @@ export default function UserForm() {
                                                 return (
                                                     <FormItem className="flex flex-col gap-2">
                                                         <FormLabel className="flex gap-1 font-normal">
-                                                            User Position
+                                                            User position
                                                             <span className="text-destructive"> * </span>
                                                             <TooltipProvider>
                                                                 <Tooltip>
@@ -665,7 +669,7 @@ export default function UserForm() {
                                                 return (
                                                     <FormItem className="flex flex-col gap-2">
                                                         <FormLabel className="flex gap-1 font-normal">
-                                                            User Status
+                                                            User status
                                                             <span className="text-muted-foreground"> (Optional) </span>
                                                             <TooltipProvider>
                                                                 <Tooltip>
@@ -706,7 +710,7 @@ export default function UserForm() {
                                                 return (
                                                     <FormItem className="flex flex-col gap-2">
                                                         <FormLabel className="flex gap-1 font-normal">
-                                                            User Visibility
+                                                            User visibility
                                                             <span className="text-muted-foreground"> (Optional) </span>
                                                             <TooltipProvider>
                                                                 <Tooltip>

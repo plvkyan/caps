@@ -21,7 +21,7 @@ import { DataTableColumnHeader } from "@/components/custom/DataTableColumnHeader
 
 // Data table imports
 // Data table column definitions imports
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, FilterFn } from "@tanstack/react-table";
 
 
 
@@ -44,7 +44,11 @@ import { useNavigate } from "react-router-dom";
 
 
 
-export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
+export const AmenityReservationTableColumns: ColumnDef<ReservationType>[] = [
+    {
+        accessorKey: "_id",
+        enableSorting: false,
+    },
     {
         id: "select",
         header: ({ table }) => (
@@ -66,10 +70,6 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         ),
         enableSorting: false,
         enableHiding: false,
-    },
-    {
-        accessorKey: "_id",
-        enableSorting: false,
     },
     {
         accessorKey: "reserveeBlkLt",
@@ -101,6 +101,9 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
     },
     {
         accessorKey: "reservationStatus",
+        accessorFn: (row) => {
+            return row.reservationStatus[row.reservationStatus.length - 1].status;
+        },
         header: ({ column }) => {
             return (
                 <DataTableColumnHeader column={column} title="Status" className="justify-center" />
@@ -110,7 +113,6 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
 
             const lastIndex = row.original.reservationStatus.length;
             const status = row.original.reservationStatus[lastIndex - 1].status;
-            console.log(status)
 
             return (
                 <div className="flex items-center justify-center pr-5 w-full">
@@ -132,6 +134,9 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
     },
     {
         accessorKey: "reservationDate",
+        accessorFn: (row) => {
+            return format(row.reservationDate, "PPP");
+        },
         header: ({ column }) => {
             return (
                 <DataTableColumnHeader column={column} title="Reservation Date" className="ml-7 justify-center" />
@@ -139,14 +144,25 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         },
         cell: ({ row }) => {
 
-            const origDate = row.getValue("reservationDate") as any
+            const origDate = row.original.reservationDate;
             const formattedDate = format(origDate, "PP")
 
             return <div className="font-regular text-center"> {formattedDate} </div>
-        }
+        },
+        filterFn:
+            (row, id, value) => {
+                const date = new Date(row.original.reservationDate);
+                
+                const { from: start, to: end } = value as { from: Date, to: Date };
+
+                return date >= start && date <= end;
+            }
     },
     {
         accessorKey: "createdAt",
+        accessorFn: (row) => {
+            return format(row.createdAt, "PPP");
+        },
         header: ({ column }) => {
             return (
                 <DataTableColumnHeader column={column} title="Created At" />
@@ -154,7 +170,7 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         },
         cell: ({ row }) => {
 
-            const origDate = row.getValue("createdAt") as any
+            const origDate = row.original.createdAt
             const formattedDate = format(origDate, "PP")
 
             return <div className="font-regular ml-1"> {formattedDate} </div>

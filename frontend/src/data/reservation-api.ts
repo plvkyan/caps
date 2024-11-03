@@ -42,6 +42,10 @@ export const getSingleReservation = async (reservationId: String) => {
     return (await fetch(apiReservationsUrl + '/' + reservationId));
 }
 
+export const getAmenityReservations = async (amenityId: String) => {
+    return (await fetch(apiReservationsUrl + '/amenity/' + amenityId));
+}
+
 export const getUserReservations = async (userId: String) => {
     return (await fetch(apiReservationsUrl + '/user/' + userId));
 }

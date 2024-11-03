@@ -19,10 +19,10 @@ export const PENDING = {
     label: "Pending",
 };
 
-export const EXPIRED = {
+export const VOID = {
     id: 4,
-    value: "Expired",
-    label: "Expired",
+    value: "Void",
+    label: "Void",
 };
 
 export const COMPLETED = {
@@ -31,12 +31,18 @@ export const COMPLETED = {
     label: "Completed",
 };
 
+export const CANCELLED = {
+    id: 6,
+    value: "Cancelled",
+    label: "Cancelled",
+};
 
 
 export const RESERVATION_DATA = [
     APPROVED,
     REJECTED,
     PENDING,
-    EXPIRED,
+    VOID,
     COMPLETED,
+    CANCELLED,
 ];

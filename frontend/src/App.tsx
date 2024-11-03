@@ -31,7 +31,7 @@ import { useAuthContext } from "@/hooks/useAuthContext.tsx"
 // Amenity List Page Import
 import AmenityPage from '@/pages/Amenities/AmenityPage.tsx';
 // Amenity Details Page Import
-import AmenityDetails from '@/pages/Amenities/AmenityDetails.tsx';
+// import AmenityDetails from '@/pages/Amenities/AmenityDetails.tsx';
 // Amenity Edit Form Page Import
 import AmenityEditForm from '@/pages/Amenities/AmenityEditForm.tsx';
 // Announcements Page Import
@@ -102,6 +102,7 @@ import PrivateRouteAdmin from '@/pages/PrivateRouteAdmin.tsx';
 import UserPage from '@/pages/Users/UserPage.tsx';
 import UserForm from '@/pages/Users/UserForm';
 import UserBulkForm from './pages/Users/UserBulkForm';
+import AmenityDetails from './pages/Amenities/AmenityDetails';
 
 
 
@@ -168,6 +169,10 @@ function App() {
                         <Route
                             path="/amenities"
                             element={<PrivateRoute component={AmenityPage} />}
+                        />
+                        <Route
+                            path="/amenities/:id"
+                            element={<PrivateRoute component={AmenityDetails} />}
                         />
 
 
@@ -312,12 +317,6 @@ function App() {
                                     <Route
                                         path="/amenities"
                                         element={<AmenityPage />}
-                                    >
-                                    </Route>
-
-                                    <Route
-                                        path="/amenities/details/:id"
-                                        element={<AmenityDetails />}
                                     >
                                     </Route>
 

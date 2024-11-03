@@ -1105,9 +1105,9 @@ export default function ReservationForm() {
 
                             {step === 1 && (reservationType === "Equipment" || reservationType === "Equipment and Facility") && (
 
-                                <div className="grid grid-cols-3 gap-6">
+                                <div className="grid gap-6 md:grid-cols-[1fr_250px] lg:grid-cols-3">
                                     {/* Equipment */}
-                                    <Card className="col-span-2 h-fit min-h-fit max-h-svh">
+                                    <Card className="auto-rows-max lg:col-span-2 h-fit min-h-fit max-h-svh">
                                         <CardContent className="flex flex-col gap-2 pt-5 max-h-svh">
                                             {/* Amenity information header */}
                                             <div className="flex flex-row justify-between items-center pb-2">
@@ -1353,9 +1353,9 @@ export default function ReservationForm() {
 
 
 
-                                <div className="grid grid-cols-3 gap-6">
+                                <div className="grid gap-6 md:grid-cols-[1fr_250px] lg:grid-cols-3">
 
-                                    <Card className="col-span-2 h-fit min-h-fit max-h-svh">
+                                    <Card className="auto-rows-max lg:col-span-2 h-fit min-h-fit max-h-svh">
 
                                         <CardContent className="flex flex-col gap-2 pt-5 max-h-svh overflow-y-auto">
 
@@ -1766,9 +1766,9 @@ export default function ReservationForm() {
 
                             {/* Facility list */}
                             {step === 3 && (reservationType === "Facility" || reservationType === "Equipment and Facility") && (
-                                <div className="grid grid-cols-3 gap-6">
+                                <div className="grid gap-6 md:grid-cols-[1fr_250px] lg:grid-cols-3">
                                     {/* Facility */}
-                                    <Card className="col-span-2 h-fit min-h-fit max-h-svh">
+                                    <Card className="auto-rows-max lg:col-span-2 h-fit min-h-fit max-h-svh">
                                         <CardContent className="flex flex-col gap-2 pt-5 max-h-svh">
                                             {/* Amenity information header */}
                                             <div className="pb-2">
@@ -1979,9 +1979,9 @@ export default function ReservationForm() {
 
                             {/* Facility information */}
                             {step === 4 && currentAmenity && (
-                                <div className="grid grid-cols-3 gap-6">
+                                <div className="grid gap-6 md:grid-cols-[1fr_250px] lg:grid-cols-3">
 
-                                    <Card className="col-span-2 h-fit min-h-fit max-h-svh">
+                                    <Card className="auto-rows-max lg:col-span-2 h-fit min-h-fit max-h-svh">
 
                                         <CardContent className="flex flex-col gap-2 pt-5 max-h-svh overflow-y-auto">
 
@@ -2373,10 +2373,10 @@ export default function ReservationForm() {
 
                             {/* Other information */}
                             {step === 5 && (
-                                <div className="grid grid-cols-3 gap-6">
+                                <div className="grid gap-6 md:grid-cols-[1fr_250px] lg:grid-cols-3">
 
                                     {/* Card form */}
-                                    <Card className="col-span-2">
+                                    <Card className="auto-rows-max lg:col-span-2">
 
 
 

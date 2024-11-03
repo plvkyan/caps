@@ -3,7 +3,7 @@
 
 // Imports
 // Import date-fns for formatting dates
-const fns = require('date-fns')
+const fns = require('../node_modules/date-fns')
 
 // Import mailgen for generating the email itself
 const mailgen = require('mailgen');
