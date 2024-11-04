@@ -57,7 +57,7 @@ import { useAuthContext } from "@/hooks/useAuthContext"
 
 // Utility Imports
 // date fns
-import { formatDistanceToNow } from "node_modules/date-fns/formatDistanceToNow"
+import { formatDistanceToNow } from "date-fns"
 
 // React Import
 import React from "react"

@@ -56,7 +56,7 @@ export type ReservationType = {
             statusAuthorPosition: string,
         }
     ],
-    reservationVisiblity: string,
+    reservationVisibility: string,
     interactedBy: string,
     interactedByPosition: string,
     interactionDate: Date,

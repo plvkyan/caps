@@ -9,6 +9,7 @@ const userRoutes = require('./routes/userRoutes')
 const paymentRoutes = require('./routes/paymentRoutes')
 const webhookRoutes = require('./routes/webhookRoutes')
 const emailRoutes = require('./routes/emailRoutes')
+const exportRoutes = require('./routes/exportRoutes')
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -23,8 +24,14 @@ const amenityRoutes = require('./routes/amenityRoutes')
 // Bill Route Import
 const billRoutes = require('./routes/billRoutes')
 
+// Email Route Import
+// const emailRoutes = require('./routes/emailRoutes')
+
 // Middleware Import
 const checkOverdue = require('./middlewares/checkOverdue')
+
+// const exportRoutes = require('./routes/exportRoutes')
+
 // const checkReservation = require('./middlewares/checkReservation')
 const checkOutstanding = require('./middlewares/checkOutstanding')
 
@@ -84,6 +91,7 @@ app.use('/api/amenities', amenityRoutes)
 app.use('/api/webhooks', webhookRoutes)
 app.use('/api/bills', billRoutes)
 app.use('/api/emails', emailRoutes)
+app.use('/api/exports', exportRoutes);
 
 
 // Connect to DB

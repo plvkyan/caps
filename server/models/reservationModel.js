@@ -26,6 +26,10 @@ const reservationSchema = new Schema({
         type: String,
         required: true
     },
+    reserveeRole: {
+        type: String,
+        required: true
+    },
     reserveeEmail: {
         type: String,
         required: false

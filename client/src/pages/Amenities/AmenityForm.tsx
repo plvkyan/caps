@@ -1,6 +1,8 @@
 
 
 
+"use client";
+
 // Imports
 // shadcn Components Imports
 // shadcn AppSidebar Imports

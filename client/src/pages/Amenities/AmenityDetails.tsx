@@ -4,11 +4,20 @@
 // Imports
 // Lucide Icon Imports
 import {
+    Archive,
     CalendarRange,
+    ChevronDown,
     ChevronLeft,
     ChevronRight,
+    ChevronUp,
+    Download,
+    EllipsisVertical,
+    FileDown,
     ImageOff,
     Info,
+    Pencil,
+    Share,
+    Trash2,
 } from "lucide-react";
 
 // shadcn Components Imports
@@ -28,13 +37,16 @@ import {
 // shadcn Button Component Import
 import { Button } from "@/components/ui/button";
 
+// shadcn Calenar Component Import
+import { Calendar } from "@/components/ui/calendar";
+
 // shadcn Card Components Import
 import {
     Card,
     CardContent,
 } from "@/components/ui/card";
 
-// shadcn Chart Components Import
+// shadcn Chart Component Import
 import {
     ChartConfig,
     ChartContainer,
@@ -42,7 +54,7 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 
-// shadcn Recharts Components Imports
+// shadcn Recharts Component Imports
 import {
     CartesianGrid,
     Line,
@@ -50,6 +62,9 @@ import {
     XAxis,
     YAxis,
 } from "recharts"
+
+// shadcn Checkbox Component Import
+import { Checkbox } from "@/components/ui/checkbox";
 
 // shadcn Collapsible Component Imports
 import {
@@ -62,13 +77,53 @@ import {
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
+
+// shadcn Dropdown Menu Component Imports
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuPortal,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+// shadcn Input Component Import
+import { Input } from "@/components/ui/input";
 
 // shadcn Label Component Import
 import { Label } from "@/components/ui/label";
 
 // shadcn NavUser Imports
 import { NavUser } from "@/components/nav-user"
+
+// shadcn Popover Component Imports
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger
+} from "@/components/ui/popover";
+
+// shadcn Select Component Imports
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
 // shadcn Separator Imports
 import { Separator } from "@/components/ui/separator"
@@ -85,11 +140,13 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+
+// shadcn Textarea Component Import
+import { Textarea } from "@/components/ui/textarea";
 
 // shadcn Toast Import
 import { toast } from "sonner";
@@ -105,8 +162,17 @@ import {
 
 
 // Custom Components Imports
-// Theme toggle component import
+// Loading Spinner Component Import
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
+
+// Theme toggle Component import
 import { ThemeToggle } from "@/components/custom/ThemeToggle";
+
+// Amenity Reservation Table Columns Import
+import { AmenityReservationTableColumns } from "@/pages/Amenities/AmenityReservationColumns";
+
+// Amenity Reservation Table Import
+import AmenityReservationTable from "@/pages/Amenities/AmenityReservationTable";
 
 
 
@@ -117,16 +183,23 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 // Utility Imports
-// Date-fns Imports
+// file-saver Import
+import { saveAs } from "file-saver";
 
+// date-fns format Import
+import { format, set } from "date-fns";
 
+// exceljs Workbook Import
+import { Workbook } from "exceljs";
 
 // React Imports
 import {
     useEffect,
-    useMemo,
     useState
 } from "react"
+
+// react-day-picker DateRange Import
+import { DateRange } from "react-day-picker";
 
 
 
@@ -145,150 +218,61 @@ import { getSingleAmenity } from "@/data/amenity-api";
 
 // Reservation API calls Import
 import { getAmenityReservations } from "@/data/reservation-api";
-import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import AmenityReservationTable from "./AmenityReservationTable";
-import { AmenityReservationTableColumns } from "./AmenityReservationColumns";
-import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import { DateRange } from "react-day-picker";
 
 
 
 
-
-
-
-
-
-
+// Chart description
 export const description = "An interactive line chart"
-// const chartData = [
-//     { date: "2024-04-01", desktop: 222, mobile: 150 },
-//     { date: "2024-04-02", desktop: 97, mobile: 180 },
-//     { date: "2024-04-03", desktop: 167, mobile: 120 },
-//     { date: "2024-04-04", desktop: 242, mobile: 260 },
-//     { date: "2024-04-05", desktop: 373, mobile: 290 },
-//     { date: "2024-04-06", desktop: 301, mobile: 340 },
-//     { date: "2024-04-07", desktop: 245, mobile: 180 },
-//     { date: "2024-04-08", desktop: 409, mobile: 320 },
-//     { date: "2024-04-09", desktop: 59, mobile: 110 },
-//     { date: "2024-04-10", desktop: 261, mobile: 190 },
-//     { date: "2024-04-11", desktop: 327, mobile: 350 },
-//     { date: "2024-04-12", desktop: 292, mobile: 210 },
-//     { date: "2024-04-13", desktop: 342, mobile: 380 },
-//     { date: "2024-04-14", desktop: 137, mobile: 220 },
-//     { date: "2024-04-15", desktop: 120, mobile: 170 },
-//     { date: "2024-04-16", desktop: 138, mobile: 190 },
-//     { date: "2024-04-17", desktop: 446, mobile: 360 },
-//     { date: "2024-04-18", desktop: 364, mobile: 410 },
-//     { date: "2024-04-19", desktop: 243, mobile: 180 },
-//     { date: "2024-04-20", desktop: 89, mobile: 150 },
-//     { date: "2024-04-21", desktop: 137, mobile: 200 },
-//     { date: "2024-04-22", desktop: 224, mobile: 170 },
-//     { date: "2024-04-23", desktop: 138, mobile: 230 },
-//     { date: "2024-04-24", desktop: 387, mobile: 290 },
-//     { date: "2024-04-25", desktop: 215, mobile: 250 },
-//     { date: "2024-04-26", desktop: 75, mobile: 130 },
-//     { date: "2024-04-27", desktop: 383, mobile: 420 },
-//     { date: "2024-04-28", desktop: 122, mobile: 180 },
-//     { date: "2024-04-29", desktop: 315, mobile: 240 },
-//     { date: "2024-04-30", desktop: 454, mobile: 380 },
-//     { date: "2024-05-01", desktop: 165, mobile: 220 },
-//     { date: "2024-05-02", desktop: 293, mobile: 310 },
-//     { date: "2024-05-03", desktop: 247, mobile: 190 },
-//     { date: "2024-05-04", desktop: 385, mobile: 420 },
-//     { date: "2024-05-05", desktop: 481, mobile: 390 },
-//     { date: "2024-05-06", desktop: 498, mobile: 520 },
-//     { date: "2024-05-07", desktop: 388, mobile: 300 },
-//     { date: "2024-05-08", desktop: 149, mobile: 210 },
-//     { date: "2024-05-09", desktop: 227, mobile: 180 },
-//     { date: "2024-05-10", desktop: 293, mobile: 330 },
-//     { date: "2024-05-11", desktop: 335, mobile: 270 },
-//     { date: "2024-05-12", desktop: 197, mobile: 240 },
-//     { date: "2024-05-13", desktop: 197, mobile: 160 },
-//     { date: "2024-05-14", desktop: 448, mobile: 490 },
-//     { date: "2024-05-15", desktop: 473, mobile: 380 },
-//     { date: "2024-05-16", desktop: 338, mobile: 400 },
-//     { date: "2024-05-17", desktop: 499, mobile: 420 },
-//     { date: "2024-05-18", desktop: 315, mobile: 350 },
-//     { date: "2024-05-19", desktop: 235, mobile: 180 },
-//     { date: "2024-05-20", desktop: 177, mobile: 230 },
-//     { date: "2024-05-21", desktop: 82, mobile: 140 },
-//     { date: "2024-05-22", desktop: 81, mobile: 120 },
-//     { date: "2024-05-23", desktop: 252, mobile: 290 },
-//     { date: "2024-05-24", desktop: 294, mobile: 220 },
-//     { date: "2024-05-25", desktop: 201, mobile: 250 },
-//     { date: "2024-05-26", desktop: 213, mobile: 170 },
-//     { date: "2024-05-27", desktop: 420, mobile: 460 },
-//     { date: "2024-05-28", desktop: 233, mobile: 190 },
-//     { date: "2024-05-29", desktop: 78, mobile: 130 },
-//     { date: "2024-05-30", desktop: 340, mobile: 280 },
-//     { date: "2024-05-31", desktop: 178, mobile: 230 },
-//     { date: "2024-06-01", desktop: 178, mobile: 200 },
-//     { date: "2024-06-02", desktop: 470, mobile: 410 },
-//     { date: "2024-06-03", desktop: 103, mobile: 160 },
-//     { date: "2024-06-04", desktop: 439, mobile: 380 },
-//     { date: "2024-06-05", desktop: 88, mobile: 140 },
-//     { date: "2024-06-06", desktop: 294, mobile: 250 },
-//     { date: "2024-06-07", desktop: 323, mobile: 370 },
-//     { date: "2024-06-08", desktop: 385, mobile: 320 },
-//     { date: "2024-06-09", desktop: 438, mobile: 480 },
-//     { date: "2024-06-10", desktop: 155, mobile: 200 },
-//     { date: "2024-06-11", desktop: 92, mobile: 150 },
-//     { date: "2024-06-12", desktop: 492, mobile: 420 },
-//     { date: "2024-06-13", desktop: 81, mobile: 130 },
-//     { date: "2024-06-14", desktop: 426, mobile: 380 },
-//     { date: "2024-06-15", desktop: 307, mobile: 350 },
-//     { date: "2024-06-16", desktop: 371, mobile: 310 },
-//     { date: "2024-06-17", desktop: 475, mobile: 520 },
-//     { date: "2024-06-18", desktop: 107, mobile: 170 },
-//     { date: "2024-06-19", desktop: 341, mobile: 290 },
-//     { date: "2024-06-20", desktop: 408, mobile: 450 },
-//     { date: "2024-06-21", desktop: 169, mobile: 210 },
-//     { date: "2024-06-22", desktop: 317, mobile: 270 },
-//     { date: "2024-06-23", desktop: 480, mobile: 530 },
-//     { date: "2024-06-24", desktop: 132, mobile: 180 },
-//     { date: "2024-06-25", desktop: 141, mobile: 190 },
-//     { date: "2024-06-26", desktop: 434, mobile: 380 },
-//     { date: "2024-06-27", desktop: 448, mobile: 490 },
-//     { date: "2024-06-28", desktop: 149, mobile: 200 },
-//     { date: "2024-06-29", desktop: 103, mobile: 160 },
-//     { date: "2024-06-30", desktop: 446, mobile: 400 },
-// ]
+
+// Chart configuration
 const chartConfig = {
-
-    quantity: {
-        label: "Quantity reserved: ",
-        color: "hsl(var(--chart-1))",
+    pending: {
+        label: "Pending: ",
+        color: "hsl(var(--warning))",
     },
-
+    approved: {
+        label: "Approved: ",
+        color: "hsl(var(--primary))",
+    },
+    rejected: {
+        label: "Rejected: ",
+        color: "hsl(var(--destructive))",
+    },
+    forReturn: {
+        label: "For Return: ",
+        color: "hsl(var(--chart-2))",
+    },
+    returned: {
+        label: "Returned: ",
+        color: "hsl(var(--chart-3))",
+    },
+    completed: {
+        label: "Completed: ",
+        color: "hsl(var(--chart-4))",
+    },
 } satisfies ChartConfig
 
 
 
 
 
-
-
-
-
-
-
+// Function definition
 export default function AmenityDetails() {
 
 
     // Contexts
     // Authentication Context
-    // const { user } = useAuthContext();
+    const { user } = useAuthContext();
 
 
 
     // States
+    // Loading state
+    const [loading, setLoading] = useState<boolean>(false);
+
+
+
     // Image preview states
     // Current image index for image preview
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -299,197 +283,382 @@ export default function AmenityDetails() {
     // Image preview dialog state
     const [showImagePreview, setShowImagePreview] = useState(false);
 
-    // Amenity state
+    // Export amenity dialog state
+    const [showExportDialog, setShowExportDialog] = useState(true);
+    // Export options basic info state
+    const [includeBasicInfo, setIncludeBasicInfo] = useState(true);
+    // Export options stock state
+    // const [includeStock, setIncludeStock] = useState(true);
+    // Export options stock options state
+    // const [showStockOptions, setShowStockOptions] = useState(true);
+    // Export amenity reservations state
+    const [includeReservationOptions, setIncludeReservationOptions] = useState(true);
+    // Export amenity reservations options state
+    const [showReservationOptions, setShowReservationOptions] = useState(true);
+    // 
+    const [exportReservationDateRange, setExportReservationDateRange] = useState<DateRange | undefined>({
+        from: undefined,
+        to: undefined,
+    });
+
+    const [exportCreatedAtDateRange, setExportCreatedAtDateRange] = useState<DateRange | undefined>({
+        from: undefined,
+        to: undefined,
+    });
+
+    const [exportStatus, setExportStatus] = useState<string[]>(["Pending", "Approved", "Rejected", "Ongoing", "For Return", "Returned", "Completed"]);
+
+    const [exportReservationVisibility, setExportReservationVisibility] = useState<string>("Unarchived");
+
+    const [exportReservationType, setExportReservationType] = useState<string>("All");
+
+    const [exportAuthorRole, setExportAuthorRole] = useState<string>("All");
+
+    // Amenity-related states
+    // Amenity information state
     const [amenity, setAmenity] = useState<AmenityType>();
-    // Loading state
-    const [loading, setLoading] = useState<boolean>(false);
-    // Reservations state
+
+    // Amenity reservations state
     const [reservations, setReservations] = useState<ReservationType[]>([]);
+
+
+
+    // Chart-related states
+    // Chart data state
+    const [chartData, setChartData] = useState([{}]);
+
+    // Chart reservation types state
+    const [chartType, setChartType] = useState(undefined);
+
     // Chart time range state
     const [date, setDate] = useState<DateRange | undefined>({
         from: undefined,
         to: undefined,
     });
-    // Chart data state
-    const [chartData, setChartData] = useState([{}]);
-
 
 
 
     // Effects
-    // Page title effect
+    // Effect for changing page title
     useEffect(() => {
         document.title = amenity?.amenityName + " Details | GCTMS";
     }, [amenity]);
 
-    // Fetch amenity effect
+    // Effect for fetching data
     useEffect(() => {
+        const fetchData = async () => {
+            const id = new URL(window.location.href).pathname.split('/').pop();
+            if (!id) {
+                toast.error('Invalid amenity ID');
+                return;
+            }
 
-        // Fetch the amenity once the page loads
-        const fetchAmenity = async () => {
             try {
                 setLoading(true);
 
-                const id = new URL(window.location.href).pathname.split('/').pop();
-                if (!id) throw new Error('Invalid amenity ID found');
+                // Fetch data in parallel
+                const [amenityRes, reservationsRes] = await Promise.all([
+                    getSingleAmenity(id),
+                    getAmenityReservations(id)
+                ]);
 
-                const response = await getSingleAmenity(id);
+                if (!amenityRes.ok) throw new Error('Failed to fetch amenity');
+                if (!reservationsRes.ok) throw new Error('Failed to fetch reservations');
 
-                if (response.ok) {
-                    const data = await response.json();
+                const [amenityData, reservations] = await Promise.all([
+                    amenityRes.json(),
+                    reservationsRes.json()
+                ]);
 
-                    setAmenity(data);
-                    setImages(data.amenityImages);
+                // Update basic amenity data
+                setAmenity(amenityData);
+                setImages(amenityData.amenityImages || []);
+                setReservations(reservations);
 
-                    toast.success("Amenity fetched successfully.");
-                }
+                // Process reservation data for chart
+                const processChartData = () => {
+                    const dataMap = new Map();
 
-                if (!response.ok) throw new Error('Failed to fetch amenity.');
-            } catch (error: any) {
-                toast.error(error.message);
+                    // Get date range
+                    const dates = reservations.map(r => new Date(r.reservationDate));
+                    if (dates.length === 0) return [];
+
+                    const startDate = new Date(Math.min(...dates));
+                    const endDate = new Date(Math.max(...dates));
+
+                    // Initialize all dates
+                    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                        const dateStr = d.toISOString().split('T')[0];
+                        dataMap.set(dateStr, {
+                            date: dateStr,
+                            pending: 0,
+                            approved: 0,
+                            rejected: 0,
+                            forReturn: 0,
+                            returned: 0,
+                            completed: 0
+                        });
+                    }
+
+                    // Aggregate reservation data
+                    reservations.forEach(reservation => {
+                        const dateStr = new Date(reservation.reservationDate).toISOString().split('T')[0];
+                        const status = reservation.reservationStatus[reservation.reservationStatus.length - 1].status;
+                        const quantity = reservation.reservationAmenities.find(a => a._id === id)?.amenityQuantity || 0;
+
+                        const data = dataMap.get(dateStr);
+                        if (data && status in data) {
+                            data[status.toLowerCase()] += quantity;
+                        }
+                    });
+
+                    return Array.from(dataMap.values()).sort((a, b) =>
+                        new Date(a.date).getTime() - new Date(b.date).getTime()
+                    );
+                };
+
+                setChartData(processChartData());
+                toast.success("Data loaded successfully");
+
+            } catch (error) {
+                console.error(error);
+                toast.error(error instanceof Error ? error.message : 'Failed to load data');
             } finally {
                 setLoading(false);
             }
-        }
+        };
 
-
-
-        // Fetch the amenity's reservations once the page loads
-        const fetchReservations = async () => {
-            try {
-                const id = new URL(window.location.href).pathname.split('/').pop();
-                if (!id) throw new Error('Invalid amenity ID found');
-
-                const response = await getAmenityReservations(id);
-
-                if (response.ok) {
-                    const data = await response.json();
-
-                    setReservations(data);
-
-                    const chartDataArray = data
-                        .filter(reservation => reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Approved")
-                        .reduce((acc, reservation) => {
-                            // Convert date to YYYY-MM-DD format
-                            const dateStr = new Date(reservation.reservationDate).toISOString().split('T')[0];
-
-                            // Find quantity for this amenity
-                            const quantity = reservation.reservationAmenities.find(a => a._id === id)?.amenityQuantity || 0;
-
-                            // If date exists in accumulator, add to quantity, otherwise create new entry
-                            if (acc[dateStr]) {
-                                acc[dateStr] += quantity;
-                            } else {
-                                acc[dateStr] = quantity;
-                            }
-
-                            return acc;
-                        }, {});
-
-                    // Convert to array format for chart
-                    const formattedData = Object.entries(chartDataArray)
-                        .map(([date, quantity]) => ({
-                            date,
-                            quantity
-                        }))
-                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-                    setChartData(formattedData);
-                    toast.success("Reservations fetched successfully.");
-                }
-
-                if (!response.ok) throw new Error('Failed to fetch reservations.');
-            } catch (error: any) {
-                toast.error(error.message);
-            }
-        }
-
-        // Call the fetch amenity and fetch reservations functions
-        fetchAmenity();
-        fetchReservations();
+        fetchData();
     }, []);
 
+    // Effect for chart data changes
     useEffect(() => {
         const id = new URL(window.location.href).pathname.split('/').pop();
-        if (!id) return;
+        if (!id || !reservations.length) return;
 
-        // If no date range selected, show all data
-        if (!date?.from || !date?.to) {
-            const allData = reservations
-            .filter(reservation => 
-                reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Approved" &&
-                reservation.reservationAmenities.some(a => a._id === id)
-            )
-            .reduce<Record<string, number>>((acc, reservation) => {
+        // Process reservations based on filters
+        const filterReservations = (reservation: ReservationType) => {
+            const hasAmenity = reservation.reservationAmenities.some(a => a._id === id);
+            if (!hasAmenity) return false;
+
+            if (!date?.from || !date?.to) return true;
+
+            const reservationDate = new Date(reservation.reservationDate);
+            return reservationDate >= date.from && reservationDate <= date.to;
+        };
+
+        // Create initial data structure for a date
+        const createEmptyDateStats = () => ({
+            pending: 0,
+            approved: 0,
+            rejected: 0,
+            forReturn: 0,
+            returned: 0,
+            completed: 0
+        });
+
+        // Aggregate reservation data by date
+        const aggregatedData = reservations
+            .filter(filterReservations)
+            .reduce<Record<string, ReturnType<typeof createEmptyDateStats>>>((acc, reservation) => {
                 const dateStr = new Date(reservation.reservationDate).toISOString().split('T')[0];
+                const status = reservation.reservationStatus[reservation.reservationStatus.length - 1].status.toLowerCase();
                 const quantity = reservation.reservationAmenities.find(a => a._id === id)?.amenityQuantity ?? 0;
-                
-                acc[dateStr] = (acc[dateStr] ?? 0) + quantity;
+
+                acc[dateStr] = acc[dateStr] || createEmptyDateStats();
+                acc[dateStr][status as keyof ReturnType<typeof createEmptyDateStats>] += quantity;
+
                 return acc;
             }, {});
 
-            const chartDataArray = Object.entries(allData)
-            .map(([date, quantity]) => ({
-                date,
-                quantity
-            }))
-            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        // Fill gaps between dates
+        const dates = Object.keys(aggregatedData).sort();
+        if (dates.length > 0) {
+            const startDate = new Date(dates[0]);
+            const endDate = new Date(dates[dates.length - 1]);
 
-            setChartData(chartDataArray);
-            return;
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                if (!aggregatedData[dateStr]) {
+                    aggregatedData[dateStr] = createEmptyDateStats();
+                }
+            }
         }
 
-        // Filter by date range if selected
-        const filteredData = reservations
-            .filter((reservation) => {
-            const isApproved = reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Approved";
-            const hasAmenity = reservation.reservationAmenities.some(a => a._id === id);
-            const reservationDate = new Date(reservation.reservationDate);
-            
-            return isApproved && 
-                   hasAmenity && 
-                   reservationDate >= (date.from as any) &&
-                   reservationDate <= (date.to as any);
-            })
-            .reduce<Record<string, number>>((acc, reservation) => {
-            const dateStr = new Date(reservation.reservationDate).toISOString().split('T')[0];
-            const quantity = reservation.reservationAmenities.find(a => a._id === id)?.amenityQuantity ?? 0;
-            
-            acc[dateStr] = (acc[dateStr] ?? 0) + quantity;
-            return acc;
-            }, {});
-
-        const chartDataArray = Object.entries(filteredData)
-            .map(([date, quantity]) => ({
-            date,
-            quantity
-            }))
+        // Convert to array and sort by date
+        const chartDataArray = Object.entries(aggregatedData)
+            .map(([date, stats]) => ({ date, ...stats }))
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
         setChartData(chartDataArray);
-        }, [date, reservations]);
-
+    }, [date, reservations]);
 
 
     // Functions
+    // Export excel file function
+    const exportExcel = async () => {
+
+        try {
+
+            if (!amenity) throw new Error('Amenity data not available');
+
+            if (!includeBasicInfo && !includeReservationOptions) {
+                throw new Error('Please select at least one export option');
+            }
+
+            const wb = new Workbook();
+
+            wb.creator = user.blkLt;
+            wb.lastModifiedBy = user.blkLt;
+            wb.created = new Date();
+            wb.modified = new Date();
+
+
+            if (includeBasicInfo) {
+                const ws = wb.addWorksheet(amenity?.amenityName + ' Details');
+
+                if (amenity && amenity.amenityType === "Equipment") {
+                    ws.columns = [
+                        { header: "Amenity Name", key: "amenityName", width: 20 },
+                        { header: "Amenity Type", key: "amenityType", width: 15 },
+                        { header: "Amenity Stock", key: "amenityStockMax", width: 10 },
+                        { header: "Amenity Min Qty", key: "amenityQuantityMin", width: 10 },
+                        { header: "Amenity Max Qty", key: "amenityQuantityMax", width: 10 },
+                        { header: "Amenity Description", key: "amenityDescription", width: 100 },
+                        { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
+                        { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
+                    ];
+                    ws.addRow({
+                        amenityName: amenity?.amenityName,
+                        amenityType: amenity?.amenityType,
+                        amenityStockMax: amenity?.amenityStockMax,
+                        amenityQuantityMin: amenity?.amenityQuantityMin,
+                        amenityQuantityMax: amenity?.amenityQuantityMax,
+                        amenityDescription: amenity?.amenityDescription,
+                        amenityReminder: amenity?.amenityReminder,
+                        amenityVisibility: amenity?.amenityVisibility
+                    });
+                    ws.addRow({});
+                } else if (amenity && amenity.amenityType === "Facility") {
+                    ws.columns = [
+                        { header: "Amenity Name", key: "amenityName", width: 20 },
+                        { header: "Amenity Type", key: "amenityType", width: 15 },
+                        { header: "Amenity Address", key: "amenityAddress", width: 50 },
+                        { header: "Amenity Description", key: "amenityDescription", width: 100 },
+                        { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
+                        { header: "Amenity Visibility", key: "amenityVisibility", width: 15 }
+                    ];
+                    ws.addRow({
+                        amenityName: amenity?.amenityName,
+                        amenityType: amenity?.amenityType,
+                        amenityAddress: amenity?.amenityAddress,
+                        amenityDescription: amenity?.amenityDescription,
+                        amenityReminder: amenity?.amenityReminder,
+                        amenityVisibility: amenity?.amenityVisibility
+                    });
+                }
+
+                ws.getRow(1).eachCell(cell => {
+                    cell.font = { bold: true };
+                });
+            }
+
+
+            // Add a second worksheet for reservations if includeReservationOptions is true
+            if (includeReservationOptions) {
+                const wsReservations = wb.addWorksheet(amenity.amenityName + ' Reservations');
+
+                // Set up columns
+                wsReservations.columns = [
+                    { header: "Reservation ID", key: "reservationId", width: 29 },
+                    { header: "Reservee ID", key: "reserveeId", width: 29 },
+                    { header: "Reservation Type", key: "reservationType", width: 22 },
+                    { header: "Reservation Amenities", key: "reservationAmenities", width: 72 },
+                    { header: "Reservation Status", key: "reservationStatus", width: 12 },
+                    { header: "Reservation Date", key: "reservationDate", width: 15 },
+                    { header: "Reservation Visibility", key: "reservationVisibility", width: 12 },
+                    { header: "Created At", key: "createdAt", width: 15 },
+                ];
+
+                // Filter reservations based on export options
+                const filteredReservations = reservations.filter(reservation => {
+                    const reservationDate = new Date(reservation.reservationDate);
+                    const createdAt = new Date(reservation.createdAt);
+                    const currentStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1].status;
+
+                    // Date range filters
+                    const matchesReservationDate = !exportReservationDateRange?.from || !exportReservationDateRange?.to ||
+                        (reservationDate >= exportReservationDateRange.from && reservationDate <= exportReservationDateRange.to);
+
+                    const matchesCreatedDate = !exportCreatedAtDateRange?.from || !exportCreatedAtDateRange?.to ||
+                        (createdAt >= exportCreatedAtDateRange.from && createdAt <= exportCreatedAtDateRange.to);
+
+                    // Status filter
+                    const matchesStatus = exportStatus.includes(currentStatus);
+
+                    // Visibility filter
+                    const matchesVisibility = exportReservationVisibility === "All" ? true :
+                        exportReservationVisibility === "Unarchived" ? reservation.reservationVisibility === "Unarchived" :
+                            exportReservationVisibility === "Archived" ? reservation.reservationVisibility === "Archived" : false;
+
+                    // Type filter
+                    const matchesType = exportReservationType === "All" ? true :
+                        exportReservationType === "Equipment" ? reservation.reservationType === "Equipment" :
+                            exportReservationType === "Facility" ? reservation.reservationType === "Facility" :
+                                exportReservationType === "Equipment and Facility" ? reservation.reservationType === "Equipment and Facility" : false;
+
+                    const matchesAuthorRole = exportAuthorRole === "All" ? true :
+                        exportAuthorRole === "Unit Owners" ? reservation.reserveePosition === "Unit Owner" :
+                            exportAuthorRole === "Admins" ? reservation.reserveePosition != "Unit Owner" : false;
+
+                    return matchesReservationDate && matchesCreatedDate && matchesStatus &&
+                        matchesVisibility && matchesType &&
+                        matchesAuthorRole;
+                });
+
+                // Add the filtered data
+                filteredReservations.forEach(reservation => {
+                    wsReservations.addRow({
+                        reservationId: reservation._id,
+                        reserveeId: reservation.reserveeId,
+                        reserveeBlkLt: reservation.reserveeBlkLt,
+                        reservationType: reservation.reservationType,
+                        reservationAmenities: reservation.reservationAmenities.map(a => `${a.amenityName} (${a.amenityQuantity})`).join(', '),
+                        reservationStatus: reservation.reservationStatus[reservation.reservationStatus.length - 1].status,
+                        reservationDate: format(new Date(reservation.reservationDate), "MMM d, yyyy"),
+                        reservationVisibility: reservation.reservationVisibility,
+                        createdAt: format(new Date(reservation.createdAt), "MMM d, yyyy"),
+                    });
+                });
+
+                // Style the header row
+                wsReservations.getRow(1).font = { bold: true };
+            }
+
+
+
+            const buffer = await wb.xlsx.writeBuffer();
+            saveAs(new Blob([buffer], { type: "application/octet-stream" }), "amenity-details.xlsx");
+
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Failed to export data');
+        }
+
+    }
+
     // Image-related functions
     // Handle previous image function
     const handlePrevImage = () => {
-        if (currentIndex === 0) {
-            setCurrentIndex(images.length - 1);
-        } else {
-            setCurrentIndex(currentIndex - 1);
-        }
+        setCurrentIndex((prev) => prev === 0 ? images.length - 1 : prev - 1);
     };
 
     // Handle next image function
     const handleNextImage = () => {
-        if (currentIndex === images.length - 1) {
-            setCurrentIndex(0);
-        } else {
-            setCurrentIndex(currentIndex + 1);
-        }
-    }
+        setCurrentIndex((prev) => prev === images.length - 1 ? 0 : prev + 1);
+    };
+
+
+
 
 
     return (
@@ -598,12 +767,56 @@ export default function AmenityDetails() {
 
                             </div>
 
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+
+                                    <Button
+                                        className="ml-auto h-7 w-7"
+                                        size="icon"
+                                        variant="outline"
+                                    >
+                                        <EllipsisVertical className="h-4 w-4" />
+                                    </Button>
+
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent align="end" className="mt-1">
+                                    <DropdownMenuGroup>
+                                        <DropdownMenuItem>
+                                            <Pencil className="h-4 w-4" />
+                                            Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setShowExportDialog(true)}>
+                                            <Share className="h-4 w-4" />
+                                            Export .xslx
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>
+                                            <Archive className="h-4 w-4" />
+                                            Archive
+                                        </DropdownMenuItem>
+
+                                    </DropdownMenuGroup>
+
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-destructive focus:text-red-500">
+                                        <Trash2 className="h-4 w-4" />
+                                        Delete
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+
+
                         </div>
 
+
+
+                        {/* Page content container */}
                         <div className="grid gap-6 md:grid-cols-[1fr_250px] lg:grid-cols-3">
 
 
 
+                            {/* Page content */}
                             {/* Main column */}
                             <div className="grid auto-rows-max items-start gap-6 lg:col-span-2">
 
@@ -673,7 +886,7 @@ export default function AmenityDetails() {
                                                     Description
                                                 </Label>
                                                 <p className="text-sm text-muted-foreground">
-                                                    A detailed account of the amenity, including its functions, features, among other information.
+                                                    A detailed account of the {amenity.amenityType.toLowerCase()}, including its functions, features, among other information.
                                                 </p>
                                             </div>
 
@@ -805,7 +1018,7 @@ export default function AmenityDetails() {
 
                                             </Label>
 
-                                            <p className="text-sm font-normal text-muted-foreground"> Choose if you want unit owners to see this amenity or not. </p>
+                                            <p className="text-sm font-normal text-muted-foreground"> Choose if you want unit owners to see this {amenity.amenityType.toLowerCase()} or not. </p>
 
                                         </div>
 
@@ -837,124 +1050,205 @@ export default function AmenityDetails() {
                                     <CardContent className="flex flex-col gap-4 pt-5">
 
                                         {/* Stocks header */}
-                                        <div className="flex flex-col">
-                                            <Label className="text-lg font-semibold"> {amenity.amenityName + " Stocks"} </Label>
-                                            <p className="text-sm font-normal text-muted-foreground"> An overview of the key characteristics of the {amenity.amenityType.toLowerCase()}. </p>
+                                        <div className="flex flex-row justify-between mb-2">
+
+                                            <div className="flex flex-col">
+                                                <Label className="text-lg font-semibold"> {amenity.amenityName + " Stocks"} </Label>
+                                                <p className="text-sm font-normal text-muted-foreground"> Manage the availability and allocation of equipment to manage reservations. </p>
+                                            </div>
+
+                                            {/* Date Range Filter Button */}
+                                            <div className="flex gap-2">
+
+                                                {/* Chart reservations */}
+                                                {/* <Select defaultValue="All">
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a fruit" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectItem value="All"> All </SelectItem>
+                                                            <SelectItem value="Pending">Pending</SelectItem>
+                                                            <SelectItem value="Approved">Approved</SelectItem>
+                                                            <SelectItem value="Rejected">Rejected</SelectItem>
+                                                            {amenity.amenityType === "Equipment" && (
+                                                                <>
+                                                                    <SelectItem value="For Return">For Return</SelectItem>
+                                                                    <SelectItem value="Returned">Returned</SelectItem>
+                                                                </>
+                                                            )}
+                                                            <SelectItem value="Completed">Completed</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select> */}
+
+                                                {/* Chart date range */}
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            className="justify-start font-normal"
+                                                            id="date"
+                                                            variant="outline"
+                                                        >
+                                                            <CalendarRange className="mr-2 h-4 w-4 opacity-50" />
+                                                            {date?.from && date?.to
+                                                                ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
+                                                                : "All reservation dates"}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-fit">
+                                                        <Calendar
+                                                            initialFocus
+                                                            mode="range"
+                                                            defaultMonth={date?.from}
+                                                            selected={date}
+                                                            onSelect={setDate}
+                                                            numberOfMonths={2}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+
+                                            </div>
+
+
                                         </div>
 
-                                        {/* Stocks  */}
-                                        {/* Date Range Filter Button */}
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    className="justify-start font-normal"
-                                                    id="date"
-                                                    variant="outline"
-                                                >
-                                                    <CalendarRange className="mr-2 h-4 w-4 opacity-50" />
-                                                    {date?.from && date?.to
-                                                        ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
-                                                        : "All reservation dates"}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-fit">
-                                                <Calendar
-                                                    initialFocus
-                                                    mode="range"
-                                                    defaultMonth={date?.from}
-                                                    selected={date}
-                                                    onSelect={setDate}
-                                                    numberOfMonths={2}
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
 
 
                                         {/* Stocks chart container */}
-                                        <ChartContainer
-                                            config={chartConfig}
-                                            className="aspect-auto h-[250px] w-full"
-                                        >
-                                            <LineChart
-                                                accessibilityLayer
-                                                data={chartData}
-                                                margin={{
-                                                    left: 12,
-                                                    right: 12,
-                                                }}
+                                        <div className="flex flex-row flex-wrap items-center md:flex-nowrap gap-4">
+
+                                            <ChartContainer
+                                                config={chartConfig}
+                                                className="grow aspect-auto h-[250px] w-full"
                                             >
-                                                <CartesianGrid vertical={true} />
-                                                <XAxis
-                                                    dataKey="date"
-                                                    tickLine={true}
-                                                    axisLine={false}
-                                                    tickMargin={8}
-                                                    minTickGap={32}
-                                                    tickFormatter={(value) => {
-                                                        const date = new Date(value)
-                                                        return date.toLocaleDateString("en-US", {
-                                                            month: "short",
-                                                            day: "numeric",
-                                                        })
+                                                <LineChart
+                                                    accessibilityLayer
+                                                    data={chartData}
+                                                    margin={{
+                                                        left: -18,
+                                                        right: 16,
                                                     }}
-                                                />
-                                                <YAxis
-                                                    tickLine={false}
-                                                    axisLine={false}
-                                                    tickMargin={8}
-                                                    tickCount={5}
-                                                />
-                                                <ChartTooltip
-                                                    content={
-                                                        <ChartTooltipContent
-                                                            className="w-[150px]"
-                                                            nameKey="quantity"
-                                                            labelFormatter={(value) => {
-                                                                return new Date(value).toLocaleDateString("en-US", {
-                                                                    month: "short",
-                                                                    day: "numeric",
-                                                                    year: "numeric",
-                                                                })
-                                                            }}
-                                                        />
-                                                    }
-                                                />
-                                                <Line
-                                                    dataKey="quantity"
-                                                    type="monotone"
-                                                    stroke="hsl(var(--primary))"
-                                                    strokeWidth={2}
-                                                    dot={false}
-                                                />
-                                            </LineChart>
-                                        </ChartContainer>
+                                                >
+                                                    <CartesianGrid vertical={true} />
+                                                    <XAxis
+                                                        dataKey="date"
+                                                        tickLine={true}
+                                                        axisLine={false}
+                                                        tickMargin={8}
+                                                        minTickGap={32}
+                                                        tickFormatter={(value) => {
+                                                            const date = new Date(value)
+                                                            return date.toLocaleDateString("en-US", {
+                                                                month: "short",
+                                                                day: "numeric",
+                                                            })
+                                                        }}
+                                                    />
+                                                    <YAxis
+                                                        tickLine={false}
+                                                        axisLine={false}
+                                                        tickMargin={8}
+                                                        tickCount={5}
+                                                    />
+                                                    <ChartTooltip
+                                                        content={
+                                                            <ChartTooltipContent
+                                                                className="w-[150px]"
+                                                                labelFormatter={(value) => {
+                                                                    return new Date(value).toLocaleDateString("en-US", {
+                                                                        month: "short",
+                                                                        day: "numeric",
+                                                                        year: "numeric",
+                                                                    })
+                                                                }}
+                                                            />
+                                                        }
+                                                    />
+                                                    <Line
+                                                        dataKey="approved"
+                                                        type="monotone"
+                                                        stroke="var(--color-approved)"
+                                                        strokeWidth={2}
+                                                        dot={false}
+                                                    />
+                                                    {/* <Line
+                                                        dataKey="pending"
+                                                        type="monotone"
+                                                        stroke="var(--color-pending)"
+                                                        strokeWidth={2}
+                                                        dot={false}
+                                                    /> */}
+                                                    {/* <Line
+                                                        dataKey="rejected"
+                                                        type="monotone"
+                                                        stroke="var(--color-rejected)"
+                                                        strokeWidth={2}
+                                                        dot={false}
+                                                    /> */}
+                                                    {amenity.amenityType === "Equipment" && (
+                                                        <>
+                                                            <Line
+                                                                dataKey="forReturn"
+                                                                type="monotone"
+                                                                stroke="var(--color-forReturn)"
+                                                                strokeWidth={2}
+                                                                dot={false}
+                                                            />
+                                                            <Line
+                                                                dataKey="returned"
+                                                                type="monotone"
+                                                                stroke="var(--color-returned)"
+                                                                strokeWidth={2}
+                                                                dot={false}
+                                                            />
+                                                        </>
+                                                    )}
+
+                                                    <Line
+                                                        dataKey="completed"
+                                                        type="monotone"
+                                                        stroke="var(--color-completed)"
+                                                        strokeWidth={2}
+                                                        dot={false}
+                                                    />
+                                                </LineChart>
+                                            </ChartContainer>
+
+                                            <div className="shrink">
+                                                <Table className="w-fit">
+                                                    <TableHeader className=" !pt-0">
+                                                        <TableRow className=" !pt-0 hover:bg-transparent">
+                                                            <TableHead className=" !pt-0 w-[150px]"> </TableHead>
+                                                            <TableHead className=" !pt-0 w-[150px]"> Quantity </TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        <TableRow key="max-stock">
+                                                            <TableCell className="font-medium"> Max Stock </TableCell>
+                                                        </TableRow>
+                                                        <TableRow key="missing-stock">
+                                                            <TableCell className="font-medium"> Unavailable </TableCell>
+                                                        </TableRow>
+                                                        <TableRow key="min-qty">
+                                                            <TableCell className="font-medium"> Min per reservation </TableCell>
+                                                        </TableRow>
+                                                        <TableRow key="max-qty">
+                                                            <TableCell className="font-medium"> Max per reservation </TableCell>
+                                                        </TableRow>
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+
+
+
+
+                                        </div>
+
 
                                         <div className="flex flex-col">
 
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead className="w-[100px]">Invoice</TableHead>
-                                                        <TableHead>Status</TableHead>
-                                                        <TableHead>Method</TableHead>
-                                                        <TableHead className="text-right">Amount</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    <TableRow key="tite">
-                                                        <TableCell className="font-medium">tite</TableCell>
-                                                        <TableCell>tie2</TableCell>
-                                                        <TableCell>tite3</TableCell>
-                                                        <TableCell className="text-right"> tite 4</TableCell>
-                                                    </TableRow>
-                                                </TableBody>
-                                                <TableFooter>
-                                                    <TableRow>
-                                                        <TableCell colSpan={3}>Total</TableCell>
-                                                        <TableCell className="text-right">$2,500.00</TableCell>
-                                                    </TableRow>
-                                                </TableFooter>
-                                            </Table>
+
 
 
                                         </div>
@@ -992,6 +1286,432 @@ export default function AmenityDetails() {
 
                         </div>
 
+                        {/* Export amenity dialog */}
+                        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+
+                            <DialogContent className="md:min-w-[70%] max-h-[80%] overflow-scroll">
+
+                                {/* Export options header */}
+                                <DialogHeader>
+
+                                    <DialogTitle>
+                                        Export Options
+                                    </DialogTitle>
+
+                                    <DialogDescription>
+                                        Please select the information to include in the export. All are selected by default.
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                {/* Amenity Basic Information */}
+                                <div className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 "
+                                    + (!includeBasicInfo ? "text-muted-foreground/50" : "text-white/90")
+                                }>
+                                    <Label className="text-sm"> Amenity Basic Information </Label>
+                                    <Checkbox
+                                        checked={includeBasicInfo}
+                                        onCheckedChange={(checked) => setIncludeBasicInfo(!!checked)}
+                                    />
+                                </div>
+
+                                {/* <Collapsible
+                                    className={"relative w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:transition-all data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"}
+                                    disabled={!includeStock}
+                                    onOpenChange={setShowStockOptions}
+                                    open={!includeStock ? false : showStockOptions}
+                                >
+                                    <Checkbox
+                                        checked={includeStock}
+                                        onCheckedChange={(checked) => setIncludeStock(!!checked)}
+                                        className="absolute top-5 right-6 z-50"
+                                    />
+
+                                    <CollapsibleTrigger className={"flex gap-2 items-center w-full "
+                                        +
+                                        (!includeStock ?
+                                            "text-muted-foreground/50" :
+                                            "text-white/90"
+                                        )}
+                                    >
+
+                                        <Label className="text-sm cursor-pointer"> Amenity Stock </Label>
+                                        <div className="flex items-center justify-center h-6 w-6 rounded-md hover:bg-accent">
+                                            {!showStockOptions ? <ChevronDown className="h-4 w-4" />
+                                                : < ChevronUp className="h-4 w-4" />}
+                                        </div>
+
+                                    </CollapsibleTrigger>
+
+                                    <CollapsibleContent>
+
+                                    asdfasfs
+                                    </CollapsibleContent>
+
+                                </Collapsible> */}
+
+                                {/* Amenity Reservations Options */}
+                                <Collapsible
+                                    className={"relative w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:transition-all data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"}
+                                    disabled={!includeReservationOptions}
+                                    onOpenChange={setShowReservationOptions}
+                                    open={!includeReservationOptions ? false : showReservationOptions}
+                                >
+
+                                    <Checkbox
+                                        checked={includeReservationOptions}
+                                        onCheckedChange={(checked) => setIncludeReservationOptions(!!checked)}
+                                        className="absolute top-5 right-6 z-50"
+                                    />
+
+                                    <CollapsibleTrigger className={"flex gap-2 items-center w-full "
+                                        + (!includeReservationOptions ? "text-muted-foreground/50" : "text-white/90")}
+                                    >
+
+                                        <Label className="text-sm cursor-pointer"> Amenity Reservations </Label>
+                                        <div className="flex items-center justify-center h-6 w-6 rounded-md hover:bg-accent">
+                                            {!showReservationOptions ? <ChevronDown className="h-4 w-4" />
+                                                : < ChevronUp className="h-4 w-4" />}
+                                        </div>
+
+                                    </CollapsibleTrigger>
+
+                                    <CollapsibleContent className="">
+
+                                        {/* Export options content */}
+                                        <div className="flex flex-wrap gap-y-3 gap-x-16 my-4">
+
+                                            {/* Export reservation date range amenities */}
+                                            <div className="flex-intial min-w-[250px] flex flex-col">
+
+                                                {/* Export reservation date range header */}
+                                                <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    Included reservation dates
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <div className="rounded-full w-fit h-fit cursor-pointer text-gray-200/30">
+                                                                    <Info className="w-4 h-4" />
+                                                                </div>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p> Include all dates by default. </p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                </Label>
+
+                                                <p className="font-light text-sm text-muted-foreground pb-1.5">
+                                                    Export reservations placed on these dates:
+                                                </p>
+
+                                                {/* Date Range Filter Button */}
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            className="justify-start font-normal"
+                                                            id="date"
+                                                            variant="outline"
+                                                        >
+                                                            <CalendarRange className="mr-2 h-4 w-4 opacity-50" />
+                                                            {exportReservationDateRange?.from && exportReservationDateRange?.to
+                                                                ? `${format(exportReservationDateRange.from, "MMM d, yyyy")} - ${format(exportReservationDateRange.to, "MMM d, yyyy")}`
+                                                                : "All reservation dates"}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-fit">
+                                                        <Calendar
+                                                            initialFocus
+                                                            mode="range"
+                                                            defaultMonth={exportReservationDateRange?.from}
+                                                            selected={exportReservationDateRange}
+                                                            onSelect={setExportReservationDateRange}
+                                                            numberOfMonths={2}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </div>
+
+                                            {/* Export created date range amenities */}
+                                            <div className="flex-intial min-w-[250px] flex flex-col">
+
+                                                {/* Export including other amenities header */}
+                                                <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    Included creation dates
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <div className="rounded-full w-fit h-fit cursor-pointer text-gray-200/30">
+                                                                    <Info className="w-4 h-4" />
+                                                                </div>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p> Include all dates by default. </p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                </Label>
+                                                <p className="font-light text-sm text-muted-foreground pb-1.5">
+                                                    Export reservations created within these dates:
+                                                </p>
+
+                                                {/* Date Range Filter Button */}
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            className="justify-start font-normal"
+                                                            id="date"
+                                                            variant="outline"
+                                                        >
+                                                            <CalendarRange className="mr-2 h-4 w-4 opacity-50" />
+                                                            {exportCreatedAtDateRange?.from && exportCreatedAtDateRange?.to
+                                                                ? `${format(exportCreatedAtDateRange.from, "MMM d, yyyy")} - ${format(exportCreatedAtDateRange.to, "MMM d, yyyy")}`
+                                                                : "All reservation dates"}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-fit">
+                                                        <Calendar
+                                                            initialFocus
+                                                            mode="range"
+                                                            defaultMonth={exportCreatedAtDateRange?.from}
+                                                            selected={exportCreatedAtDateRange}
+                                                            onSelect={setExportCreatedAtDateRange}
+                                                            numberOfMonths={2}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </div>
+
+                                            {/* Export reservation status */}
+                                            <div className="flex flex-col gap-4 pb-3 w-full">
+
+                                                <Label className="text-sm text-muted-foreground"> Reservation Status </Label>
+
+                                                <div className="flex flex-row flex-wrap gap-12">
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            checked={exportStatus.includes('Pending')}
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    setExportStatus([...exportStatus, 'Pending']);
+                                                                } else {
+                                                                    setExportStatus(exportStatus.filter(status => status !== 'Pending'));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Label className="text-sm"> Pending </Label>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            checked={exportStatus.includes('Approved')}
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    setExportStatus([...exportStatus, 'Approved']);
+                                                                } else {
+                                                                    setExportStatus(exportStatus.filter(status => status !== 'Approved'));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Label className="text-sm"> Approved </Label>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            checked={exportStatus.includes('Rejected')}
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    setExportStatus([...exportStatus, 'Rejected']);
+                                                                } else {
+                                                                    setExportStatus(exportStatus.filter(status => status !== 'Rejected'));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Label className="text-sm"> Rejected </Label>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            checked={exportStatus.includes('Ongoing')}
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    setExportStatus([...exportStatus, 'Ongoing']);
+                                                                } else {
+                                                                    setExportStatus(exportStatus.filter(status => status !== 'Ongoing'));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Label className="text-sm"> Ongoing </Label>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            checked={exportStatus.includes('For Return')}
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    setExportStatus([...exportStatus, 'For Return']);
+                                                                } else {
+                                                                    setExportStatus(exportStatus.filter(status => status !== 'For Return'));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Label className="text-sm"> For Return </Label>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            checked={exportStatus.includes('Returned')}
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    setExportStatus([...exportStatus, 'Returned']);
+                                                                } else {
+                                                                    setExportStatus(exportStatus.filter(status => status !== 'Returned'));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Label className="text-sm"> Returned </Label>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            checked={exportStatus.includes('Completed')}
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    setExportStatus([...exportStatus, 'Completed']);
+                                                                } else {
+                                                                    setExportStatus(exportStatus.filter(status => status !== 'Completed'));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Label className="text-sm"> Completed </Label>
+                                                    </div>
+
+                                                </div>
+
+
+
+                                            </div>
+
+                                            {/* Export reservation visibility */}
+                                            <div className="flex-intial w-[200px] flex flex-col gap-1">
+
+                                                {/* Export visibility header */}
+                                                <Label className="text-sm text-muted-foreground"> Reservation visibility </Label>
+
+                                                {/* Export visibility input */}
+                                                <Select
+                                                    defaultValue="Unarchived"
+                                                    onValueChange={(value) => setExportReservationVisibility(value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select visibility of exported reservations" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectItem value="All"> All </SelectItem>
+                                                            <SelectItem value="Unarchived"> Unarchived </SelectItem>
+                                                            <SelectItem value="Archived"> Archived </SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+
+                                            </div>
+
+                                            {/* Export reservation type */}
+                                            <div className="flex-intial w-[200px] flex flex-col gap-1">
+
+                                                {/* Export reservation type header */}
+                                                <Label className="text-sm text-muted-foreground"> Reservation types </Label>
+
+                                                {/* Export reservation type input */}
+                                                <Select
+                                                    defaultValue="Equipment and Facility"
+                                                    onValueChange={(value) => setExportReservationType(value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select types of reservations" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            {amenity.amenityType === "Equipment" && <SelectItem value="Equipment"> Equipment </SelectItem>}
+                                                            {amenity.amenityType === "Facility" && <SelectItem value="Facility"> Facility </SelectItem>}
+                                                            <SelectItem value="Equipment and Facility"> Equipment and Facility </SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            {/* Export creator visibility */}
+                                            {/* <div className="flex-intial w-[200px] flex flex-col gap-1"> */}
+
+                                            {/* Export creator visibility header */}
+                                            {/* <Label className="text-sm text-muted-foreground"> Author visibility </Label> */}
+
+                                            {/* Export creator visibility input */}
+                                            {/* <Select */}
+                                            {/* defaultValue="Unarchived" */}
+                                            {/* onValueChange={(value) => setExportAuthorVisibility(value)} */}
+                                            {/* > */}
+                                            {/* <SelectTrigger> */}
+                                            {/* <SelectValue placeholder="Select visibility of reservees" /> */}
+                                            {/* </SelectTrigger> */}
+                                            {/* <SelectContent> */}
+                                            {/* <SelectGroup> */}
+                                            {/* <SelectItem value="All"> All </SelectItem> */}
+                                            {/* <SelectItem value="Unarchived"> Unarchived </SelectItem> */}
+                                            {/* <SelectItem value="Archived"> Archived </SelectItem> */}
+                                            {/* </SelectGroup> */}
+                                            {/* </SelectContent> */}
+                                            {/* </Select> */}
+                                            {/* </div> */}
+
+                                            {/* Export creator type */}
+                                            <div className="flex-intial w-[200px] flex flex-col gap-1">
+
+                                                {/* Export creator type header */}
+                                                <Label className="text-sm text-muted-foreground"> Author role </Label>
+
+                                                {/* Export creator type input */}
+                                                <Select
+                                                    defaultValue="All"
+                                                    onValueChange={(value) => setExportAuthorRole(value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select user roles" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectItem value="All"> All </SelectItem>
+                                                            <SelectItem value="Unit Owners"> Unit Owners </SelectItem>
+                                                            <SelectItem value="Admins"> Admins </SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                        </div>
+
+                                    </CollapsibleContent>
+
+                                </Collapsible>
+
+                                <DialogFooter>
+                                    <Button
+                                        className=""
+                                        disabled={!includeBasicInfo && !includeReservationOptions}
+                                        onClick={exportExcel}
+                                        size="sm"
+                                    >
+                                        <Download className="h-7 w-7" />
+                                        Download .xslx
+                                    </Button>
+                                </DialogFooter>
+
+                            </DialogContent>
+
+                        </Dialog>
+
+                        {/* Image preview dialog */}
                         <Dialog open={showImagePreview} onOpenChange={setShowImagePreview}>
 
                             <DialogContent className="p-0 items-center justify-center max-w-[80%] min-h-[80%]">
