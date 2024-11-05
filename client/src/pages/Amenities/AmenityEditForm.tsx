@@ -225,7 +225,7 @@ const AmenityEditForm = () => {
         const fetchAmenity = async () => {
 
             // Fetch amenity
-            const amenityResponse = await fetch("http://localhost:4000/api/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length));
+            const amenityResponse = await fetch(import.meta.env.VITE_API_URL + "/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length));
 
             // Parse the response to JSON
             const amenityData = await amenityResponse.json();
@@ -298,7 +298,7 @@ const AmenityEditForm = () => {
         resolver: zodResolver(facilityEditFormSchema),
         defaultValues: async () => {
 
-            const facilityDataResponse = await fetch("http://localhost:4000/api/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length));
+            const facilityDataResponse = await fetch(import.meta.env.VITE_API_URL + "/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length));
 
             const facilityData = await facilityDataResponse.json();
 
@@ -328,7 +328,7 @@ const AmenityEditForm = () => {
         resolver: zodResolver(equipmentEditFormSchema),
         defaultValues: async () => {
 
-            const equipmentDataResponse = await fetch("http://localhost:4000/api/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "));
+            const equipmentDataResponse = await fetch(import.meta.env.VITE_API_URL + "/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "));
 
             const equipmentData = await equipmentDataResponse.json();
 
@@ -364,7 +364,7 @@ const AmenityEditForm = () => {
 
         values.amenityImages = images;
 
-        const equipmentEditResponse = await fetch('http://localhost:4000/api/amenities/' + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "), {
+        const equipmentEditResponse = await fetch(import.meta.env.VITE_API_URL + '/amenities/' + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "), {
             method: 'PATCH',
             body: JSON.stringify(values, null, 2),
             headers: {
@@ -388,7 +388,7 @@ const AmenityEditForm = () => {
     // Patch submit function to update the facility details
     const facilityEditSubmit = async (values: zod.infer<typeof facilityEditFormSchema>) => {
 
-        const facilityEditResponse = await fetch('http://localhost:4000/api/amenities/' + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "), {
+        const facilityEditResponse = await fetch(import.meta.env.VITE_API_URL + '/amenities/' + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "), {
             method: 'PATCH',
             body: JSON.stringify(values, null, 2),
             headers: {

@@ -131,7 +131,7 @@ const AnnouncementEdit = ({ announcement, showEditDialog, setShowEditDialog }) =
 
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
 
-        const response = await fetch('http://localhost:4000/api/announcements/' + announcement._id, {
+        const response = await fetch(import.meta.env.VITE_API_URL + '/announcements/' + announcement._id, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(values)

@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 // useAuthContext Hook Import
 import { useAuthContext } from '@/hooks/useAuthContext';
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
 
 
 

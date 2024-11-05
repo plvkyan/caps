@@ -78,7 +78,7 @@ const AnnouncementDetails = ({ announcement }) => {
     ann.stat = "Archived";
 
     const response = await fetch(
-      "http://localhost:4000/api/announcements/" + announcement._id,
+      import.meta.env.VITE_API_URL + "/announcements/" + announcement._id,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -97,7 +97,7 @@ const AnnouncementDetails = ({ announcement }) => {
   // Delete Announcement Function
   const deleteAnnouncement = async () => {
     const response = await fetch(
-      "http://localhost:4000/api/announcements/" + announcement._id,
+      import.meta.env.VITE_API_URL + "/announcements/" + announcement._id,
       {
         method: "DELETE",
       }
@@ -119,7 +119,7 @@ const AnnouncementDetails = ({ announcement }) => {
     ann.stat = "Unarchived";
 
     const response = await fetch(
-      "http://localhost:4000/api/announcements/" + announcement._id,
+      import.meta.env.VITE_API_URL + "/announcements/" + announcement._id,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

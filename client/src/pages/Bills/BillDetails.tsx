@@ -115,7 +115,7 @@ export const BillDetails = ({ bills }) => {
 
         bill.stat = "Archived"
 
-        const response = await fetch('http://localhost:4000/api/bills/' + bills._id, {
+        const response = await fetch(import.meta.env.VITE_API_URL + '/bills/' + bills._id, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bill)
@@ -144,7 +144,7 @@ export const BillDetails = ({ bills }) => {
 
         bill.stat = "Unarchived"
 
-        const response = await fetch('http://localhost:4000/api/bills/' + bills._id, {
+        const response = await fetch(import.meta.env.VITE_API_URL + '/bills/' + bills._id, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bill)
@@ -175,7 +175,7 @@ export const BillDetails = ({ bills }) => {
 
     const deleteReservation = async () => {
 
-        const response = await fetch('http://localhost:4000/api/bills/' + bills._id, {
+        const response = await fetch(import.meta.env.VITE_API_URL + '/bills/' + bills._id, {
             method: 'DELETE'
         })
 
@@ -219,8 +219,8 @@ export const BillDetails = ({ bills }) => {
                         send_email_receipt: true,
                         show_description: true,
                         show_line_items: true,
-                        cancel_url: 'http://localhost:5173/bills/cancelled',
-                        success_url: 'http://localhost:5173/bills/success',
+                        cancel_url: import.meta.env.VITE_API_URL + '/bills/cancelled',
+                        success_url: import.meta.env.VITE_API_URL + '/bills/success',
                         line_items: [
                             {
                                 currency: 'PHP',

@@ -11,9 +11,9 @@
 
 // Variable Declarations
 // API Base URL
-const apiBaseUrl = process.env.REACT_APP_API_URL;
+const apiBaseUrl = import.meta.env.VITE_API_URL;
 // API Reservations URL
-const apiReservationsUrl = apiBaseUrl + 'reservations';
+const apiReservationsUrl = apiBaseUrl + '/reservations';
 
 
 

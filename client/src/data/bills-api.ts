@@ -5,9 +5,9 @@
 
 // Variable Declarations
 // API Base URL
-const apiBaseUrl = 'http://localhost:4000/api/';
+const apiBaseUrl = import.meta.env.VITE_API_URL;
 // API Bills URL
-const apiBillsUrl = apiBaseUrl + 'bills';
+const apiBillsUrl = apiBaseUrl + '/bills';
 
 
 

@@ -3,9 +3,9 @@
 
 // Variables
 // API calls base URL
-const apiBaseUrl = 'http://localhost:4000/api/';
+const apiBaseUrl = import.meta.env.VITE_API_URL;
 // Amenities API URL
-const apiAmenitiesUrl = apiBaseUrl + 'amenities';
+const apiAmenitiesUrl = apiBaseUrl + '/amenities';
 
 
 
