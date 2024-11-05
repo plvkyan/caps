@@ -13,7 +13,9 @@ const exportRoutes = require('./routes/exportRoutes')
 
 const upload = multer({ dest: 'uploads/' });
 
-console.log(__dirname);
+const path = require('path');
+const fileURLtoPath = require('url').fileURLToPath;
+
 // Route Imports
 
 // Reservation Route Import
@@ -93,10 +95,10 @@ app.use('/api/bills', billRoutes)
 app.use('/api/emails', emailRoutes)
 app.use('/api/exports', exportRoutes);
 
-app.use(express.static('../client/dist'));
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
 app.get('*', (req, res) => {
-    res.sendFile('../client/dist/index.html')
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'))
 });
 
 // app.get("/*", function (req, res) {
