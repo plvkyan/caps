@@ -77,12 +77,10 @@ app.use(express.json())
 // app.use(checkReservation)
 // app.use(checkOutstanding)
 app.use(checkOngoingReservation)
-app.use((req, res, next) => {
-
-    // console.log(req.path, req.method)
-    next()
-
-})
+// app.use((req, res, next) => {
+//     // console.log(req.path, req.method)
+//     next()
+// })
 
 // Routes
 app.use('/api/announcements', announcementRoutes)
@@ -94,16 +92,16 @@ app.use('/api/bills', billRoutes)
 app.use('/api/emails', emailRoutes)
 app.use('/api/exports', exportRoutes);
 
-app.get("/*", function (req, res) {
-    res.sendFile(
-        path.join(__dirname, "../client/build", "index.html"),
-        function (err) {
-            if (err) {
-                res.status(500).send
-            }
-        }
-    );
-});
+// app.get("/*", function (req, res) {
+//     res.sendFile(
+//         path.join(__dirname, "../client/build", "index.html"),
+//         function (err) {
+//             if (err) {
+//                 res.status(500).send
+//             }
+//         }
+//     );
+// });
 
 
 // Connect to DB

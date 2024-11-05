@@ -38,7 +38,6 @@ import { AmenityType } from "@/types/amenity-type";
 
 
 // Utility imports
-
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
