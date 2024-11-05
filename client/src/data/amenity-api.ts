@@ -26,7 +26,11 @@ export const createAmenity = async (amenityData: any) => {
 
 
 // PATCH functions
-
+export const archiveAmenity = async (id: string) => {
+    return (await fetch(apiAmenitiesUrl + '/archive/' + id, {
+        method: 'PATCH',
+    }));
+}
 
 
 

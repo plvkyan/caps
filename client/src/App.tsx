@@ -49,7 +49,7 @@ import Archives from '@/pages/Archives/Archives.tsx';
 // Bill Details Page Import
 import BillPage from '@/pages/Bills/BillPage.tsx';
 // Bills List Page Import
-import BillList from '@/pages/Bills/BillsList.tsx';
+// import BillList from '@/pages/Bills/BillsList.tsx';
 // Bill Payment Cancelled Page Import
 import Cancelled from '@/pages/PaymentCancelled.tsx';
 // Bill Payment Success Page Import
@@ -103,6 +103,9 @@ import UserPage from '@/pages/Users/UserPage.tsx';
 import UserForm from '@/pages/Users/UserForm';
 import UserBulkForm from './pages/Users/UserBulkForm';
 import AmenityDetails from './pages/Amenities/AmenityDetails';
+import { BillForm } from './pages/Bills/BillForm';
+import BillPresetForm from './pages/Bills/BillPresetForm';
+import ArchivePage from './pages/Archives/ArchivePage';
 
 
 
@@ -161,6 +164,8 @@ function App() {
 
 
                         {/* Protected routes */}
+                        <Route path="/dashboard" element={<PrivateRoute component={DashboardPage} />} />
+                        <Route path="/settings" element={<PrivateRoute component={Settings} />} />
                         {/* Amenity routes */}
                         <Route
                             path="/amenities/create"
@@ -175,6 +180,33 @@ function App() {
                             element={<PrivateRoute component={AmenityDetails} />}
                         />
 
+
+
+
+                        {/* Archive Routes */}
+                        <Route
+                            path="/archives"
+                            element={<PrivateRoute component={ArchivePage} />}
+                        />
+
+
+
+
+                        {/* Bill Routes */}
+                        <Route
+                            path="/bills"
+                            element={<PrivateRoute component={BillPage} />}
+                        />
+
+                        <Route
+                            path="/bills/create/"
+                            element={<PrivateRoute component={BillForm} />}
+                        />
+
+                        <Route
+                            path="/bills/preset-create/"
+                            element={<PrivateRoute component={BillPresetForm} />}
+                        />
 
 
 
@@ -325,13 +357,6 @@ function App() {
                                         element={<AmenityEditForm />}
                                     >
                                     </Route>
-
-                                    <Route
-                                        path="/settings"
-                                        element={<Settings />}
-                                    >
-                                    </Route>
-
 
 
                                     {/* If a page is not found, redirect to Error 404 Page */}

@@ -12,7 +12,6 @@ import {
     ChevronUp,
     Download,
     EllipsisVertical,
-    FileDown,
     ImageOff,
     Info,
     Pencil,
@@ -214,7 +213,7 @@ import { ReservationType } from "@/types/reservation-type";
 
 // Data Imports
 // Amenity API calls Import
-import { getSingleAmenity } from "@/data/amenity-api";
+import { archiveAmenity, getSingleAmenity } from "@/data/amenity-api";
 
 // Reservation API calls Import
 import { getAmenityReservations } from "@/data/reservation-api";
@@ -284,7 +283,7 @@ export default function AmenityDetails() {
     const [showImagePreview, setShowImagePreview] = useState(false);
 
     // Export amenity dialog state
-    const [showExportDialog, setShowExportDialog] = useState(true);
+    const [showExportDialog, setShowExportDialog] = useState(false);
     // Export options basic info state
     const [includeBasicInfo, setIncludeBasicInfo] = useState(true);
     // Export options stock state
@@ -494,6 +493,7 @@ export default function AmenityDetails() {
     }, [date, reservations]);
 
 
+
     // Functions
     // Export excel file function
     const exportExcel = async () => {
@@ -508,8 +508,8 @@ export default function AmenityDetails() {
 
             const wb = new Workbook();
 
-            wb.creator = user.blkLt;
-            wb.lastModifiedBy = user.blkLt;
+            wb.creator = user.userBlkLt;
+            wb.lastModifiedBy = user.userBlkLt;
             wb.created = new Date();
             wb.modified = new Date();
 
@@ -657,6 +657,23 @@ export default function AmenityDetails() {
         setCurrentIndex((prev) => prev === images.length - 1 ? 0 : prev + 1);
     };
 
+    // Archive amenity function
+    const handleArchiveAmenity = async () => {
+        try {
+            if (!amenity) throw new Error('Amenity data not available');
+
+            const res = await archiveAmenity(amenity._id);
+
+            if (!res.ok) throw new Error('Failed to archive amenity');
+
+            sessionStorage.setItem('archiveSuccess', 'Amenity archived successfully');
+            history.back();
+        } catch (error) {
+            console.error(error);
+            toast.error(error instanceof Error ? error.message : 'Failed to archive amenity');
+        }
+    };
+
 
 
 
@@ -790,7 +807,9 @@ export default function AmenityDetails() {
                                             <Share className="h-4 w-4" />
                                             Export .xslx
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={handleArchiveAmenity}
+                                        >
                                             <Archive className="h-4 w-4" />
                                             Archive
                                         </DropdownMenuItem>

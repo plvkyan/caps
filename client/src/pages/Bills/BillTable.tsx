@@ -95,11 +95,11 @@ import { DateRange } from "react-day-picker";
 
 
 
-interface ReservationData {
+interface BillData {
     _id: string;
 }
 
-interface ReservationTableProps<TData extends ReservationData, TValue> {
+interface BillTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
 }
@@ -112,10 +112,10 @@ interface ReservationTableProps<TData extends ReservationData, TValue> {
 
 
 
-export default function ReservationTable<TData extends ReservationData, TValue>({
+export default function BillTable<TData extends BillData, TValue>({
     columns,
     data,
-}: ReservationTableProps<TData, TValue>) {
+}: BillTableProps<TData, TValue>) {
 
 
 
@@ -182,12 +182,12 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
         }
 
         if (sessionStorage.getItem("rejectedSuccessful")) {
-            toast.success("Reservation/s rejected successfully", { closeButton: true });
+            toast.success("Reservation rejected successfully", { closeButton: true });
             sessionStorage.removeItem("rejectedSuccessful");
         }
 
         if (sessionStorage.getItem("archiveSuccessful")) {
-            toast.success("Reservation/s archived successfully", { closeButton: true });
+            toast.success("Reservation archived successfully", { closeButton: true });
             sessionStorage.removeItem("archiveSuccessful");
         }
 
@@ -228,89 +228,33 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     useEffect(() => {
 
         if (date?.from && date?.to) {
-            table.getColumn('reservationDate')?.setFilterValue({
+            table.getColumn('billDueDate')?.setFilterValue({
                 from: date.from,
                 to: date.to,
             });
         } else {
-            table.getColumn('reservationDate')?.setFilterValue(undefined);
+            table.getColumn('billDueDate')?.setFilterValue(undefined);
         }
     }, [date, table]);
 
 
 
     // Functions
-    // Handle Archive Button Function
-    const handleArchiveButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await archiveManyReservations(selectedRowIds);
-
-            if (response.ok) {
-                sessionStorage.setItem("archiveSuccessful", "true");
-                window.location.reload();
-            } else {
-                throw new Error("Error archiving reservations");
-            }
-        } catch (error) {
-            toast.error((error as Error).message, { closeButton: true });
-        }
-    };
-    // Handle Archive Button Function
-    const handleApproveButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await approveManyReservations(selectedRowIds, user.id, user.userBlkLt, user.userPosition);
-
-            if (response.ok) {
-                sessionStorage.setItem("approveSuccessful", selectedRowIds.length.toString() + " reservations approved successfully.");
-                window.location.reload();
-            } else {
-                const errorData = await response.json();
-                throw errorData;
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error((error as { error?: string }).error || "Error approving reservations", {
-                closeButton: true,
-                description: (error as { description?: string }).description || "Please make sure that selected reservations are still pending."
-            });
-        }
-    };
-
-    // Handle Reject Button Function
-    const handleRejectButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await rejectManyReservations(selectedRowIds, user.id, user.userBlkLt, user.userPosition);
-
-            if (response.ok) {
-                sessionStorage.setItem("rejectedSuccessful", "true");
-                window.location.reload();
-            } else {
-                const errorData = await response.json();
-                throw errorData;
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error((error as { error?: string }).error || "Error rejecting reservations", {
-                closeButton: true,
-                description: (error as { description?: string }).description || "Please make sure that selected reservations are still pending."
-            });
-        }
-    };
-
-
     // Redirect to Reservation Form Function
-    const navToReservationForm = () => {
-        const reservationFormPath = "/reservations/create";
-        navigate(reservationFormPath);
+    const navToBillForm = () => {
+        const billFormPath = "/bills/create";
+        navigate(billFormPath);
+    }
+
+    const navToBillPresetForm = () => {
+        const billPresetPath = "/bills/preset-create";
+        navigate(billPresetPath);
     }
 
 
 
-    const navigateToReservationDetails = (id: String) => {
-        navigate("/reservations/" + id);
+    const navToBillDetails = (id: String) => {
+        navigate("/bills/" + id);
     }
 
 
@@ -324,50 +268,20 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
             <div className="flex justify-between">
 
                 <div className="flex flex-col">
-                    <h1 className="font-semibold text-2xl"> Reservations </h1>
-                    <h3 className="font-light text-muted-foreground"> All reservations with their dates and statuses. </h3>
+                    <h1 className="font-semibold text-2xl"> Bills   </h1>
+                    <h3 className="font-light text-muted-foreground"> An overview of all bills and their key details. </h3>
                 </div>
 
                 <div className="flex items-end gap-2">
 
-                    {user.userRole === "Admin" && (
-                        <>
-
-                            <Button
-                                disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                                onClick={() => handleArchiveButton()}
-                                size="sm"
-                                variant="outline"
-                            >
-                                <Archive className="h-4 w-4" />
-                                Archive
-                            </Button>
-
-                            <Button
-                                disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                                onClick={() => handleRejectButton()}
-                                variant="outline"
-                                size="sm"
-                            >
-                                <CircleX className="h-4 w-4 text-destructive" />
-                                Mark as Rejected
-                            </Button>
-                            <Button
-                                disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                                onClick={() => handleApproveButton()}
-                                variant="outline"
-                                size="sm"
-                            >
-                                <CircleCheck className="h-4 w-4 text-primary" />
-                                Mark as Approved
-                            </Button>
-
-                        </>
-                    )}
-
-                    <Button className="" onClick={navToReservationForm} size="sm" variant="default" >
+                    <Button className="" onClick={navToBillPresetForm} size="sm" variant="outline" >
                         <CirclePlus className="h-4 w-4" />
-                        Create Reservation
+                        Create Bill Preset
+                    </Button>
+
+                    <Button className="" onClick={navToBillForm} size="sm" variant="default" >
+                        <CirclePlus className="h-4 w-4" />
+                        Create Bill
                     </Button>
 
                 </div>
@@ -395,7 +309,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                                 <CalendarRange className="mr-2 h-4 w-4" />
                                 {date?.from && date?.to && isFiltered
                                     ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
-                                    : "Reservation Date Range"}
+                                    : "Due Date Range"}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-fit">
@@ -412,7 +326,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
                     <DataTableViewOptions table={table} label="Toggle" />
 
-                    <DataTableFacetedFilter column={table.getColumn("reservationStatus")} title="Status" options={RESERVATION_DATA} />
+                    {/* <DataTableFacetedFilter column={table.getColumn("billType")} title="Status" options={RESERVATION_DATA} /> */}
 
                     {isFiltered && (
                         <Button
@@ -490,7 +404,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                                                 <TableCell
                                                     className="cursor-pointer"
                                                     key={cell.id}
-                                                    onClick={() => navigateToReservationDetails(row.original._id)}
+                                                    onClick={() => navToBillDetails(row.original._id)}
                                                 >
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                 </TableCell>
@@ -502,7 +416,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No reservations found.
+                                    No bills found.
                                 </TableCell>
                             </TableRow>
                         )}

@@ -131,8 +131,8 @@ const AnnouncementForm = () => {
     // Handle Submit Function for POSTING an announcement
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
 
-        values.blkLt = (user.blkLt);
-        values.blkLtPosition = (user.position);
+        values.blkLt = (user.userBlkLt);
+        values.blkLtPosition = (user.userPosition);
 
         const response = await fetch('http://localhost:4000/api/announcements', {
             method: 'POST',
@@ -171,7 +171,7 @@ const AnnouncementForm = () => {
                 </CardTitle>
 
                 <CardDescription>
-                    You're posting as: {user.blkLt}
+                    You're posting as: {user.userBlkLt}
                 </CardDescription>
 
             </CardHeader>
@@ -256,10 +256,10 @@ const AnnouncementForm = () => {
                     <CardFooter className="p-5">
 
                         <Button
-                            className="ml-auto p-3 accent"
+                            className="ml-auto accent"
                             type="submit"
                         >
-                            <SquarePen className="h-6 w-6 pr-2" />
+                            <SquarePen className="h-7 w-7" />
                             Post
                         </Button>
 

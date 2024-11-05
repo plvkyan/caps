@@ -21,7 +21,7 @@ import { DataTableColumnHeader } from "@/components/custom/DataTableColumnHeader
 
 // Data table imports
 // Data table column definitions imports
-import { ColumnDef, FilterFn } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 
 
 
@@ -30,7 +30,7 @@ import { ColumnDef, FilterFn } from "@tanstack/react-table";
 // Type definitions are a great way to ensure that your data is always in the shape you expect.
 // This can help prevent bugs and make your code easier to understand.
 // Type Imports
-import { ReservationType } from "@/types/reservation-type";
+import { BillType } from "@/types/bill-type";
 
 
 
@@ -38,13 +38,11 @@ import { ReservationType } from "@/types/reservation-type";
 // date-fns format function Import
 import { format } from "date-fns";
 
-import { useNavigate } from "react-router-dom";
 
 
 
 
-
-export const AmenityReservationTableColumns: ColumnDef<ReservationType>[] = [
+export const BillTableColumns: ColumnDef<BillType>[] = [
     {
         accessorKey: "_id",
         enableSorting: false,
@@ -72,86 +70,71 @@ export const AmenityReservationTableColumns: ColumnDef<ReservationType>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "reserveeBlkLt",
+        accessorKey: "billTitle",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Block and Lot" />
+                <DataTableColumnHeader column={column} title="Title" />
             )
         },
         cell: ({ row }) => {
             return (
-                <span>{row.original.reserveeBlkLt}</span>
+                <span>{row.original.billTitle}</span>
             )
         }
     },
     {
-        accessorKey: "reservationType",
+        accessorKey: "billType",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Amenities" />
+                <DataTableColumnHeader column={column} title="Type" />
             )
         },
         cell: ({ row }) => {
             return (
-                <span>
-                    {row.original.reservationType}
-                </span>
+                <span> {row.original.billType} </span>
             )
         }
     },
     {
-        accessorKey: "reservationStatus",
+        accessorKey: "billAmount",
         accessorFn: (row) => {
-            return row.reservationStatus[row.reservationStatus.length - 1].status;
+            return row.billAmount;
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Status" className="justify-center" />
+                <DataTableColumnHeader column={column} title="Amount" />
             )
         },
         cell: ({ row }) => {
 
-            const lastIndex = row.original.reservationStatus.length;
-            const status = row.original.reservationStatus[lastIndex - 1].status;
+            const currency = row.original.billCurrency;
+            const amount = row.original.billAmount;
 
             return (
-                <div className="flex items-center justify-center pr-5 w-full">
-                    <Badge variant={
-                        status === "Pending" ? "warning" :
-                            status === "Approved" ? "default" :
-                                status === "Rejected" ? "destructive" :
-                                    "outline"
-                    }>
-                        {status}
-                    </Badge>
-                </div>
+                <span> {currency + " " + amount} </span>
             )
-        },
-        filterFn: (row, id, value) => {
-            const lastStatus = row.original.reservationStatus[row.original.reservationStatus.length - 1].status;
-            return value.includes(lastStatus);
         },
     },
     {
-        accessorKey: "reservationDate",
+        accessorKey: "billDueDate",
         accessorFn: (row) => {
-            return format(row.reservationDate, "PPP");
+            return format(row.billDueDate, "PPP");
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Reservation Date" className="ml-7 justify-center" />
+                <DataTableColumnHeader column={column} title="Due Date" className="ml-7 justify-center" />
             )
         },
         cell: ({ row }) => {
 
-            const origDate = row.original.reservationDate;
+            const origDate = row.original.billDueDate;
             const formattedDate = format(origDate, "PP")
 
             return <div className="font-regular text-center"> {formattedDate} </div>
         },
         filterFn:
             (row, id, value) => {
-                const date = new Date(row.original.reservationDate);
+                const date = new Date(row.original.billDueDate);
 
                 const { from: start, to: end } = value as { from: Date, to: Date };
 
@@ -170,8 +153,8 @@ export const AmenityReservationTableColumns: ColumnDef<ReservationType>[] = [
         },
         cell: ({ row }) => {
 
-            const origDate = row.original.createdAt
-            const formattedDate = format(origDate, "PPP")
+            const origDate = row.original.createdAt;
+            const formattedDate = format(origDate, "PP")
 
             return <div className="font-regular ml-1"> {formattedDate} </div>
         }

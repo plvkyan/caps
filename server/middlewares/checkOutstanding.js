@@ -63,7 +63,7 @@ const checkOutstanding = async (req, res, next) => {
 
             for (let i = 0; i < delinquentUsers.length; i++) {
 
-                if (user.blkLt == delinquentUsers[i]) {
+                if (user.userBlkLt == delinquentUsers[i]) {
 
                     return user;
 
@@ -77,9 +77,9 @@ const checkOutstanding = async (req, res, next) => {
 
         //     for (let i = 0; i < initUsers.length; i++) {
 
-        //         if (user.blkLt == delinquentUsers[i]) {
+        //         if (user.userBlkLt == delinquentUsers[i]) {
 
-        //             return user.blkLt;
+        //             return user.userBlkLt;
 
         //         }
         //     }

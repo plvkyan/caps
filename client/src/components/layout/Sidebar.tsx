@@ -118,7 +118,7 @@ export default function Navbar() {
                             <div className="text-sub/55 text-xs px-3 pb-1"> ASSOCIATION </div>
 
                             {
-                                user.position === "Admin" &&
+                                user.userPosition === "Admin" &&
                                 (
                                     <CustomLink
                                         to="/amenities"
@@ -139,7 +139,7 @@ export default function Navbar() {
                             </CustomLink>
 
                             {
-                                user.position === "Admin" &&
+                                user.userPosition === "Admin" &&
                                 (
                                     <CustomLink
                                         to="/users"
@@ -161,7 +161,7 @@ export default function Navbar() {
                             <div className="text-sub/55 text-xs px-3 pb-1"> SUPPORT </div>
 
                             {
-                                user.position === "Admin" &&
+                                user.userPosition === "Admin" &&
                                 (
                                     <CustomLink
                                         to="/archives"

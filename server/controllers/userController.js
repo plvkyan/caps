@@ -77,8 +77,14 @@ const loginUser = async (req, res) => {
         // Create a token
         const token = createToken(user._id)
 
+        const _id = user._id;
+        const userRole = user.userRole;
+        const userPosition = user.userPosition;
+        const userStatus = user.userStatus;
+        const userVisibility = user.userVisibility;
+
         // Return the user and token
-        res.status(200).json({ user, token })
+        res.status(200).json({ _id, userBlkLt, userRole, userPosition, userStatus, userVisibility, token })
     } catch (error) {
         res.status(400).json({ error: error.message })
     }
@@ -129,18 +135,18 @@ const getArchivedUsers = async (req, res) => {
 
 // GET all users
 const getUnitOwners = async (req, res) => {
+    try {
+        const unitOwners = await User.find({ 
+            userVisibility: "Unarchived",
+            userPosition: "Unit Owner" 
+        })
+        .sort({ createdAt: -1 })
+        .lean()
 
-    const initUsers = await User.find({}).sort({ createdAt: -1 })
-
-    const users = initUsers.filter(function (user) {
-        return user.stat === "Unarchived";
-    });
-
-    const unitOwners = users.filter(function (user) {
-        return user.position === "Unit Owner";
-    })
-
-    res.status(200).json(unitOwners)
+        res.status(200).json(unitOwners)
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch unit owners" })
+    }
 }
 
 

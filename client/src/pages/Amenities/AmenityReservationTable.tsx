@@ -6,53 +6,20 @@
 // Lucide React Icons Imports
 import {
     CalendarRange,
-    ChevronDown,
-    ChevronUp,
-    FileDown,
-    Info,
     X
 } from "lucide-react";
 
 
 
 // shadcn Components Imports
-// shadcn Accordion Component Imports
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion"
-
 // shadcn Button Component Import
 import { Button } from "@/components/ui/button";
 
 // shadcn Calendar Component Import
 import { Calendar } from "@/components/ui/calendar"
 
-// shadcn Collapsible Component Imports
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-
 // shadcn Input Component Import
 import { Input } from "@/components/ui/input";
-
-// shadcn Select Component Imports
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-
-// shadcn Sonner Component Import
-import { toast } from "sonner";
 
 // shadcn Table Imports
 import {
@@ -63,14 +30,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-
-// shadcn Tooltip Component Imports
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 // shadcn Popover Component Imports
 import {
@@ -96,7 +55,6 @@ import { DataTableViewOptions } from "@/components/custom/DataTableViewOptions";
 // Data table column definitions imports
 import {
     ColumnDef,
-    FilterFn,
     SortingState,
     VisibilityState,
     flexRender,
@@ -112,11 +70,8 @@ import {
 // Utility Imports
 // date-fns format Function Import
 import {
-    addDays,
     format
 } from "date-fns"
-
-import { dateBetweenFilterFn } from "@/components/custom/dateBetweenFilterFn";
 
 // React Day Picker DateRange Import
 import { DateRange } from "react-day-picker"
@@ -141,13 +96,10 @@ import { RESERVATION_DATA } from "@/data/reservation-data";
 
 // API call Imports
 import {
-    approveManyReservations,
     archiveManyReservations,
     getAllReservations,
-    rejectManyReservations
 } from "@/data/reservation-api";
-import { useAuthContext } from "@/hooks/useAuthContext";
-import { Label } from "@/components/ui/label";
+// import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 
@@ -170,7 +122,6 @@ interface AmenityReservationTableProps<TData extends ReservationData, TValue> {
 export default function AmenityReservationTable<TData extends ReservationData, TValue>({
     columns,
     data,
-    amenityType
 }: AmenityReservationTableProps<TData, TValue>) {
 
 
@@ -179,7 +130,7 @@ export default function AmenityReservationTable<TData extends ReservationData, T
     // useNavigate Hook
     const navigate = useNavigate();
     // useAuthContext Hook
-    const { user } = useAuthContext();
+    // const { user } = useAuthContext();
 
 
     // States
@@ -231,75 +182,7 @@ export default function AmenityReservationTable<TData extends ReservationData, T
 
 
 
-    // onClick Functions
-    // Handle Archive Button Function
-    const handleArchiveButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await archiveManyReservations(selectedRowIds);
-
-            if (response.ok) {
-                sessionStorage.setItem("archiveSuccessful", "true");
-                window.location.reload();
-            } else {
-                throw new Error("Error archiving reservations");
-            }
-        } catch (error) {
-            toast.error((error as Error).message, { closeButton: true });
-        }
-    };
-    // Handle Archive Button Function
-    const handleApproveButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await approveManyReservations(selectedRowIds, user.id, user.blkLt, user.position);
-
-            if (response.ok) {
-                sessionStorage.setItem("approveSuccessful", selectedRowIds.length.toString() + " reservations approved successfully.");
-                window.location.reload();
-            } else {
-                const errorData = await response.json();
-                throw errorData;
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error((error as { error?: string }).error || "Error approving reservations", {
-                closeButton: true,
-                description: (error as { description?: string }).description || "Please make sure that selected reservations are still pending."
-            });
-        }
-    };
-
-    // Handle Reject Button Function
-    const handleRejectButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await rejectManyReservations(selectedRowIds, user.id, user.blkLt, user.position);
-
-            if (response.ok) {
-                sessionStorage.setItem("rejectedSuccessful", "true");
-                window.location.reload();
-            } else {
-                const errorData = await response.json();
-                throw errorData;
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error((error as { error?: string }).error || "Error rejecting reservations", {
-                closeButton: true,
-                description: (error as { description?: string }).description || "Please make sure that selected reservations are still pending."
-            });
-        }
-    };
-
-
-    // Redirect to Reservation Form Function
-    const navToReservationForm = () => {
-        const reservationFormPath = "/reservations/create";
-        navigate(reservationFormPath);
-    }
-
-    // Update the table filter when date range changes
+    
     useEffect(() => {
 
         if (date?.from && date?.to) {
@@ -310,6 +193,7 @@ export default function AmenityReservationTable<TData extends ReservationData, T
         } else {
             table.getColumn('reservationDate')?.setFilterValue(undefined);
         }
+
     }, [date, table]);
 
 
@@ -345,12 +229,18 @@ export default function AmenityReservationTable<TData extends ReservationData, T
         };
     }, [])
 
+
+
+    // Functions
+    // Update the table filter when date range changes
     const navigateToReservationDetails = (id: String) => {
         navigate("/reservations/" + id);
     }
 
 
 
+
+    
     return (
 
         <div className="flex flex-col gap-4">

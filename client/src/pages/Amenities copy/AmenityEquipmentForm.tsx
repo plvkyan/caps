@@ -185,7 +185,7 @@ const AmenityEquipmentForm = () => {
             amenityQuantityMin: 1,
             amenityQuantityMax: 0,
             amenityReminder: "",
-            amenityCreator: user.blkLt,
+            amenityCreator: user.userBlkLt,
             amenityVisibility: "Unarchived",
         }
     });

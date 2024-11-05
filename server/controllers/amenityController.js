@@ -32,10 +32,6 @@ const getArchivedAmenities = async (req, res) => {
     res.status(200).json(amenities)
 }
 
-
-
-
-
 // GET specific amenity name
 const getSpecificAmenity = async (req, res) => {
 
@@ -87,7 +83,6 @@ const createAmenity = async (req, res) => {
 
 
 
-
 // DELETE an amenity
 const deleteAmenity = async (req, res) => {
     const { id } = req.params
@@ -109,10 +104,9 @@ const deleteAmenity = async (req, res) => {
 
 
 
-
-// UPDATE an announcement
+// PATCH controllers
+// UPDATE an amenity
 const updateAmenity = async (req, res) => {
-
 
     // if (!mongoose.Types.amenityName.isValid(amenityName)) {
     //     return res.status(400).json({ error: 'No such amenity' })
@@ -132,9 +126,44 @@ const updateAmenity = async (req, res) => {
         return res.status(400).json({ error: error.message })
     }
 
-
-
 }
+
+// Archive an amenity
+const archiveAmenity = async (req, res) => {
+    const { id } = req.params
+
+    try {
+
+        console.log(id);
+        const existingAmenity = await Amenity.findById(id)
+
+        
+        if (!existingAmenity) {
+            return res.status(404).json({ error: 'Amenity not found' })
+        }
+        console.log("it exists");
+
+        if (existingAmenity.amenityVisibility === "Archived") {
+            return res.status(400).json({ error: 'Amenity is already archived' })
+        }
+
+        console.log("it is not archived");
+
+        const amenity = await Amenity.findOneAndUpdate(
+            { _id: id }, 
+            { amenityVisibility: "Archived" }, 
+            { new: true }
+        )
+
+        console.log("successfully archived");
+
+        res.status(200).json(amenity)
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+
 
 
 
@@ -146,5 +175,8 @@ module.exports = {
     getAmenities,
     getArchivedAmenities,
     getSpecificAmenity,
-    updateAmenity
+    updateAmenity,
+
+    // PATCH controllers
+    archiveAmenity,
 }

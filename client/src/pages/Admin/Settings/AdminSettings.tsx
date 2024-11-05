@@ -85,7 +85,7 @@ export function AdminSettings() {
                                         </CardHeader>
                                         <CardContent>
                                             <form>
-                                                <Input placeholder="Blk 24 Lt 1" value={user.role} disabled/>
+                                                <Input placeholder="Blk 24 Lt 1" value={user.userRole} disabled/>
                                             </form>
                                         </CardContent>
                                     </Card>
@@ -101,7 +101,7 @@ export function AdminSettings() {
                                         </CardHeader>
                                         <CardContent>
                                             <form>
-                                                <Input placeholder="Blk 24 Lt 1" value={user.position} disabled/>
+                                                <Input placeholder="Blk 24 Lt 1" value={user.userPosition} disabled/>
                                             </form>
                                         </CardContent>
                                     </Card>

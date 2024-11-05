@@ -289,8 +289,8 @@ export default function ReservationForm() {
         resolver: zodResolver(reservationFormSchema),
         defaultValues: {
             reserveeId: user.id,
-            reserveeBlkLt: user.blkLt,
-            reserveePosition: user.position,
+            reserveeBlkLt: user.userBlkLt,
+            reserveePosition: user.userPosition,
             reservationType: "Equipment",
             reservationAmenities: [],
             reservationReason: "",
@@ -491,7 +491,7 @@ export default function ReservationForm() {
 
         if ((step === 1 || step === 2) && reservationEquipmentsIds.length > 0) {
             const currentAmenities = reservationForm.getValues("reservationAmenities");
-            const facilityAmenities = currentAmenities.filter(amenity => amenity.amenityType === "Facility");
+            const facilityAmenities = currentAmenities.filter(amenity => amenity?.amenityType === "Facility");
             const selectedEquipmentAmenities = filterAmenitiesByIds(amenityList, reservationEquipmentsIds);
 
             reservationForm.setValue("reservationAmenities", [...selectedEquipmentAmenities, ...facilityAmenities]);
@@ -550,7 +550,7 @@ export default function ReservationForm() {
         }
 
         const currentAmenities = reservationForm.getValues("reservationAmenities");
-        const facilityAmenities = currentAmenities.filter(amenity => amenity.amenityType === "Facility");
+        const facilityAmenities = currentAmenities.filter(amenity => amenity?.amenityType === "Facility");
         const selectedEquipmentAmenities = filterAmenitiesByIds(amenityList, reservationEquipmentsIds);
 
         reservationForm.setValue("reservationAmenities", [...facilityAmenities, ...selectedEquipmentAmenities]);
@@ -582,7 +582,7 @@ export default function ReservationForm() {
 
         const updatedAmenities = reservationForm
             .getValues("reservationAmenities")
-            .filter((amenity) => amenity.amenityType !== "Facility")
+            .filter((amenity) => amenity?.amenityType !== "Facility")
             .concat(currentAmenity);
 
         console.log(5);
@@ -1824,15 +1824,15 @@ export default function ReservationForm() {
                                             {(reservationType === "Equipment" || reservationType === "Equipment and Facility") && reservationForm.getValues("reservationAmenities").map((amenity, index) => {
 
                                                 // console.log(index);
-                                                console.log(equipmentAvailableStocks[index]?.availableStock ?? amenity.amenityStock);
+                                                console.log(equipmentAvailableStocks[index]?.availableStock ?? amenity?.amenityStock);
 
-                                                if (amenity.amenityType === "Equipment")
+                                                if (amenity?.amenityType === "Equipment")
                                                     return (
                                                         <div key={index} className="flex flex-col gap-4 p-4 my-1 rounded-md border border-dashed">
                                                             {/* Header */}
                                                             <div className="flex justify-between">
                                                                 <div className="">
-                                                                    <Label className="text-sm font-medium">{amenity.amenityName}</Label>
+                                                                    <Label className="text-sm font-medium">{amenity?.amenityName}</Label>
                                                                     <p className="text-sm text-muted-foreground"> Stocks will change depending on the date's availability. </p>
                                                                 </div>
                                                                 <Badge
@@ -1869,10 +1869,10 @@ export default function ReservationForm() {
                                                                                     max={equipmentAvailableStocks[index]?.availableStock < (amenity.amenityQuantityMax ?? 0) ? equipmentAvailableStocks[index].availableStock : (amenity.amenityQuantityMax ?? 0)}
                                                                                     type="number"
                                                                                     placeholder="Quantity"
-                                                                                    value={fieldProps.value.find((item) => item._id === amenity._id)?.amenityQuantity}
+                                                                                    value={fieldProps.value.find((item) => item?._id === amenity._id)?.amenityQuantity}
                                                                                     onChange={(e) => {
                                                                                         const updatedAmenities = reservationForm.watch("reservationAmenities").map((item) =>
-                                                                                            item._id === amenity._id
+                                                                                            item?._id === amenity._id
                                                                                                 ? { ...item, amenityQuantity: parseInt(e.target.value, 10) }
                                                                                                 : item
                                                                                         );
@@ -1898,15 +1898,15 @@ export default function ReservationForm() {
                                                     return (
                                                         <div className="flex flex-col gap-4 p-4 my-1 rounded-md border border-dashed">
                                                             {/* Header */}
-                                                            <Label className="text-sm font-medium">{amenity.amenityName}</Label>
+                                                            <Label className="text-sm font-medium">{amenity?.amenityName}</Label>
 
                                                             <div className="grid grid-cols-3 gap-2">
                                                                 <div className="col-span-2">
                                                                     <Label className="text-sm">
-                                                                        {amenity.amenityType} Address <span className="text-destructive"> * </span>
+                                                                        {amenity?.amenityType} Address <span className="text-destructive"> * </span>
                                                                     </Label>
                                                                     <p className="text-sm font-normal text-muted-foreground">
-                                                                        {amenity.amenityAddress}
+                                                                        {amenity?.amenityAddress}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -1938,10 +1938,10 @@ export default function ReservationForm() {
                                                             <TabsTrigger
                                                                 type="button"
                                                                 key={index}
-                                                                value={amenity.amenityName}
+                                                                value={amenity?.amenityName ?? ""}
                                                                 className="rounded-none px-4 !bg-transparent data-[state=active]:border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"
                                                             >
-                                                                {amenity.amenityName}
+                                                                {amenity?.amenityName}
                                                             </TabsTrigger>
                                                         ))}
                                                     </TabsList>
@@ -1954,13 +1954,13 @@ export default function ReservationForm() {
                                                     </TabsContent>
                                                     {reservationForm.getValues("reservationAmenities").map((amenity, index) => {
 
-                                                        if (amenity.amenityType === "Equipment") {
+                                                        if (amenity?.amenityType === "Equipment") {
                                                             let equipmentDisabledDates: Matcher[] = [
                                                                 ...(equipmentUnavailableDates[index]?.map(date => new Date(date)) || []),
                                                                 { before: dateAWeekFromNow }
                                                             ];
                                                             return (
-                                                                <TabsContent key={index} value={amenity.amenityName} className="flex justify-center m-0">
+                                                                <TabsContent key={index} value={amenity?.amenityName ?? ''} className="flex justify-center m-0">
                                                                     <Calendar
                                                                         disabled={equipmentDisabledDates}
                                                                         numberOfMonths={2}
@@ -1973,7 +1973,7 @@ export default function ReservationForm() {
                                                                 { before: dateAWeekFromNow }
                                                             ];
                                                             return (
-                                                                <TabsContent key={index} value={amenity.amenityName} className="flex justify-center m-0">
+                                                                <TabsContent key={index} value={amenity?.amenityName ?? ''} className="flex justify-center m-0">
                                                                     <Calendar
                                                                         disabled={facilityDisabledDates}
                                                                         numberOfMonths={2}
@@ -2133,9 +2133,9 @@ export default function ReservationForm() {
                                                 </Label>
                                                 <div className="flex items-start justify-between">
                                                     <span className="text-sm font-medium">
-                                                        {user.blkLt}
+                                                        {user.userBlkLt}
                                                     </span>
-                                                    <Badge> {user.position} </Badge>
+                                                    <Badge> {user.userPosition} </Badge>
                                                 </div>
 
                                                 <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
@@ -2160,8 +2160,8 @@ export default function ReservationForm() {
                                                                 <div className="flex items-center gap-4 w-full">
                                                                     <Dialog onOpenChange={(isOpen) => !isOpen && setCurrentIndex(0)}>
                                                                         <DialogTrigger>
-                                                                            {amenity.amenityImages.length > 0 ? (
-                                                                                <img src={amenity.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
+                                                                            {amenity?.amenityImages && amenity.amenityImages.length > 0 ? (
+                                                                                <img src={amenity?.amenityImages[0]?.url} className="h-16 w-16 max-h-16 max-w-16 rounded-md object-cover" />
                                                                             ) : (
                                                                                 <div className="flex items-center justify-center min-h-16 min-w-16 rounded-md bg-muted/50">
                                                                                     <ImageOff className="h-5 w-5 text-muted-foreground" />
@@ -2173,9 +2173,9 @@ export default function ReservationForm() {
                                                                             <DialogDescription className="sr-only">Image preview</DialogDescription>
                                                                             <Button
                                                                                 className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
+                                                                                disabled={amenity?.amenityImages.length === 1}
                                                                                 type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === 0 ? amenity.amenityImages.length - 1 : prev - 1))}
+                                                                                onClick={() => setCurrentIndex((prev) => (prev === 0 ? (amenity?.amenityImages?.length ?? 1) - 1 : prev - 1))}
                                                                                 size="icon"
                                                                                 variant="outline"
                                                                             >
@@ -2183,31 +2183,31 @@ export default function ReservationForm() {
                                                                             </Button>
                                                                             <Button
                                                                                 className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
-                                                                                disabled={amenity.amenityImages.length === 1}
+                                                                                disabled={amenity?.amenityImages.length === 1}
                                                                                 type="button"
-                                                                                onClick={() => setCurrentIndex((prev) => (prev === amenity.amenityImages.length - 1 ? 0 : prev + 1))}
+                                                                                onClick={() => setCurrentIndex((prev) => (prev === (amenity?.amenityImages?.length ?? 1) - 1 ? 0 : prev + 1))}
                                                                                 size="icon"
                                                                                 variant="outline"
                                                                             >
                                                                                 <ChevronRight className="h-4 w-4" />
                                                                             </Button>
-                                                                            <img src={amenity.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
+                                                                            <img src={amenity?.amenityImages[currentIndex]?.url} className="aspect-video rounded-md object-contain" />
                                                                         </DialogContent>
                                                                     </Dialog>
                                                                     <div className="flex flex-col items-start line-clamp-1">
-                                                                        <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity.amenityName}</Label>
+                                                                        <Label className="text-start text-sm font-medium line-clamp-1 !!no-underline">{amenity?.amenityName}</Label>
                                                                         <span className="text-start text-sm text-muted-foreground line-clamp-1">
-                                                                            {amenity.amenityType === "Equipment"
-                                                                                ? `Quantity: ${amenity.amenityQuantity ?? 'N/A'}`
-                                                                                : amenity.amenityType}
+                                                                            {amenity?.amenityType === "Equipment"
+                                                                                ? `Quantity: ${amenity?.amenityQuantity ?? 'N/A'}`
+                                                                                : amenity?.amenityType}
                                                                         </span>  </div>
                                                                 </div>
                                                             </AccordionTrigger>
                                                             <AccordionContent className="flex flex-col gap-2">
-                                                                {amenity.amenityType === "Facility" && (
+                                                                {amenity?.amenityType === "Facility" && (
                                                                     <div>
                                                                         <Label className="text-start text-muted-foreground">Facility Address</Label>
-                                                                        <p>{amenity.amenityAddress}</p>
+                                                                        <p>{amenity?.amenityAddress}</p>
                                                                     </div>
                                                                 )}
                                                                 <div>

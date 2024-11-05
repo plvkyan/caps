@@ -1,15 +1,16 @@
+
+
+// Imports
+// Lucide Icons Imports
 import {
-  BadgeCheck,
   Bell,
   ChevronsUpDown,
-  CreditCard,
   Home,
   LogOut,
   Settings,
-  Sparkles,
 } from "lucide-react"
 
-// shadcn Alert Dialog Imports
+// shadcn Alert Dialog Component Imports
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -19,27 +20,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
+
+// shadcn Avatar Component Imports
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
 
-// shadcn Button Import
+// shadcn Button Component Import
 import { Button } from "@/components/ui/button";
 
-// shadcn Drawer Component Imports
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
-
+// shadcn Dropdown Menu Component Imports
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,6 +41,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+
+// shadcn Sidebar Component Imports
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -59,7 +53,9 @@ import { useLogout } from "@/hooks/useLogout";
 import { useState } from "react";
 import { useAuthContext } from "@/hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
-import path from "path";
+
+
+
 
 
 export function NavUser() {
@@ -125,12 +121,12 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground border px-4 gap-2"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                {/* <AvatarImage src={user.blkLt} alt={user.blkLt} /> */}
-                <AvatarFallback className="rounded-lg"> U </AvatarFallback>
+                {/* <AvatarImage src={user.userBlkLt} alt={user.userBlkLt} /> */}
+                <AvatarFallback className="rounded-lg"> BL </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold"> {user.blkLt} </span>
-                <span className={"truncate text-xs " + (user.memberStatus === "Outstanding" ? "text-primary" : "text-warning")}> {user.position} </span>
+                <span className="truncate font-semibold"> {user.userBlkLt} </span>
+                <span className={"truncate text-xs " + (user.userStatus === "Outstanding" ? "text-primary" : "text-warning")}> {user.userPosition} </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -144,12 +140,12 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.blkLt} alt={user.blkLt} />
-                  <AvatarFallback className="rounded-lg"> U </AvatarFallback>
+                  <AvatarImage src={user.userBlkLt} alt={user.userBlkLt} />
+                  <AvatarFallback className="rounded-lg"> BL </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold"> {user.blkLt} </span>
-                  <span className={"truncate text-xs " + (user.memberStatus === "Outstanding" ? "text-primary" : "text-warning")}> {user.position} </span>
+                  <span className="truncate font-semibold"> {user.userBlkLt} </span>
+                  <span className={"truncate text-xs " + (user.memberStatus === "Outstanding" ? "text-primary" : "text-warning")}> {user.userPosition} </span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -162,11 +158,11 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <Bell />
                 Notification
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              </DropdownMenuItem> */}
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
                 <Settings />
                 Settings
               </DropdownMenuItem>

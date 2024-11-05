@@ -99,16 +99,16 @@ export default function ReservationPage() {
         async function fetchUnarchivedReservations() {
 
             try {
-                const fetchFunction = user.position === "Admin" ? getUnarchivedReservations : () => getUserUnarchivedReservations(user._id);
+                const fetchFunction = user.userRole === "Admin" ? getUnarchivedReservations : () => getUserUnarchivedReservations(user._id);
                 const result = await fetchFunction();
                 const data = await result.json();
 
                 if (!ignore) {
                     if (result.ok) {
-                        console.log(`${user.position === "Admin" ? "All" : "User"} unarchived reservations fetched successfully: `, data);
+                        console.log(`${user.userRole === "Admin" ? "All" : "User"} unarchived reservations fetched successfully: `, data);
                         setReservations(data);
                     } else {
-                        console.log(`${user.position === "Admin" ? "All" : "User"} unarchived reservations fetch failed.`);
+                        console.log(`${user.userRole === "Admin" ? "All" : "User"} unarchived reservations fetch failed.`);
                     }
                 }
             } catch (error) {
@@ -158,14 +158,6 @@ export default function ReservationPage() {
                             <Breadcrumb>
 
                                 <BreadcrumbList>
-
-                                    <BreadcrumbItem className="hidden md:block">
-                                        <BreadcrumbLink href="/dashboard">
-                                            Dashboard
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-
-                                    <BreadcrumbSeparator className="hidden md:block" />
 
                                     <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbPage>

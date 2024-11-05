@@ -1,16 +1,28 @@
 
 
 
+// Requires
+// Express require
 const express = require('express')
+// Router require
 const router = express.Router()
 
-
-
+// Controllers
 const { 
 
+
+
+    // GET functions
+    getUnarchivedBillPresets,
+
+
+
+    // POST functions
+    createBillPreset,
     createBill,
     deleteBill,
     getArchivedBills,
+    getBills,
     getBill,
     getUnarchivedBills,
     getUserBills,
@@ -19,7 +31,7 @@ const {
 } = require('../controllers/billController')
 
 
-const requireAuth = require('../middlewares/requireAuth')
+// const requireAuth = require('../middlewares/requireAuth')
 
 
 
@@ -29,25 +41,44 @@ const requireAuth = require('../middlewares/requireAuth')
 
 
 
+// GET routes
+// GET all bills
+router.get('/', getBills)
 
 // GET all unarchived bills
-router.get('/', getUnarchivedBills)
-
-// GET all unarchived bills
-router.get('/:blkLt', getUserBills)
+router.get('/unarchived', getUnarchivedBills)
 
 // GET all archived bills
 router.get('/archived', getArchivedBills)
 
-// GET a single bill
-router.get('/details/:id', getBill)
+// GET all unarchived bills
+router.get('/user/:id', getUserBills)
 
+// GET a single bill
+router.get('/single/:id', getBill)
+
+router.get('/presets/unarchived', getUnarchivedBillPresets)
+
+
+
+// POST routes
 // POST a new bill
 router.post('/', createBill)
+// POST a new bill preset
+router.post('/presets', createBillPreset) 
 
+
+
+
+// DELETE routes
 // DELETE a bill
 router.delete('/:id', deleteBill)
 
+
+
+
+
+// PATCH routes
 // UPDATE a bill
 router.patch('/:id', updateBill)
 

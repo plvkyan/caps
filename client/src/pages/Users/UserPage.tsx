@@ -71,7 +71,7 @@ import { getAllUsers } from "@/data/user-api"
 
 
 
-export default function ReservationPage() {
+export default function UserPage() {
 
 
     // Contexts
@@ -151,14 +151,6 @@ export default function ReservationPage() {
                             <Breadcrumb>
 
                                 <BreadcrumbList>
-
-                                    <BreadcrumbItem className="hidden md:block">
-                                        <BreadcrumbLink href="/dashboard">
-                                            Dashboard
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-
-                                    <BreadcrumbSeparator className="hidden md:block" />
 
                                     <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbPage>

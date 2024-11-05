@@ -82,7 +82,7 @@ export default function Reservations() {
 
             let json;
 
-            if (user.position === "Admin") {
+            if (user.userPosition === "Admin") {
 
                 const response = await fetch('http://localhost:4000/api/reservations');
 
@@ -96,9 +96,9 @@ export default function Reservations() {
                 }
             }
 
-            if (user.position !== "Admin") {
+            if (user.userPosition !== "Admin") {
 
-                const response = await fetch('http://localhost:4000/api/reservations/' + user.blkLt);
+                const response = await fetch('http://localhost:4000/api/reservations/' + user.userBlkLt);
 
                 json = await response.json();
 
@@ -167,7 +167,7 @@ export default function Reservations() {
                         </div>
 
                         {/* {
-                            (user.position === "Admin" && reservations && amenityList) && 
+                            (user.userPosition === "Admin" && reservations && amenityList) && 
                             (
                                 // <ReservationAmenities reservations={reservations} amenityList={amenityList} />
                             )

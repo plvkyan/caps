@@ -28,14 +28,14 @@ const billRoutes = require('./routes/billRoutes')
 // const emailRoutes = require('./routes/emailRoutes')
 
 // Middleware Import
-const checkOverdue = require('./middlewares/checkOverdue')
+// const checkOverdue = require('./middlewares/checkOverdue')
 
 // const exportRoutes = require('./routes/exportRoutes')
 
 // const checkReservation = require('./middlewares/checkReservation')
 const checkOutstanding = require('./middlewares/checkOutstanding')
 
-
+const checkOngoingReservation = require('./middlewares/checkOngoingReservation')
 
 
 
@@ -73,9 +73,10 @@ app.use((req, res, next) => {
 app.use(express.json({limit: '30mb'}));
 app.use(express.urlencoded({limit: '30mb', extended: true}));
 app.use(express.json())
-app.use(checkOverdue)
+// app.use(checkOverdue)
 // app.use(checkReservation)
 // app.use(checkOutstanding)
+app.use(checkOngoingReservation)
 app.use((req, res, next) => {
 
     // console.log(req.path, req.method)

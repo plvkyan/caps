@@ -163,7 +163,7 @@ export default function Navbar() {
                                 <span className="sr-only"> Grand Cedar Homes </span>
                             </Link>
 
-                            {user.role != "Unit Owner" &&
+                            {user.userRole != "Unit Owner" &&
                                 (
                                     <>
                                         <CustomLink
@@ -228,7 +228,7 @@ export default function Navbar() {
                                 )
                             }
 
-                            {user.role == "Unit Owner" &&
+                            {user.userRole == "Unit Owner" &&
                                 (
                                     <>
                                         <CustomLink

@@ -186,7 +186,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
                 <div className="flex flex-col">
                     <h1 className="font-semibold text-2xl"> Amenities </h1>
-                    <h3 className="font-light text-muted-foreground"> Looking for a specific amenity? </h3>
+                    <h3 className="font-light text-muted-foreground"> A list of all available amenities. </h3>
                 </div>
 
                 <div className="flex items-end gap-2">
@@ -208,9 +208,9 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                     placeholder="Search..."
                 />
 
-                <DataTableViewOptions table={table} label="Toggle Columns" />
+                <DataTableViewOptions table={table} label="Toggle" />
 
-                <DataTableFacetedFilter column={table.getColumn("amenityType")} title="Filter" options={AMENITY_DATA} />
+                <DataTableFacetedFilter column={table.getColumn("amenityType")} title="Type" options={AMENITY_DATA} />
 
                 {isFiltered && (
                     <Button
@@ -219,7 +219,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                         className="items-center"
                     >
                         <X className="h-4 w-4" />
-                        Reset
+                        Reset Filters
                     </Button>
                 )}
 
@@ -285,7 +285,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No reservations found.
+                                    No amenities found.
                                 </TableCell>
                             </TableRow>
                         )}

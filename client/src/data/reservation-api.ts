@@ -95,7 +95,7 @@ export const addCommentToReservation = async (reservationId, commentData) => {
 
 // PATCH request to archive many reservations
 export const archiveManyReservations = async (reservationIds) => {
-    return (await fetch(apiReservationsUrl + "/update/batch", {
+    return (await fetch(apiReservationsUrl + "/update/visibility/batch/archive", {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json'

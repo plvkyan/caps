@@ -92,13 +92,13 @@ export default function Dashboard() {
     // Use Effects
     useEffect(() => {
 
-        if ( user.position === "Admin") {
+        if ( user.userPosition === "Admin") {
 
             document.title = "Admin Dashboard | GCTMS "
 
         }
 
-        if ( user.position === "Unit Owner") {
+        if ( user.userPosition === "Unit Owner") {
 
             document.title = "Dashboard | GCTMS "
 

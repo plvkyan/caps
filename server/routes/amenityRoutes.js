@@ -15,6 +15,7 @@ const {
    getArchivedAmenities,
    getSpecificAmenity,
    updateAmenity,
+   archiveAmenity,
 
 } = require('../controllers/amenityController')
 
@@ -46,6 +47,9 @@ router.post('/', createAmenity);
 
 // UPDATE an amenity
 router.patch('/:id', updateAmenity)
+
+// ARCHIVE an amenity
+router.patch('/archive/:id', archiveAmenity)
 
 
 

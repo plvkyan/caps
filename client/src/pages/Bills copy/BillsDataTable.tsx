@@ -189,7 +189,7 @@ export function BillsDataTable<TData, TValue>({
                 </div>
 
                 {
-                    user.position === "Admin" && (
+                    user.userPosition === "Admin" && (
 
                         <DropdownMenu>
                             

@@ -324,7 +324,7 @@ const UserEditForm = ({ userAccount, showEditDialog, setShowEditDialog }) => {
                                                                 </FormLabel>
                                                             </FormItem>
 
-                                                            {user.role != "President" && (
+                                                            {user.userRole != "President" && (
                                                                 <FormItem className="flex items-center space-x-3 space-y-0 pl-3 !m-0">
 
                                                                     <FormControl>
@@ -337,7 +337,7 @@ const UserEditForm = ({ userAccount, showEditDialog, setShowEditDialog }) => {
                                                                 </FormItem>
                                                             )}
 
-                                                            {user.role == "President" && (
+                                                            {user.userRole == "President" && (
                                                                 <FormItem className="flex items-center space-x-3 space-y-0 pl-3 !m-0">
 
                                                                     <FormControl>

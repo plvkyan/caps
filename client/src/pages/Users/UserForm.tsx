@@ -92,7 +92,7 @@ import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
 // Hooks Imports
 // Authentication Hook Import
-// import { useAuthContext } from "@/hooks/useAuthContext";
+import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 
@@ -152,7 +152,7 @@ export default function UserForm() {
 
     // Contexts
     // Authentication Context
-    // const { user } = useAuthContext();
+    const { user } = useAuthContext();
 
 
 
@@ -219,7 +219,7 @@ export default function UserForm() {
                 throw new Error(data.error || 'Error creating new user.');
             }
 
-            toast.success("New user created.", {
+            toast.success("New user created", {
                 description: "A new '" + values.userRole + "' user has been created.",
                 closeButton: true,
             });
@@ -595,7 +595,7 @@ export default function UserForm() {
                                                                 </FormItem>
                                                                 <FormItem className="flex items-center gap-3">
                                                                     <FormControl>
-                                                                        <RadioGroupItem value="Admin" />
+                                                                        <RadioGroupItem disabled={user.userPosition != "President"} value="Admin" />
                                                                     </FormControl>
                                                                     <FormLabel className="font-normal">
                                                                         Admin

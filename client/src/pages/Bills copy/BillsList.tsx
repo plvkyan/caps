@@ -82,11 +82,11 @@ export default function BillsList() {
 
 
 
-            if (user.position === "Unit Owner") {
+            if (user.userPosition === "Unit Owner") {
 
                 const fetchBills = async () => {
 
-                    const response = await fetch('http://localhost:4000/api/bills/' + user.blkLt)
+                    const response = await fetch('http://localhost:4000/api/bills/' + user.userBlkLt)
 
                     const json = await response.json()
 
@@ -112,7 +112,7 @@ export default function BillsList() {
 
 
 
-            if (user.position === "Admin") {
+            if (user.userPosition === "Admin") {
 
                 const fetchBills = async () => {
 
@@ -140,7 +140,7 @@ export default function BillsList() {
                     if (response.ok) {
 
 
-                        setUsers(json.map((user) => user.blkLt))
+                        setUsers(json.map((user) => user.userBlkLt))
                         console.log(users)
 
                     }

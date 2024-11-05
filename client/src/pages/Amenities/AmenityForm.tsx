@@ -172,7 +172,7 @@ export default function AmenityForm() {
             amenityQuantityMin: 1,
             amenityQuantityMax: 1,
             amenityReminder: "",
-            amenityCreator: user.blkLt,
+            amenityCreator: user.userBlkLt,
             amenityVisibility: "Unarchived",
         },
     });

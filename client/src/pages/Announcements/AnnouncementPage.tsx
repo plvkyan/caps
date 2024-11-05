@@ -108,7 +108,7 @@ export default function AnnouncementPage() {
 
             setReservations([]);
 
-            if (user.position === "Admin") {
+            if (user.userPosition === "Admin") {
                 const unarchivedReservationsResult = await getUnarchivedReservations();
                 const unarchivedReservations = await unarchivedReservationsResult.json();
                 if (!ignore && unarchivedReservationsResult.ok) {

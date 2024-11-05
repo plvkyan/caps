@@ -253,7 +253,7 @@ export const columns: ColumnDef<User>[] = [
 
 
 
-                            {user.role == "President" &&
+                            {user.userRole == "President" &&
                                 (
                                     <>
 
@@ -282,7 +282,7 @@ export const columns: ColumnDef<User>[] = [
                                 )
                             }
 
-                            {user.role != "President" && (rowUser.role == "Unit Owner" && user.role == "Admin") &&
+                            {user.userRole != "President" && (rowuser.userRole == "Unit Owner" && user.userRole == "Admin") &&
                                 (
                                     <>
                                     

@@ -383,7 +383,7 @@ export const BillDetails = ({ bills }) => {
                     {bills.billName}
                 </h1>
 
-                {(user.position === "Unit Owner" && bills.billReceivers[0].billStatus !== "Paid"
+                {(user.userPosition === "Unit Owner" && bills.billReceivers[0].billStatus !== "Paid"
                 ) && (
                         <div className="flex justify-end w-full">
                             <Button onClick={payAction}> Pay Bill </Button>
@@ -392,7 +392,7 @@ export const BillDetails = ({ bills }) => {
 
                     )}
 
-                {(user.position === "Unit Owner" && bills.billReceivers[0].billStatus === "Paid"
+                {(user.userPosition === "Unit Owner" && bills.billReceivers[0].billStatus === "Paid"
                 ) && (
                         <div className="flex justify-end w-full">
                             <Button disabled onClick={payAction}> Already Paid </Button>
@@ -411,7 +411,7 @@ export const BillDetails = ({ bills }) => {
                         <DropdownMenuTrigger asChild>
 
                             {
-                                user.position === "Admin" && (
+                                user.userPosition === "Admin" && (
                                     <Button size="icon" variant="outline" className="h-8 w-8">
                                         <MoreVertical className="h-3.5 w-3.5" />
                                         <span className="sr-only">More</span>
@@ -426,14 +426,14 @@ export const BillDetails = ({ bills }) => {
                         <DropdownMenuContent align="end">
 
                             {
-                                (bills.stat == "Unarchived" && user.position === "Admin") &&
+                                (bills.stat == "Unarchived" && user.userPosition === "Admin") &&
                                 (
                                     <DropdownMenuItem onClick={setArchive}> Archive </DropdownMenuItem>
                                 )
                             }
 
                             {
-                                (bills.stat == "Archived" && user.position === "Admin") &&
+                                (bills.stat == "Archived" && user.userPosition === "Admin") &&
                                 (
                                     <DropdownMenuItem onClick={setUnarchive}> Unarchive </DropdownMenuItem>
                                 )
@@ -442,7 +442,7 @@ export const BillDetails = ({ bills }) => {
                             <DropdownMenuSeparator />
 
                             {
-                                user.position === "Admin" &&
+                                user.userPosition === "Admin" &&
                                 (
                                     <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive"> Delete </DropdownMenuItem>
                                 )
@@ -467,7 +467,7 @@ export const BillDetails = ({ bills }) => {
                 <div className="grid w-full auto-rows-max items-start gap-4 w-full">
 
 
-                    {user.position === "Admin" && (
+                    {user.userPosition === "Admin" && (
                         <Card className="overflow w-full">
 
 
@@ -641,7 +641,7 @@ export const BillDetails = ({ bills }) => {
                             <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
 
                                 <div className="text-xs text-muted-foreground">
-                                    Interacting as: {user.blkLt}
+                                    Interacting as: {user.userBlkLt}
                                 </div>
 
                             </CardFooter>
@@ -658,7 +658,7 @@ export const BillDetails = ({ bills }) => {
 
 
 
-                    {user.position == "Unit Owner" && (
+                    {user.userPosition == "Unit Owner" && (
                         <Card className="overflow w-full">
 
 
@@ -771,7 +771,7 @@ export const BillDetails = ({ bills }) => {
                             <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
 
                                 <div className="text-xs text-muted-foreground">
-                                    Interacting as: {user.blkLt}
+                                    Interacting as: {user.userBlkLt}
                                 </div>
 
                             </CardFooter>
@@ -807,7 +807,7 @@ export const BillDetails = ({ bills }) => {
                     <DropdownMenuTrigger asChild>
 
                         {
-                            user.position === "Admin" && (
+                            user.userPosition === "Admin" && (
                                 <Button size="icon" variant="outline" className="h-8 w-8">
                                     <MoreVertical className="h-3.5 w-3.5" />
                                     <span className="sr-only">More</span>
@@ -822,14 +822,14 @@ export const BillDetails = ({ bills }) => {
                     <DropdownMenuContent align="end">
 
                         {
-                            (bills.stat == "Unarchived" && user.position === "Admin") &&
+                            (bills.stat == "Unarchived" && user.userPosition === "Admin") &&
                             (
                                 <DropdownMenuItem onClick={setArchive}> Archive </DropdownMenuItem>
                             )
                         }
 
                         {
-                            (bills.stat == "Archived" && user.position === "Admin") &&
+                            (bills.stat == "Archived" && user.userPosition === "Admin") &&
                             (
                                 <DropdownMenuItem onClick={setUnarchive}> Unarchive </DropdownMenuItem>
                             )
@@ -838,7 +838,7 @@ export const BillDetails = ({ bills }) => {
                         <DropdownMenuSeparator />
 
                         {
-                            user.position === "Admin" &&
+                            user.userPosition === "Admin" &&
                             (
                                 <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive"> Delete </DropdownMenuItem>
                             )

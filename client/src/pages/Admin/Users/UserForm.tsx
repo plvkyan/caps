@@ -311,7 +311,7 @@ const UserForm = () => {
 
 
 
-                                                        {user.role != "President" && (
+                                                        {user.userRole != "President" && (
                                                             <FormItem className="flex items-center space-x-3 space-y-0 pl-3 !m-0">
 
                                                                 <FormControl>
@@ -324,7 +324,7 @@ const UserForm = () => {
                                                             </FormItem>
                                                         )}
 
-                                                        {user.role === "President" && (
+                                                        {user.userRole === "President" && (
                                                             <FormItem className="flex items-center space-x-3 space-y-0 pl-3 !m-0">
 
                                                                 <FormControl>

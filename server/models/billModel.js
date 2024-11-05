@@ -13,14 +13,17 @@ const Schema = mongoose.Schema
 
 const billSchema = new Schema({
 
-    billName: {
+    billTitle: {
+        type: String,
+        required: true,
+    },
+    billType: {
         type: String,
         required: true,
     },
     billDescription: {
         type: String,
         required: true,
-        default: "",
     },
     billQuantity: {
         type: Number,
@@ -36,33 +39,52 @@ const billSchema = new Schema({
         type: Number,
         required: true,
     },
-    billReceivers: {
+    billRecurringDate: {
+        type: String,
+        required: false,
+    },
+    billDueDate: {
+        type: Date,
+        required: true,
+        default: new Date(new Date().setMonth(new Date().getMonth() + 1))
+    },
+    billPayors: {
         type: Array,
         properties: {
-            receiverBlkLt: {
+            payorId: {
                 type: String,
                 required: true,
+            },
+            payorBlkLt: {
+                type: String,
+                required: true,
+            },
+            payorEmail: {
+                type: String,
+                required: false,
             },
             billStatus: {
                 type: String,
                 required: true,
                 default: "Pending"
             },
-            billDue: {
+            billPaidDate: {
                 type: Date,
-                required: true,
-                default: new Date(new Date().setMonth(new Date().getMonth() + 1))
+                required: false,
             }
         }
     },
-    billMadeby: {
+    billCreatorId: {
         type: String,
         required: true,
     },
-    billMadeDate: {
-        type: Date,
+    billCreatorBlkLt: {
+        type: String,
         required: true,
-        default: new Date(),
+    },
+    billCreatorPosition: {
+        type: String,
+        required: true,
     },
     billVisibility: {
         type: String,
@@ -72,9 +94,9 @@ const billSchema = new Schema({
 
 }, { timestamps: true });
 
-const due = new Date();
 
-const newDate = new Date(new Date().setMonth(due.getMonth() + 1));
+
+
 
 
 

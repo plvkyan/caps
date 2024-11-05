@@ -312,7 +312,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
         const approveReservation = async () => {
 
             reservation.reservationStatus = "Approved";
-            reservation.interactedBy = user.blkLt;
+            reservation.interactedBy = user.userBlkLt;
             reservation.interactionDate = date;
 
             const response = await fetch('http://localhost:4000/api/reservations/' + reservation._id, {
@@ -409,7 +409,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
     const setReject = async () => {
 
         reservation.reservationStatus = "Rejected";
-        reservation.interactedBy = user.blkLt;
+        reservation.interactedBy = user.userBlkLt;
         reservation.interactionDate = date;
 
         const response = await fetch('http://localhost:4000/api/reservations/' + reservation._id, {
@@ -567,7 +567,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
     //
     filteredUser = users.filter((user) => {
-        return user.blkLt === reservation.blkLt;
+        return user.userBlkLt === reservation.blkLt;
     })
 
     //
@@ -690,7 +690,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                         <DropdownMenuTrigger asChild>
 
                             {
-                                user.position === "Admin" && (
+                                user.userPosition === "Admin" && (
                                     <Button size="icon" variant="outline" className="h-8 w-8">
                                         <MoreVertical className="h-3.5 w-3.5" />
                                         <span className="sr-only"> More </span>
@@ -705,7 +705,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
                             {/* Archive button when unarchived */}
                             {
-                                (reservation.stat == "Unarchived" && user.position === "Admin") &&
+                                (reservation.stat == "Unarchived" && user.userPosition === "Admin") &&
                                 (
                                     <DropdownMenuItem onClick={setArchive}> Archive </DropdownMenuItem>
                                 )
@@ -713,7 +713,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
                             {/* Unarchive button when archived */}
                             {
-                                (reservation.stat == "Archived" && user.position === "Admin") &&
+                                (reservation.stat == "Archived" && user.userPosition === "Admin") &&
                                 (
                                     <DropdownMenuItem onClick={setUnarchive}> Unarchive </DropdownMenuItem>
                                 )
@@ -723,7 +723,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                             <DropdownMenuSeparator />
 
                             {
-                                user.position === "Admin" &&
+                                user.userPosition === "Admin" &&
                                 (
                                     <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive"> Delete </DropdownMenuItem>
                                 )
@@ -735,7 +735,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
                     {/* Approve and reject button when reservation is pending */}
                     {
-                        (reservation.reservationStatus != "Approved" && reservation.reservationStatus != "Rejected" && reservation.reservationStatus != "Expired" && user.position === "Admin") &&
+                        (reservation.reservationStatus != "Approved" && reservation.reservationStatus != "Rejected" && reservation.reservationStatus != "Expired" && user.userPosition === "Admin") &&
                         (
                             <>
                                 <Button type="submit" form="reservationForm" onClick={setReject} variant="outline" size="sm">
@@ -748,7 +748,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
                     {/* Reopen button when reservation is approved or rejected */}
                     {
-                        (reservation.reservationStatus == "Approved" || reservation.reservationStatus == "Rejected" && reservation.reservationStatus != "Expired" && user.position === "Admin") &&
+                        (reservation.reservationStatus == "Approved" || reservation.reservationStatus == "Rejected" && reservation.reservationStatus != "Expired" && user.userPosition === "Admin") &&
                         (
                             <>
                                 <Button onClick={() => { setReopen(reservation.amenityName) }} variant="outline" size="sm"> Reopen </Button>
@@ -758,7 +758,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
                     {/* Reopen button when reservation is approved or rejected */}
                     {
-                        (reservation.reservationStatus == "Expired" && user.position === "Admin") &&
+                        (reservation.reservationStatus == "Expired" && user.userPosition === "Admin") &&
                         (
                             <>
                                 <Button disabled onClick={setReopen} variant="outline" size="sm"> Expired </Button>
@@ -976,7 +976,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
                                 {
                                     (
-                                        (reservation.reservationStatus == "Approved" || reservation.reservationStatus == "Rejected") && user.position === "Admin") &&
+                                        (reservation.reservationStatus == "Approved" || reservation.reservationStatus == "Rejected") && user.userPosition === "Admin") &&
                                     (
                                         <>
 
@@ -1051,7 +1051,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                         <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
 
                             <div className="text-xs text-muted-foreground">
-                                Interacting as: {user.blkLt}
+                                Interacting as: {user.userBlkLt}
                             </div>
 
                         </CardFooter>
@@ -1068,7 +1068,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
 
 
                     {
-                        user.position === "Admin" &&
+                        user.userPosition === "Admin" &&
                         (
                             <Form {...form}>
 
@@ -1189,7 +1189,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                     <DropdownMenuTrigger asChild>
 
                         {
-                            user.position === "Admin" && (
+                            user.userPosition === "Admin" && (
                                 <Button size="icon" variant="outline" className="h-8 w-8">
                                     <MoreVertical className="h-3.5 w-3.5" />
                                     <span className="sr-only"> More </span>
@@ -1204,14 +1204,14 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                     <DropdownMenuContent align="end">
 
                         {
-                            (reservation.stat == "Unarchived" && user.position === "Admin") &&
+                            (reservation.stat == "Unarchived" && user.userPosition === "Admin") &&
                             (
                                 <DropdownMenuItem onClick={setArchive}> Archive </DropdownMenuItem>
                             )
                         }
 
                         {
-                            (reservation.stat == "Archived" && user.position === "Admin") &&
+                            (reservation.stat == "Archived" && user.userPosition === "Admin") &&
                             (
                                 <DropdownMenuItem onClick={setUnarchive}> Unarchive </DropdownMenuItem>
                             )
@@ -1220,7 +1220,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                         <DropdownMenuSeparator />
 
                         {
-                            user.position === "Admin" &&
+                            user.userPosition === "Admin" &&
                             (
                                 <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive"> Delete </DropdownMenuItem>
                             )
@@ -1231,7 +1231,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                 </DropdownMenu>
 
                 {
-                    (reservation.reservationStatus != "Approved" && reservation.reservationStatus != "Rejected" && user.position === "Admin") &&
+                    (reservation.reservationStatus != "Approved" && reservation.reservationStatus != "Rejected" && user.userPosition === "Admin") &&
                     (
                         <>
                             <Button type="submit" form="reservationForm" onClick={setReject} variant="outline" size="sm">
@@ -1243,7 +1243,7 @@ export const ReservationDetails = ({ reservation, users, amenityList }) => {
                 }
 
                 {
-                    (reservation.reservationStatus == "Approved" || reservation.reservationStatus == "Rejected" && user.position === "Admin") &&
+                    (reservation.reservationStatus == "Approved" || reservation.reservationStatus == "Rejected" && user.userPosition === "Admin") &&
                     (
                         <>
                             <Button onClick={setReopen} variant="outline" size="sm"> Reopen </Button>

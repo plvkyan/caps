@@ -152,6 +152,10 @@ export function DataTableViewOptions<TData>({
                                 column.id === "userRole" ? "Role" :
                                 column.id === "userPosition" ? "Position" :
                                 column.id === "createdAt" ? "Created At" :
+                                column.id === "billTitle" ? "Bill Title" :
+                                column.id === "billType" ? "Bill Type" :
+                                column.id === "billAmount" ? "Bill Amount" :
+                                column.id === "billDueDate" ? "Bill Due Date" :
                                 column.id
                                 }
                             </DropdownMenuCheckboxItem>

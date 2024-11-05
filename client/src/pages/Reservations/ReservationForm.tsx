@@ -299,8 +299,8 @@ export default function ReservationForm() {
         resolver: zodResolver(reservationFormSchema),
         defaultValues: {
             reserveeId: user.id,
-            reserveeBlkLt: user.blkLt,
-            reserveePosition: user.position,
+            reserveeBlkLt: user.userBlkLt,
+            reserveePosition: user.userPosition,
             reservationType: "Equipment",
             reservationAmenities: [],
             reservationReason: "",
@@ -310,8 +310,8 @@ export default function ReservationForm() {
                     status: "Pending",
                     statusDate: new Date(),
                     statusAuthorId: user.id,
-                    statusAuthor: user.blkLt,
-                    statusAuthorPosition: user.position,
+                    statusAuthor: user.userBlkLt,
+                    statusAuthorPosition: user.userPosition,
                 }
             ],
         }
@@ -1224,9 +1224,9 @@ export default function ReservationForm() {
                                                 </Label>
                                                 <div className="flex items-start justify-between">
                                                     <span className="text-sm font-medium">
-                                                        {user.blkLt}
+                                                        {user.userBlkLt}
                                                     </span>
-                                                    <Badge> {user.position} </Badge>
+                                                    <Badge> {user.userPosition} </Badge>
                                                 </div>
 
                                                 <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
@@ -1639,9 +1639,9 @@ export default function ReservationForm() {
                                                 </Label>
                                                 <div className="flex items-start justify-between">
                                                     <span className="text-sm font-medium">
-                                                        {user.blkLt}
+                                                        {user.userBlkLt}
                                                     </span>
-                                                    <Badge> {user.position} </Badge>
+                                                    <Badge> {user.userPosition} </Badge>
                                                 </div>
 
                                                 <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
@@ -1852,9 +1852,9 @@ export default function ReservationForm() {
                                                 </Label>
                                                 <div className="flex items-start justify-between">
                                                     <span className="text-sm font-medium">
-                                                        {user.blkLt}
+                                                        {user.userBlkLt}
                                                     </span>
-                                                    <Badge> {user.position} </Badge>
+                                                    <Badge> {user.userPosition} </Badge>
                                                 </div>
 
                                                 <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
@@ -2245,9 +2245,9 @@ export default function ReservationForm() {
                                                 </Label>
                                                 <div className="flex items-start justify-between">
                                                     <span className="text-sm font-medium">
-                                                        {user.blkLt}
+                                                        {user.userBlkLt}
                                                     </span>
-                                                    <Badge> {user.position} </Badge>
+                                                    <Badge> {user.userPosition} </Badge>
                                                 </div>
 
                                                 <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>
@@ -2726,9 +2726,9 @@ export default function ReservationForm() {
                                                 </Label>
                                                 <div className="flex items-start justify-between">
                                                     <span className="text-sm font-medium">
-                                                        {user.blkLt}
+                                                        {user.userBlkLt}
                                                     </span>
-                                                    <Badge> {user.position} </Badge>
+                                                    <Badge> {user.userPosition} </Badge>
                                                 </div>
 
                                                 <span className="text-sm text-muted-foreground"> {format(new Date(), "PPp")} </span>

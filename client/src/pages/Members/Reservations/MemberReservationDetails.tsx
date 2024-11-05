@@ -642,7 +642,7 @@ export const MemberReservationDetails = ({ reservations }) => {
                         <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
 
                             <div className="text-xs text-muted-foreground">
-                                Interacting as: {user.blkLt}
+                                Interacting as: {user.userBlkLt}
                             </div>
 
                         </CardFooter>

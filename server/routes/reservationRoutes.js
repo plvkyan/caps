@@ -50,6 +50,7 @@ const {
    setReservationReturned,
    setReservationCompleted,
    uploadReservationImages,
+   batchArchiveReservations,
 } = require('../controllers/reservationController');
 const { set } = require('mongoose');
 
@@ -161,6 +162,7 @@ router.patch('/update/status/forreturn/:id', setReservationForReturn);
 router.patch('/update/status/returned/:id', setReservationReturned);
 router.patch('/update/status/completed/:id', setReservationCompleted);
 router.patch('/update/images/:id', uploadReservationImages);
+router.patch('/update/visibility/batch/archive', batchArchiveReservations)
 
 router.patch('/update/status/batch/approve', batchApproveReservations)
 router.patch('/update/status/batch/reject',  batchRejectReservations)

@@ -49,9 +49,9 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 
 // Utility Imports
 // React Imports
-import { 
-    useEffect, 
-    useState 
+import {
+    useEffect,
+    useState
 } from "react"
 
 
@@ -92,6 +92,13 @@ export default function AmenityPage() {
         document.title = "Amenities | GCTMS";
     }, []);
 
+    useEffect(() => {
+        
+        sessionStorage.getItem("archiveSuccess") && toast.success("Amenity archived successfully.", { closeButton: true });
+        sessionStorage.removeItem("archiveSuccess");
+        
+    })
+
     // Fetching unarchived amenities effect
     useEffect(() => {
         const fetchUnarchivedAmenities = async () => {
@@ -100,9 +107,6 @@ export default function AmenityPage() {
                 if (!ignore) {
                     if (response.ok) {
                         const data = await response.json();
-                        toast.success("Successfully fetched unarchived amenities.", {
-                            closeButton: true,
-                        });
                         setAmenities(data);
                     } else {
                         toast.error("Failed to fetch unarchived amenities.", {
@@ -156,14 +160,6 @@ export default function AmenityPage() {
                             <Breadcrumb>
 
                                 <BreadcrumbList>
-
-                                    <BreadcrumbItem className="hidden md:block">
-                                        <BreadcrumbLink href="/dashboard">
-                                            Dashboard
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-
-                                    <BreadcrumbSeparator className="hidden md:block" />
 
                                     <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbPage>

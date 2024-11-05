@@ -63,7 +63,7 @@ export default function MemberReservations() {
 
         const fetchReservations = async () => {
 
-            const response = await fetch('http://localhost:4000/api/reservations/' + user.blkLt)
+            const response = await fetch('http://localhost:4000/api/reservations/' + user.userBlkLt)
 
             const json = await response.json()
 

@@ -2,9 +2,11 @@
 
 
 // Imports
+
 // shadcn Components Imports
 // shadcn AppSidebar Imports
 import { AppSidebar } from "@/components/app-sidebar"
+
 // shadcn Breadcrumb Imports
 import {
     Breadcrumb,
@@ -14,10 +16,13 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+
 // shadcn NavUser Imports
 import { NavUser } from "@/components/nav-user"
+
 // shadcn Separator Imports
 import { Separator } from "@/components/ui/separator"
+
 // shadcn Sidebar Imports
 import {
     SidebarInset,
@@ -36,6 +41,7 @@ import { ThemeToggle } from "@/components/custom/ThemeToggle";
 // Data table imports
 // Data table column definitions imports
 import { ReservationTableColumns } from "@/pages/Reservations/ReservationColumns";
+
 // Data table component import
 import ReservationTable from "@/pages/Reservations/ReservationTable";
 
@@ -65,17 +71,11 @@ import { ReservationType } from "@/types/reservation-type"
 // Data Imports
 // All unarchived reservation data Import
 import { getUnarchivedReservations } from "@/data/reservation-api.ts";
+
 // All user unarchived reservation data Import
 import { getUserUnarchivedReservations } from "@/data/reservation-api.ts";
 
 
-const userData = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-}
 
 
 
@@ -108,7 +108,7 @@ export default function ReservationPage() {
 
             setReservations([]);
 
-            if (user.position === "Admin") {
+            if (user.userPosition === "Admin") {
                 const unarchivedReservationsResult = await getUnarchivedReservations();
                 const unarchivedReservations = await unarchivedReservationsResult.json();
                 if (!ignore && unarchivedReservationsResult.ok) {
@@ -173,16 +173,8 @@ export default function ReservationPage() {
                                 <BreadcrumbList>
 
                                     <BreadcrumbItem className="hidden md:block">
-                                        <BreadcrumbLink href="/dashboard">
-                                            Dashboard
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-
-                                    <BreadcrumbSeparator className="hidden md:block" />
-
-                                    <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbPage>
-                                            Reservations
+                                            Dashboard
                                         </BreadcrumbPage>
                                     </BreadcrumbItem>
 
@@ -195,7 +187,7 @@ export default function ReservationPage() {
                         {/* Account navigation */}
                         <div className="hidden md:flex items-center gap-2">
                             <ThemeToggle />
-                            <NavUser user={userData.user} />
+                            <NavUser />
                         </div>
 
                     </div>
@@ -204,7 +196,6 @@ export default function ReservationPage() {
 
                 <main className="flex flex-col gap-4 p-8 pt-4">
 
-                    <ReservationTable columns={ReservationTableColumns} data={reservations} />
 
                 </main>
 

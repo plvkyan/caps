@@ -259,7 +259,7 @@ const AdminReservationForm = ({ }) => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             blkLt: user.blkLt,
-            blkLtPosition: user.position,
+            blkLtPosition: user.userPosition,
             amenityAddress: "",
             amenityName: "",
             amenityType: undefined,

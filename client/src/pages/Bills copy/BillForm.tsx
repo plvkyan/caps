@@ -221,7 +221,7 @@ export const BillForm = (users) => {
             billDescription: "",
             billCurrency: "PHP",
             billAmount: 200,
-            billMadeby: user.blkLt,
+            billMadeby: user.userBlkLt,
             billMadeDate: new Date(),
             billDue: new Date(date.setMonth(date.getMonth() + 1)),
             stat: "Unarchived",
@@ -847,7 +847,7 @@ export const BillForm = (users) => {
                                         <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
                 
                                             <div className="text-sm text-muted-foreground">
-                                                Interacting as: {user.blkLt}
+                                                Interacting as: {user.userBlkLt}
                                             </div>
                 
                                         </CardFooter> 

@@ -60,3 +60,8 @@ export const getSingleUser = async (userId: String) => {
 export const getAllUsers = async () => {
     return (await fetch(apiUsersUrl));
 }
+
+// GET request to get unarchived unit owners
+export const getUnitOwners = async () => {
+    return (await fetch(apiUsersUrl + '/unarchived/unit-owners'));
+}

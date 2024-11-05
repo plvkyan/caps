@@ -48,7 +48,7 @@ router.post('/signup/bulk', bulkCreateUsers)
 router.get('/', getUsers)
 
 // GET all unarchived unitowner users
-router.get('/unitOwners', getUnitOwners)
+router.get('/unarchived/unit-owners', getUnitOwners)
 
 // GET all archived users
 router.get('/archived', getArchivedUsers)

@@ -160,7 +160,7 @@ const AmenityFacilityForm = () => {
             amenityDescription: "",
             amenityAddress: "",
             amenityReminder: "",
-            amenityCreator: user.blkLt,
+            amenityCreator: user.userBlkLt,
             amenityVisibility: "Unarchived",
         }
     });

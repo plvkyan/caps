@@ -12,9 +12,13 @@ import {
     CircleX,
     CloudUpload,
     Ellipsis,
+    EllipsisVertical,
     ImageOff,
     Info,
+    Pencil,
     SendHorizontal,
+    Share,
+    Trash2,
     TriangleAlert,
     Upload,
     X
@@ -60,6 +64,22 @@ import {
     DialogContent,
     DialogTrigger
 } from "@/components/ui/dialog";
+
+// shadcn Dropdown Menu Component Imports
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuPortal,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 // shadcn Form Component Imports
 import {
@@ -205,8 +225,8 @@ export default function ReservationDetails() {
         defaultValues: {
             commentContent: "",
             commentAuthorId: user.id,
-            commentAuthor: user.blkLt,
-            commentAuthorPosition: user.position,
+            commentAuthor: user.userBlkLt,
+            commentAuthorPosition: user.userPosition,
         }
     });
 
@@ -314,11 +334,13 @@ export default function ReservationDetails() {
 
             try {
                 const response = await getSingleUser(reservation.reserveeId);
+                const data = await response.json();
+
+                console.log(data);
                 if (!response.ok) {
                     throw new Error('Failed to fetch reservee details');
                 }
 
-                const data = await response.json();
                 setReservee(data);
                 // toast.success("Reservee details fetched successfully");
             } catch (error) {
@@ -349,7 +371,7 @@ export default function ReservationDetails() {
 
         fetchReservee();
         fetchAvailableStocks();
-        
+
     }, [reservation]);
 
 
@@ -363,7 +385,7 @@ export default function ReservationDetails() {
             if (images[0] === null || images[0] === undefined) {
                 setImages([]);
             }
-            
+
             // Set the images state value to the images array
             values.reservationImages = images;
 
@@ -470,8 +492,8 @@ export default function ReservationDetails() {
             const response = await setReservationApproved(
                 reservation._id,
                 user.id,
-                user.blkLt,
-                user.position
+                user.userBlkLt,
+                user.userPosition
             );
 
             const data = await response.json();
@@ -503,8 +525,8 @@ export default function ReservationDetails() {
             const response = await setReservationRejected(
                 reservation._id,
                 user.id,
-                user.blkLt,
-                user.position
+                user.userBlkLt,
+                user.userPosition
             );
 
             const data = await response.json();
@@ -534,8 +556,8 @@ export default function ReservationDetails() {
             const response = await setReservationOngoing(
                 reservation._id,
                 user.id,
-                user.blkLt,
-                user.position
+                user.userBlkLt,
+                user.userPosition
             );
 
             const data = await response.json();
@@ -565,8 +587,8 @@ export default function ReservationDetails() {
             const response = await setReservationForReturn(
                 reservation._id,
                 user.id,
-                user.blkLt,
-                user.position
+                user.userBlkLt,
+                user.userPosition
             );
 
             const data = await response.json();
@@ -596,8 +618,8 @@ export default function ReservationDetails() {
             const response = await setReservationReturned(
                 reservation._id,
                 user.id,
-                user.blkLt,
-                user.position
+                user.userBlkLt,
+                user.userPosition
             );
 
             const data = await response.json();
@@ -627,8 +649,8 @@ export default function ReservationDetails() {
             const response = await setReservationCompleted(
                 reservation._id,
                 user.id,
-                user.blkLt,
-                user.position
+                user.userBlkLt,
+                user.userPosition
             );
 
             const data = await response.json();
@@ -747,54 +769,114 @@ export default function ReservationDetails() {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            <Button
-                                onClick={handleRejectReservation}
-                                size="sm"
-                                variant="outline"
-                            >
-                                <CircleX className="h-4 w-4 text-destructive" />
-                                Reject
-                            </Button>
-                            <Button
-                                onClick={handleApproveReservation}
-                                size="sm"
-                                variant="outline"
-                            >
-                                <CircleCheck className="h-4 w-4 text-primary" />
-                                Approve
-                            </Button>
-                            <Button
+                            {user.userRole === "Admin" && (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+
+                                        <Button
+                                            className="ml-auto h-7 w-7"
+                                            size="icon"
+                                            variant="outline"
+                                        >
+                                            <EllipsisVertical className="h-4 w-4" />
+                                        </Button>
+
+                                    </DropdownMenuTrigger>
+
+                                    <DropdownMenuContent align="end" className="mt-1">
+                                        <DropdownMenuGroup>
+                                            <DropdownMenuItem>
+                                                <Archive className="h-4 w-4" />
+                                                Archive
+                                            </DropdownMenuItem>
+
+                                        </DropdownMenuGroup>
+
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="text-destructive focus:text-red-500">
+                                            <Trash2 className="h-4 w-4" />
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            )}
+                            {user.userRole === "Admin" && reservation && reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Pending" && (
+                                <>
+                                    <Button
+                                        onClick={handleRejectReservation}
+                                        size="sm"
+                                        variant="outline"
+                                    >
+                                        <CircleX className="h-4 w-4 text-destructive" />
+                                        Reject
+                                    </Button>
+                                    <Button
+                                        className="text-primary-foreground"
+                                        onClick={handleApproveReservation}
+                                        size="sm"
+                                        variant="default"
+                                    >
+                                        <CircleCheck className="h-4 w-4" />
+                                        Approve
+                                    </Button>
+                                </>
+                            )}
+                            {/* <Button
                                 onClick={handleSetReservationOngoing}
                                 size="sm"
                                 variant="outline"
                             >
                                 <Ellipsis className="h-4 w-4 text-warning" />
                                 Ongoing
-                            </Button>
-                            <Button
+                            </Button> */}
+                            {/* <Button
                                 onClick={handleSetReservationForReturn}
                                 size="sm"
                                 variant="outline"
                             >
                                 <Ellipsis className="h-4 w-4 text-warning" />
                                 For return
-                            </Button>
-                            <Button
-                                onClick={handleSetReservationReturned}
-                                size="sm"
-                                variant="outline"
-                            >
-                                <CircleCheck className="h-4 w-4 text-primary" />
-                                Returned
-                            </Button>
-                            <Button
-                                onClick={handleSetReservationCompleted}
-                                size="sm"
-                                variant="outline"
-                            >
-                                <CircleCheck className="h-4 w-4 text-primary" />
-                                Completed
-                            </Button>
+                            </Button> */}
+
+                            {user.userRole === "Admin" && reservation
+                                && reservation.reservationType === "Equipment" && reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "For Return"
+                                && (
+                                    <Button
+                                        onClick={handleSetReservationReturned}
+                                        size="sm"
+                                        variant="outline"
+                                    >
+                                        <CircleCheck className="h-4 w-4 text-primary" />
+                                        Returned
+                                    </Button>
+                                )}
+
+                            {user.userRole === "Admin" && reservation &&
+                                (reservation.reservationType === "Equipment" && reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Returned")
+                                && (
+                                    <Button
+                                        onClick={handleSetReservationCompleted}
+                                        size="sm"
+                                        variant="outline"
+                                    >
+                                        <CircleCheck className="h-4 w-4 text-primary" />
+                                        Completed
+                                    </Button>
+                                )}
+
+                            {user.userRole === "Admin" && reservation &&
+                                (reservation.reservationType === "Facility" && reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Ongoing")
+                                && (
+                                    <Button
+                                        onClick={handleSetReservationCompleted}
+                                        size="sm"
+                                        variant="outline"
+                                    >
+                                        <CircleCheck className="h-4 w-4 text-primary" />
+                                        Completed
+                                    </Button>
+                                )}
+
                         </div>
 
 
@@ -878,8 +960,8 @@ export default function ReservationDetails() {
                                 </React.Fragment>
                             );
                         })}
-                    </div>   
-                    
+                    </div>
+
                     <div className="flex text-sm bg-gray-700/20 border border-gray-700 text-gray-400 items-center gap-3 rounded-md px-4 py-3.5">
                         <Info className="w-5 h-5" />
                         Please note that having a good track record for both bill payments and reservations will increase your chances of approval.
@@ -901,7 +983,7 @@ export default function ReservationDetails() {
                                     <div>
                                         <Label className="text-lg font-semibold"> Reservation Details </Label>
                                         <p className="text-sm text-muted-foreground">
-                                            {user.role != "Admin" ? "Check the status of your reservation and any updates related to your request." : "Verify all reservation information before confirming or rejecting the reservation."}
+                                            {user.userRole != "Admin" ? "Check the status of your reservation and any updates related to your request." : "Verify all reservation information before confirming or rejecting the reservation."}
                                         </p>
                                     </div>
 
@@ -936,7 +1018,7 @@ export default function ReservationDetails() {
                                     <div>
                                         <Label className="text-base"> Reservation amenities </Label>
                                         <p className="text-sm text-muted-foreground">
-                                            {user.role != "Admin" ? "Review your selections and your reserved amenities' details. Don't forget to read the reminders! " : "Confirm details and availability for each amenity listed below."}
+                                            {user.userRole != "Admin" ? "Review your selections and your reserved amenities' details. Don't forget to read the reminders! " : "Confirm details and availability for each amenity listed below."}
                                         </p>
                                     </div>
 
@@ -1086,7 +1168,7 @@ export default function ReservationDetails() {
 
                                                 <div className="flex flex-col">
                                                     <Label className="text-lg font-semibold"> Reservation Images </Label>
-                                                    {user.role != "Admin" ? (
+                                                    {user.userRole != "Admin" ? (
                                                         <p className="text-sm text-muted-foreground">  Upload up to 6 images of the amenity to document their condition before and after use. </p>
                                                     ) : (
                                                         <p className="text-sm text-muted-foreground">  Uploaded images provide documentation of the amenity's condition. Review each image for clear evidence of amenity use and any notable details. </p>
@@ -1099,7 +1181,7 @@ export default function ReservationDetails() {
                                                     variant="outline"
                                                 >
                                                     {loading ? <LoadingSpinner className="h-4 w-4" /> : <CloudUpload className="h-4 w-4" />}
-                                                    
+
                                                 </Button>
 
                                             </div>
@@ -1184,7 +1266,7 @@ export default function ReservationDetails() {
 
                                                 </div>
 
-                                                {images?.length !== 6 && images?.length! <= 6 && user.role != "Admin" && (
+                                                {images?.length !== 6 && images?.length! <= 6 && user.userRole != "Admin" && (
                                                     <button type="button" className="relative flex flex-col gap-2 aspect-video items-center justify-center rounded-md border border-dashed cursor-pointer">
                                                         <Upload className="h-6 w-6 text-muted-foreground" />
                                                         <div className="flex flex-col px-6">
@@ -1315,10 +1397,10 @@ export default function ReservationDetails() {
                                     <div className="p-4 rounded-md bg-muted/50">
                                         <div className="flex flex-col gap-3">
                                             <div className="flex items-center gap-2">
-                                                <span className="font-medium text-sm">{user.blkLt}</span>
+                                                <span className="font-medium text-sm">{user.userBlkLt}</span>
                                                 <span
                                                     className={"text-xs text-muted-foreground " + (user.memberStatus === "Outstanding" ? "text-primary" : user.memberstatus === "Delinquent" ? "text-warning" : "text-muted-foreground")}>
-                                                    {user.position}
+                                                    {user.userPosition}
                                                 </span>
 
                                             </div>

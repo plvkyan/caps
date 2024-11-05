@@ -181,8 +181,8 @@ export function MemberReservationForm() {
         
         resolver: zodResolver(formSchema),
         defaultValues: {
-            blkLt: user.blkLt,
-            blkLtPosition: user.position,
+            blkLt: user.userBlkLt,
+            blkLtPosition: user.userPosition,
             amenityAddress: "",
             amenityName: "",
             amenityType: undefined,
@@ -885,7 +885,7 @@ export function MemberReservationForm() {
 
                                                                     <CardTitle className="group flex items-center gap-2 text-lg">
 
-                                                                        {user.blkLt}
+                                                                        {user.userBlkLt}
 
                                                                     </CardTitle>
 
@@ -1070,7 +1070,7 @@ export function MemberReservationForm() {
                                                                 <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
      
                                                                     <div className="text-xs text-muted-foreground">
-                                                                        Interacting as: {user.blkLt}
+                                                                        Interacting as: {user.userBlkLt}
                                                                     </div>
      
                                                                 </CardFooter> 

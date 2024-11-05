@@ -5,6 +5,7 @@
 // shadcn Components Imports
 // shadcn AppSidebar Imports
 import { AppSidebar } from "@/components/app-sidebar"
+
 // shadcn Breadcrumb Imports
 import {
     Breadcrumb,
@@ -14,10 +15,13 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+
 // shadcn NavUser Imports
 import { NavUser } from "@/components/nav-user"
+
 // shadcn Separator Imports
 import { Separator } from "@/components/ui/separator"
+
 // shadcn Sidebar Imports
 import {
     SidebarInset,
@@ -36,6 +40,7 @@ import { ThemeToggle } from "@/components/custom/ThemeToggle";
 // Data table imports
 // Data table column definitions imports
 import { ReservationTableColumns } from "@/pages/Reservations/ReservationColumns";
+
 // Data table component import
 import ReservationTable from "@/pages/Reservations/ReservationTable";
 
@@ -67,19 +72,17 @@ import { ReservationType } from "@/types/reservation-type"
 import { getUnarchivedReservations } from "@/data/reservation-api.ts";
 // All user unarchived reservation data Import
 import { getUserUnarchivedReservations } from "@/data/reservation-api.ts";
+import BillTable from "./BillTable"
+import { BillTableColumns } from "./BillColumns"
+import { BillType } from "@/types/bill-type"
+import { getUnarchivedBills, getUserBills } from "@/data/bills-api"
 
 
-const userData = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-}
 
 
 
 export default function BillPage() {
+
 
 
     // Contexts
@@ -90,54 +93,51 @@ export default function BillPage() {
 
     // States
     // Reservations state
-    const [reservations, setReservations] = useState<ReservationType[]>([]);
+    const [bills, setBills] = useState<BillType[]>([]);
 
 
 
     // Use Effects
     // Page title effect
     useEffect(() => {
-        document.title = "Reservations | GCTMS";
+        document.title = "Bills | GCTMS";
     }, []);
 
-    // Fetching unarchived reservations effect
-    useEffect(() => {
+     // Fetching unarchived bills effect
+     useEffect(() => {
+        async function fetchUnarchivedBills() {
+            setBills([]);
 
-
-        async function fetchUnarchivedReservations() {
-
-            setReservations([]);
-
-            if (user.position === "Admin") {
-                const unarchivedReservationsResult = await getUnarchivedReservations();
-                const unarchivedReservations = await unarchivedReservationsResult.json();
-                if (!ignore && unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetched successfully: ", unarchivedReservations);
-                    setReservations(unarchivedReservations);
+            if (user.userRole === "Admin") {
+                const unarchivedBillsResult = await getUnarchivedBills();
+                const unarchivedBills = await unarchivedBillsResult.json();
+                if (!ignore && unarchivedBillsResult.ok) {
+                    console.log("All unarchived bills fetched successfully: ", unarchivedBills);
+                    setBills(unarchivedBills);
                 }
-                if (!ignore && !unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetch failed.");
+                if (!ignore && !unarchivedBillsResult.ok) {
+                    console.log("All unarchived bills fetch failed.");
                 }
             } else {
-                const userUnarchivedReservationsResult = await getUserUnarchivedReservations(user._id);
-                const userUnarchivedReservations = await userUnarchivedReservationsResult.json();
-                if (!ignore && userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetched successfully.");
-                    setReservations(userUnarchivedReservations);
+                const userUnarchivedBillsResult = await getUserBills(user._id);
+                const userUnarchivedBills = await userUnarchivedBillsResult.json();
+                if (!ignore && userUnarchivedBillsResult.ok) {
+                    console.log("User unarchived bills fetched successfully.");
+                    setBills(userUnarchivedBills);
                 }
-                if (!ignore && !userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetch failed.");
+                if (!ignore && !userUnarchivedBillsResult.ok) {
+                    console.log("User unarchived bills fetch failed.");
                 }
             }
-
         }
 
         let ignore = false;
-        fetchUnarchivedReservations();
+        fetchUnarchivedBills();
         return () => {
             ignore = true;
         }
     }, []);
+   
 
 
 
@@ -173,14 +173,6 @@ export default function BillPage() {
                                 <BreadcrumbList>
 
                                     <BreadcrumbItem className="hidden md:block">
-                                        <BreadcrumbLink href="/dashboard">
-                                            Dashboard
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-
-                                    <BreadcrumbSeparator className="hidden md:block" />
-
-                                    <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbPage>
                                             Bills
                                         </BreadcrumbPage>
@@ -204,7 +196,7 @@ export default function BillPage() {
 
                 <main className="flex flex-col gap-4 p-8 pt-4">
 
-                    <ReservationTable columns={ReservationTableColumns} data={reservations} />
+                    <BillTable columns={BillTableColumns} data={bills} />
 
                 </main>
 

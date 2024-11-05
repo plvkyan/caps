@@ -120,8 +120,8 @@ export const UserDropdown = () => {
 
                 <DropdownMenuContent align="end">
 
-                    <DropdownMenuLabel> {user.blkLt} </DropdownMenuLabel>
-                    <DropdownMenuLabel className="text-muted-foreground"> {user.role} </DropdownMenuLabel>
+                    <DropdownMenuLabel> {user.userBlkLt} </DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-muted-foreground"> {user.userRole} </DropdownMenuLabel>
 
 
 
@@ -132,7 +132,7 @@ export const UserDropdown = () => {
 
                     <DropdownMenuSeparator />
 
-                    {user.role != "Unit Owner" &&
+                    {user.userRole != "Unit Owner" &&
                         (
                             <>
 
@@ -159,7 +159,7 @@ export const UserDropdown = () => {
                         )
                     }
 
-                    {user.role == "Unit Owner" &&
+                    {user.userRole == "Unit Owner" &&
                         (
                             <>
 

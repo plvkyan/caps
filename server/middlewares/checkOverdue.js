@@ -66,7 +66,7 @@ const checkOverdue = async (req, res, next) => {
 
         const outstandingUsers = initUsers.filter((user) => {
 
-            if (!delinquentUsers.includes(user.blkLt)) {
+            if (!delinquentUsers.includes(user.userBlkLt)) {
 
                 return user;
 
@@ -87,7 +87,7 @@ const checkOverdue = async (req, res, next) => {
 
         const outstandingFunction = outstandingUsers.map( async (user) => {
 
-            await User.updateOne({ blkLt: user.blkLt }, {memberStatus: "Outstanding"});
+            await User.updateOne({ blkLt: user.userBlkLt }, {memberStatus: "Outstanding"});
 
         });
 

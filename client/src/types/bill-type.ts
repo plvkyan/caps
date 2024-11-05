@@ -1,22 +1,45 @@
 
+
+
 export type BillType = {
     _id: string,
-    billName: string,
+    billTitle: string,
+    billType: string,
     billDescription: string,
     billQuantity: number,
     billCurrency: string,
     billAmount: number,
-    billReceivers: {
-        receiverBlkLt: string,
+    billDueDate: Date,
+    billPayors: {
+        payorId: string,
+        payorBlkLt: string,
+        payorEmail: string,
         billStatus: string,
-        billDue: Date,
-        receiverEmail: string,
+        billPaidDate: Date,
     },
-    billMadeby: string,
-    billMadeDate: Date,
-    stat: string,
+    billCreatorId: string,
+    billCreatorBlkLt: string,
+    billCreatorPosition: string,
+    billVisibility: string,
     createdAt: Date,
 }
+
+export type BillPresetType = {
+    _id: string,
+    billPresetTitle: string,
+    billPresetType: string,
+    billPresetDescription: string,
+    billPresetQuantity: number,
+    billPresetCurrency: string,
+    billPresetAmount: number,
+    billPresetRecurringDate?: Date,
+    billPresetCreatorId: string,
+    billPresetCreatorBlkLt: string,
+    billPresetCreatorPosition: string,
+    billPresetVisibility: string,
+    createdAt: Date,
+}
+
 
 
 export const PAID = {
