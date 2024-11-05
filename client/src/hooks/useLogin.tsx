@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 // useAuthContext Hook Import
 import { useAuthContext } from '@/hooks/useAuthContext';
 
-
+const API_URL = process.env.REACT_APP_API_URL;
 
 
 
@@ -30,7 +30,7 @@ export const useLogin = () => {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:4000/api/users/login', {
+            const response = await fetch(API_URL + '/api/users/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userBlkLt, userPassword }),

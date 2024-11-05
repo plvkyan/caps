@@ -11,11 +11,9 @@
 
 // Variable Declarations
 // API Base URL
-const apiBaseUrl = 'http://localhost:4000/api/';
+const apiBaseUrl = process.env.REACT_APP_API_URL;
 // API Reservations URL
 const apiReservationsUrl = apiBaseUrl + 'reservations';
-
-
 
 
 
