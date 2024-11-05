@@ -11,11 +11,12 @@ import { useNavigate } from 'react-router-dom';
 
 
 // Custom Hooks Imports
-// useAuthContext Hook Import
+// useAuthContext Hook Import 
 import { useAuthContext } from '@/hooks/useAuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+console.log(API_URL);
 
 
 export const useLogin = () => {
@@ -32,7 +33,7 @@ export const useLogin = () => {
         console.log(API_URL);
 
         try {
-            const response = await fetch(API_URL + '/api/users/login', {
+            const response = await fetch(API_URL + '/users/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userBlkLt, userPassword }),
