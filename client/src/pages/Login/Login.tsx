@@ -80,6 +80,8 @@ const Login = () => {
     // Call when form is submitted
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
 
+        console.log(values)
+
         await login(values.userBlkLt, values.userPassword)
     }
 
