@@ -8,18 +8,13 @@ import {
     ChevronLeft,
     ChevronRight,
     CircleCheck,
-    CirclePlus,
     CircleX,
     CloudUpload,
-    Ellipsis,
     EllipsisVertical,
     ImageOff,
     Info,
-    Pencil,
     SendHorizontal,
-    Share,
     Trash2,
-    TriangleAlert,
     Upload,
     X
 } from "lucide-react";
@@ -71,13 +66,7 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuPortal,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -85,7 +74,6 @@ import {
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -174,8 +162,8 @@ import {
     getSingleReservation,
     setReservationApproved,
     setReservationCompleted,
-    setReservationForReturn,
-    setReservationOngoing,
+    // setReservationForReturn,
+    // setReservationOngoing,
     setReservationRejected,
     setReservationReturned,
     updateReservationImages,
@@ -392,8 +380,6 @@ export default function ReservationDetails() {
             // Post the data to the server
             const response = await updateReservationImages(reservation?._id, images);
 
-            const data = await response.json();
-
             if (!response.ok) {
                 const data = await response.json();
                 throw new Error(data.error || 'Error creating new equipment reservation.');
@@ -546,67 +532,67 @@ export default function ReservationDetails() {
         }
     };
 
-    const handleSetReservationOngoing = async () => {
-        if (!reservation?._id) {
-            toast.error("Reservation ID not found");
-            return;
-        }
+    // const handleSetReservationOngoing = async () => {
+    //     if (!reservation?._id) {
+    //         toast.error("Reservation ID not found");
+    //         return;
+    //     }
 
-        try {
-            const response = await setReservationOngoing(
-                reservation._id,
-                user.id,
-                user.userBlkLt,
-                user.userPosition
-            );
+    //     try {
+    //         const response = await setReservationOngoing(
+    //             reservation._id,
+    //             user.id,
+    //             user.userBlkLt,
+    //             user.userPosition
+    //         );
 
-            const data = await response.json();
+    //         const data = await response.json();
 
-            if (!response.ok) {
-                throw data;
-            }
+    //         if (!response.ok) {
+    //             throw data;
+    //         }
 
-            sessionStorage.setItem("reservationOngoing", "true");
-            window.location.reload();
-        } catch (error) {
-            console.log(error);
-            toast.error((error as { error?: string }).error || "Failed to set reservation status to ongoing.", {
-                closeButton: true,
-                description: (error as { description?: string }).description || null,
-            });
-        }
-    };
+    //         sessionStorage.setItem("reservationOngoing", "true");
+    //         window.location.reload();
+    //     } catch (error) {
+    //         console.log(error);
+    //         toast.error((error as { error?: string }).error || "Failed to set reservation status to ongoing.", {
+    //             closeButton: true,
+    //             description: (error as { description?: string }).description || null,
+    //         });
+    //     }
+    // };
 
-    const handleSetReservationForReturn = async () => {
-        if (!reservation?._id) {
-            toast.error("Reservation ID not found");
-            return;
-        }
+    // const handleSetReservationForReturn = async () => {
+    //     if (!reservation?._id) {
+    //         toast.error("Reservation ID not found");
+    //         return;
+    //     }
 
-        try {
-            const response = await setReservationForReturn(
-                reservation._id,
-                user.id,
-                user.userBlkLt,
-                user.userPosition
-            );
+    //     try {
+    //         const response = await setReservationForReturn(
+    //             reservation._id,
+    //             user.id,
+    //             user.userBlkLt,
+    //             user.userPosition
+    //         );
 
-            const data = await response.json();
+    //         const data = await response.json();
 
-            if (!response.ok) {
-                throw data;
-            }
+    //         if (!response.ok) {
+    //             throw data;
+    //         }
 
-            sessionStorage.setItem("reservationForReturn", "true");
-            window.location.reload();
-        } catch (error) {
-            console.log(error);
-            toast.error((error as { error?: string }).error || "Failed to set reservation status to for return.", {
-                closeButton: true,
-                description: (error as { description?: string }).description || null,
-            });
-        }
-    };
+    //         sessionStorage.setItem("reservationForReturn", "true");
+    //         window.location.reload();
+    //     } catch (error) {
+    //         console.log(error);
+    //         toast.error((error as { error?: string }).error || "Failed to set reservation status to for return.", {
+    //             closeButton: true,
+    //             description: (error as { description?: string }).description || null,
+    //         });
+    //     }
+    // };
 
     const handleSetReservationReturned = async () => {
         if (!reservation?._id) {
@@ -1245,7 +1231,7 @@ export default function ReservationDetails() {
                                                 )}
 
                                                 <div className="grid grid-cols-3 gap-2">
-                                                    {images && user.id === reservation?.reserveeId && images.map((image: any, index: number) => (
+                                                    {images && user.id === reservation?.reserveeId && images.map((index: number) => (
                                                         <div className="group relative">
                                                             <Button
                                                                 className="h-5 w-5 rounded-full absolute -top-2 -right-2 flex z-50"

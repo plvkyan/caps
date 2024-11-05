@@ -88,13 +88,7 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuPortal,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -186,7 +180,7 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 import { saveAs } from "file-saver";
 
 // date-fns format Import
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 
 // exceljs Workbook Import
 import { Workbook } from "exceljs";
@@ -268,7 +262,7 @@ export default function AmenityDetails() {
 
     // States
     // Loading state
-    const [loading, setLoading] = useState<boolean>(false);
+    // const [setLoading] = useState<boolean>(false);
 
 
 
@@ -327,7 +321,7 @@ export default function AmenityDetails() {
     const [chartData, setChartData] = useState([{}]);
 
     // Chart reservation types state
-    const [chartType, setChartType] = useState(undefined);
+    // const [chartType, setChartType] = useState(undefined);
 
     // Chart time range state
     const [date, setDate] = useState<DateRange | undefined>({
@@ -353,7 +347,7 @@ export default function AmenityDetails() {
             }
 
             try {
-                setLoading(true);
+                // setLoading(true);
 
                 // Fetch data in parallel
                 const [amenityRes, reservationsRes] = await Promise.all([
@@ -423,7 +417,7 @@ export default function AmenityDetails() {
                 console.error(error);
                 toast.error(error instanceof Error ? error.message : 'Failed to load data');
             } finally {
-                setLoading(false);
+                // setLoading(false);
             }
         };
 

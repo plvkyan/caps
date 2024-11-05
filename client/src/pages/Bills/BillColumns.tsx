@@ -8,8 +8,6 @@
 
 
 // shadcn Components Imports
-// shadcn Badge Component Import
-import { Badge } from "@/components/ui/badge";
 // shadcn Checkbox Component Import
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -134,6 +132,8 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         },
         filterFn:
             (row, id, value) => {
+
+                console.log(id); 
                 const date = new Date(row.original.billDueDate);
 
                 const { from: start, to: end } = value as { from: Date, to: Date };

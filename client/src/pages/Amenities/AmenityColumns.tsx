@@ -8,8 +8,6 @@
 
 
 // shadcn Components Imports
-// shadcn Badge Component Import
-import { Badge } from "@/components/ui/badge";
 // shadcn Checkbox Component Import
 import { Checkbox } from "@/components/ui/checkbox";
 // shadcn Dialog Imports
@@ -40,8 +38,7 @@ import { AmenityType } from "@/types/amenity-type";
 
 
 // Utility imports
-// date-fns format function Import
-import { format } from "date-fns";
+
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";

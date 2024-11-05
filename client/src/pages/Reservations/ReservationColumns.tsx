@@ -126,6 +126,8 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
             )
         },
         filterFn: (row, id, value) => {
+
+            console.log(id);
             const lastStatus = row.original.reservationStatus[row.original.reservationStatus.length - 1].status;
             return value.includes(lastStatus);
         },
@@ -149,6 +151,9 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         },
         filterFn:
             (row, id, value) => {
+
+                console.log(id);
+
                 const date = new Date(row.original.reservationDate);
 
                 const { from: start, to: end } = value as { from: Date, to: Date };

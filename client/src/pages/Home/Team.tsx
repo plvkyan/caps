@@ -1,15 +1,11 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { buttonVariants } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-
-import { Facebook, Instagram, Linkedin } from "lucide-react";
 
 
 
@@ -97,19 +93,7 @@ const teamList: TeamProps[] = [
 export const Team = () => {
 
 
-        
-    const socialIcon = (iconName: string) => {
-        switch (iconName) {
-        case "Linkedin":
-            return <Linkedin size="20" />;
 
-        case "Facebook":
-            return <Facebook size="20" />;
-
-        case "Instagram":
-            return <Instagram size="20" />;
-        }
-    };
 
     return (
 
@@ -133,7 +117,7 @@ export const Team = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 gap-y-10">
 
                 {teamList.map(
-                ({ imageUrl, avatar, name, position, socialNetworks }: TeamProps) => (
+                ({ avatar, name, position }: TeamProps) => (
                     
                     <Card
                         key={name}
@@ -146,6 +130,7 @@ export const Team = () => {
                                 alt={`${name} ${position}`}
                                 className="absolute -top-12 rounded-full w-24 h-24 aspect-square object-cover"
                             /> */}
+                            
 
                             <Avatar className="absolute -top-12 rounded-full w-24 h-24 aspect-square object-cover">
                                 <AvatarFallback> {avatar} </AvatarFallback>

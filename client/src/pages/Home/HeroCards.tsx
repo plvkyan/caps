@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 import {
@@ -11,7 +10,7 @@ import {
     CardFooter,
 } from "@/components/ui/card";
 
-import { Check, Ellipsis, Facebook, Linkedin } from "lucide-react";
+import { Check, Ellipsis, Facebook } from "lucide-react";
 import { LightBulbIcon } from "./Icons.tsx";
 
 

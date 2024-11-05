@@ -30,7 +30,6 @@ import {
 import { useAnnouncementsContext } from "@/hooks/useAnnouncementsContext";
 
 // Authentication Hook Import
-import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 

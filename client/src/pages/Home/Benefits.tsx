@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 
 import { Check } from "lucide-react";
-import { Link } from "react-router-dom";
 
 
 

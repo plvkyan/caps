@@ -41,7 +41,6 @@ import Announcements from '@/pages/Announcements/Announcements.tsx';
 
 // Archive-related Import
 // Archives Page Import
-import Archives from '@/pages/Archives/Archives.tsx';
 
 
 
@@ -92,13 +91,11 @@ import ReservationPage from '@/pages/Reservations/ReservationPage.tsx';
 
 // User-related Imports
 // Users List Page Import
-import AdminUsers from '@/pages/Admin/Users/UsersList.tsx';
 import Settings from '@/pages/Settings.tsx';
 import ReservationForm from '@/pages/Reservations/ReservationForm.tsx';
 import PrivateRoute from '@/PrivateRoute.tsx';
 import AmenityForm from '@/pages/Amenities/AmenityForm.tsx';
 import ReservationDetails from '@/pages/Reservations/ReservationDetails.tsx';
-import PrivateRouteAdmin from '@/pages/PrivateRouteAdmin.tsx';
 import UserPage from '@/pages/Users/UserPage.tsx';
 import UserForm from '@/pages/Users/UserForm';
 import UserBulkForm from './pages/Users/UserBulkForm';
@@ -333,18 +330,6 @@ function App() {
                                     </Route>
 
                                     {/* Archives Page */}
-                                    <Route
-                                        path="/archives"
-                                        element={!user ? <Login /> : <Archives />}
-                                    >
-                                    </Route>
-
-                                    {/* Users List Page */}
-                                    <Route
-                                        path="/users"
-                                        element={!user ? <Login /> : <AdminUsers />}
-                                    >
-                                    </Route>
 
                                     <Route
                                         path="/amenities"

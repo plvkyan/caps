@@ -69,14 +69,6 @@ import { getUnarchivedReservations } from "@/data/reservation-api.ts";
 import { getUserUnarchivedReservations } from "@/data/reservation-api.ts";
 
 
-const userData = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-}
-
 
 
 export default function AnnouncementPage() {
@@ -195,7 +187,7 @@ export default function AnnouncementPage() {
                         {/* Account navigation */}
                         <div className="hidden md:flex items-center gap-2">
                             <ThemeToggle />
-                            <NavUser user={userData.user} />
+                            <NavUser />
                         </div>
 
                     </div>

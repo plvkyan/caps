@@ -71,14 +71,6 @@ import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
 
 
-// Data table imports
-// Data table column definitions imports
-import { AmenityTableColumns } from "@/pages/Amenities/AmenityColumns";
-// Data table component import
-import AmenityTable from "@/pages/Amenities/AmenityTable";
-
-
-
 // Hooks Imports
 // Authentication Hook Import
 import { useAuthContext } from "@/hooks/useAuthContext";
@@ -104,23 +96,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 
 // Types Imports
-// Reservation Type Import
-import { AmenityType } from "@/types/amenity-type"
 
 
 
 // Data Imports
 // All unarchived amenities API Import
-import { createAmenity, getUnarchivedAmenities } from "@/data/amenity-api.ts";
+import { createAmenity } from "@/data/amenity-api.ts";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, CirclePlus, TriangleAlert, Upload, X } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
     Card,
-    CardHeader,
     CardContent,
-    CardTitle,
-    CardDescription,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -180,8 +167,6 @@ export default function AmenityForm() {
 
 
     // States
-    // Reservations state
-    const [amenities, setAmenities] = useState<AmenityType[]>([]);
     // State for rotating index of images for image preview
     const [rotatingIndex, setRotatingIndex] = useState(0);
     // State for current index of images for image preview

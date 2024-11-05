@@ -22,9 +22,6 @@ import {
     AlertDialogTitle
 } from "@/components/ui/alert-dialog"
 
-// shadcn Badge Import
-import { Badge } from "@/components/ui/badge"
-
 // shadcn Button Import 
 import { Button } from "@/components/ui/button"
 
@@ -47,23 +44,8 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 
-// shadcn Form Import
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-} from "@/components/ui/form"
-
-// shadcn Input Import
-import { Input } from "@/components/ui/input"
-
 // shadcn Separator Import
 import { Separator } from "@/components/ui/separator"
-
-// shadcn Textarea Import
-import { Textarea } from "@/components/ui/textarea"
 
 // shadcn Toast Import
 import { useToast } from "@/components/ui/use-toast"
@@ -80,19 +62,10 @@ import { Toaster } from "@/components/ui/toaster"
 import { format, formatDistanceToNow } from "date-fns"
 
 // Link Import
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 // React Import Everything
 import * as React from 'react';
-
-// zod Import
-import * as zod from "zod";
-
-// React useForm Import
-import { useForm } from "react-hook-form";
-
-// zodResolver Import
-import { zodResolver } from "@hookform/resolvers/zod";
 
 
 
@@ -102,18 +75,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthContext } from "@/hooks/useAuthContext"
 
 // Reservation Hook
-import { useReservationsContext } from "@/hooks/useReservationsContext"
 import { useBillsContext } from "@/hooks/useBillsContext"
-
-
-
-
-
-const formSchema = zod
-    .object({
-        reservationComment: zod.string().optional(),
-        reservationCommentSubject: zod.string().optional(),
-    })
 
 
 
@@ -132,9 +94,6 @@ export const BillDetails = ({ bills }) => {
 
     // Toast
     const { toast } = useToast()
-
-    // Use Date Today
-    const date = new Date()
 
 
 
@@ -216,8 +175,6 @@ export const BillDetails = ({ bills }) => {
 
     const deleteReservation = async () => {
 
-        let bill = bills;
-
         const response = await fetch('http://localhost:4000/api/bills/' + bills._id, {
             method: 'DELETE'
         })
@@ -245,8 +202,6 @@ export const BillDetails = ({ bills }) => {
 
     }
 
-
-    let word;
 
     const payAction = async () => {
 
@@ -304,13 +259,6 @@ export const BillDetails = ({ bills }) => {
 
             let bill = bills;
             bill.billReceivers[0].billStatus = "Paid";
-
-            const response = await fetch('http://localhost:4000/api/bills/' + bills._id, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(bill)
-            })
-
 
 
         }

@@ -21,7 +21,7 @@ import { DataTableColumnHeader } from "@/components/custom/DataTableColumnHeader
 
 // Data table imports
 // Data table column definitions imports
-import { ColumnDef, FilterFn } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 
 
 
@@ -37,8 +37,6 @@ import { ReservationType } from "@/types/reservation-type";
 // Utility imports
 // date-fns format function Import
 import { format } from "date-fns";
-
-import { useNavigate } from "react-router-dom";
 
 
 
@@ -128,6 +126,7 @@ export const AmenityReservationTableColumns: ColumnDef<ReservationType>[] = [
             )
         },
         filterFn: (row, id, value) => {
+            console.log(id);
             const lastStatus = row.original.reservationStatus[row.original.reservationStatus.length - 1].status;
             return value.includes(lastStatus);
         },
@@ -151,6 +150,7 @@ export const AmenityReservationTableColumns: ColumnDef<ReservationType>[] = [
         },
         filterFn:
             (row, id, value) => {
+                console.log(id);
                 const date = new Date(row.original.reservationDate);
 
                 const { from: start, to: end } = value as { from: Date, to: Date };

@@ -11,10 +11,8 @@ import { AppSidebar } from "@/components/app-sidebar"
 import {
     Breadcrumb,
     BreadcrumbItem,
-    BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
 // shadcn NavUser Imports
@@ -39,11 +37,7 @@ import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
 
 // Data table imports
-// Data table column definitions imports
-import { ReservationTableColumns } from "@/pages/Reservations/ReservationColumns";
 
-// Data table component import
-import ReservationTable from "@/pages/Reservations/ReservationTable";
 
 
 
@@ -92,7 +86,7 @@ export default function ReservationPage() {
     // Reservations state
     const [reservations, setReservations] = useState<ReservationType[]>([]);
 
-
+    console.log(reservations);
 
     // Use Effects
     // Page title effect

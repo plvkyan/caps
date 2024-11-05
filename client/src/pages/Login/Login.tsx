@@ -28,9 +28,6 @@ import {
 // shadcn Input Component Import
 import { Input } from "@/components/ui/input";
 
-// shadcn Label Component Import
-import { Label } from "@/components/ui/label";
-
 // shadcn Link Component Import
 import { Link } from "react-router-dom";
 
@@ -45,11 +42,8 @@ import {
 
 
 // Utility
-import * as React from 'react';
 import * as zod from 'zod';
-import { useAuthContext } from "@/hooks/useAuthContext";
 import { useForm } from "react-hook-form"
-import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod"
 
 // Hooks

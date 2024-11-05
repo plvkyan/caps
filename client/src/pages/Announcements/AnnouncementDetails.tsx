@@ -69,7 +69,6 @@ const AnnouncementDetails = ({ announcement }) => {
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
 
   // Edit Dialog States
-  const [showEditDialog, setShowEditDialog] = React.useState(false);
 
   // Functions
   // Archive Announcement Function

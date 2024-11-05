@@ -12,13 +12,12 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { LogoIcon } from "./Icons";
-import { CircleUser, Home, LayoutDashboard, Menu, Settings } from "lucide-react";
+import {  Menu } from "lucide-react";
 import { ModeToggle } from "../../components/custom/mode-toggle";
 
 
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { UserDropdown } from "@/components/custom/UserDropDown";
 import { useState } from "react";
 

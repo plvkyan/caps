@@ -3,7 +3,6 @@
 // Imports
 // Lucide Icons Imports
 import {
-  Bell,
   ChevronsUpDown,
   Home,
   LogOut,

@@ -6,11 +6,8 @@
 
 // Lucide React Icons Imports
 import {
-    Archive,
     CalendarRange,
-    CircleCheck,
     CirclePlus,
-    CircleX,
     X
 } from "lucide-react";
 
@@ -50,7 +47,6 @@ import {
 // Custom Data Table Pagination Import
 import { BottomDataTablePagination } from "@/components/custom/BottomDataTablePagination";
 // Custom Data Table Faceted Filter
-import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
 // Custom Data Table View Options
 import { DataTableViewOptions } from "@/components/custom/DataTableViewOptions";
 
@@ -85,10 +81,7 @@ import { useNavigate } from "react-router-dom";
 
 
 // Types
-import { RESERVATION_DATA } from "@/data/reservation-data";
 import { toast } from "sonner";
-import { approveManyReservations, archiveManyReservations, getAllReservations, rejectManyReservations } from "@/data/reservation-api";
-import { useAuthContext } from "@/hooks/useAuthContext";
 import { DateRange } from "react-day-picker";
 
 
@@ -123,7 +116,7 @@ export default function BillTable<TData extends BillData, TValue>({
     // useNavigate Hook
     const navigate = useNavigate();
     // useAuthContext Hook
-    const { user } = useAuthContext();
+    // const { user } = useAuthContext();
 
 
     // States
@@ -135,8 +128,6 @@ export default function BillTable<TData extends BillData, TValue>({
     const [sorting, setSorting] = useState<SortingState>([]);
     // Selected Rows State
     const [rowSelection, setRowSelection] = useState({});
-    // Reservations State
-    const [reservations, setReservations] = useState<[]>([]);
 
     // Custom States
     // Date Range State
@@ -196,32 +187,7 @@ export default function BillTable<TData extends BillData, TValue>({
     useEffect(() => {
 
 
-        async function fetchUnarchivedReservations() {
-            try {
-                const fetchFunction = getAllReservations;
-                const result = await fetchFunction();
-                const data = await result.json();
-
-                if (!ignore) {
-                    if (result.ok) {
-                        console.log("All reservations fetched successfully.");
-                        setReservations(data);
-                    } else {
-                        console.log("All reservations fetch failed.");
-                    }
-                }
-            } catch (error) {
-                if (!ignore) {
-                    console.error("Error fetching reservations: ", error);
-                }
-            }
-        }
-
-        let ignore = false;
-        fetchUnarchivedReservations();
-        return () => {
-            ignore = true;
-        };
+       
     }, [])
 
     // Update the table filter when date range changes

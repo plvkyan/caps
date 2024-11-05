@@ -5,13 +5,11 @@
 // Lucide React Icons Imports
 import {
     CalendarIcon,
-    ChevronDown,
     ChevronLeft,
     ChevronRight,
     CirclePlus,
     ImageOff,
     Info,
-    PlusCircle,
     TriangleAlert,
 } from "lucide-react";
 
@@ -65,13 +63,6 @@ import {
 // shadcn Checkbox Component Import
 import { Checkbox } from "@/components/ui/checkbox";
 
-//shadcn Collapisible Component Import
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-
 // shadcn Dialog Imports
 import {
     Dialog,
@@ -80,17 +71,6 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/dialog";
-// shadcn Drawer Component Import
-import {
-    Drawer,
-    DrawerClose,
-    DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerTrigger,
-} from "@/components/ui/drawer"
 
 // shadcn Form Component Imports
 import {
@@ -135,9 +115,6 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-// shadcn Skeleton Component Import
-import { Skeleton } from "@/components/ui/skeleton";
-
 // shadcn Table Component Imports
 import {
     Table,
@@ -164,7 +141,6 @@ import { toast } from "sonner";
 import {
     Tooltip,
     TooltipContent,
-    TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 
@@ -203,8 +179,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // Type Imports
 // Amenity Type Import
 import { AmenityType } from "@/types/amenity-type";
-// Reservation Type Import
-import { ReservationType } from "@/types/reservation-type";
 
 
 
@@ -220,7 +194,6 @@ import { getUnarchivedAmenities } from "@/data/amenity-api";
 // Reservation API Imports
 import {
     createReservation,
-    getUnarchivedReservations,
     getEquipmentUnavailableDates,
     getEquipmentAvailableStocks,
     getFacilityUnavailableDates,
@@ -1406,7 +1379,7 @@ export default function ReservationForm() {
                                                     <FormField
                                                         control={reservationForm.control}
                                                         name="reservationAmenities"
-                                                        render={({ field }) => {
+                                                        render={({ }) => {
                                                             return (
 
                                                                 <FormItem>
@@ -2485,7 +2458,7 @@ export default function ReservationForm() {
 
 
 
-                                            {(reservationType === "Facility" || reservationType === "Equipment and Facility") && reservationForm.getValues("reservationAmenities").map((amenity, index) => {
+                                            {(reservationType === "Facility" || reservationType === "Equipment and Facility") && reservationForm.getValues("reservationAmenities").map((amenity) => {
 
                                                 if (false)
                                                     return (

@@ -94,6 +94,17 @@ app.use('/api/bills', billRoutes)
 app.use('/api/emails', emailRoutes)
 app.use('/api/exports', exportRoutes);
 
+app.get("/*", function (req, res) {
+    res.sendFile(
+        path.join(__dirname, "../client/build", "index.html"),
+        function (err) {
+            if (err) {
+                res.status(500).send
+            }
+        }
+    );
+});
+
 
 // Connect to DB
 mongoose.connect(process.env.MONGO_URI)

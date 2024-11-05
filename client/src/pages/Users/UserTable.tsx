@@ -67,7 +67,6 @@ import { useNavigate } from "react-router-dom";
 
 // Types
 import { toast } from "sonner";
-import { useAuthContext } from "@/hooks/useAuthContext";
 import { getAllUsers } from "@/data/user-api";
 import { STATUS_FILTER_OPTIONS } from "@/types/user-type";
 
@@ -110,6 +109,7 @@ export default function UserTable<TData, TValue>({
     // Users State
     const [users, setUsers] = useState([]);
 
+    console.log(users);
 
 
     // React Table

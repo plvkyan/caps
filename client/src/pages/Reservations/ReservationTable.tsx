@@ -138,6 +138,8 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     // Reservations State
     const [reservations, setReservations] = useState<[]>([]);
 
+    console.log(reservations);
+
     // Custom States
     // Date Range State
     const [date, setDate] = useState<DateRange | undefined>({

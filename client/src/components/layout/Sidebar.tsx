@@ -216,6 +216,7 @@ function CustomLink({ to, children, ...props }) {
         <Link
             to={to}
             className={isActive ? "flex font-medium items-center gap-3 rounded-lg bg-muted px-3 py-2 transition-all" : "flex items-center gap-3 rounded-lg px-3 py-2 transition-all text-main hover:font-medium hover:bg-muted"}
+            {...props}
         >
             {children}
         </Link>

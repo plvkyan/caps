@@ -44,7 +44,6 @@ import MultipleSelector, { Option } from '@/components/custom/MultipleSelector';
 import { useAnnouncementsContext } from "@/hooks/useAnnouncementsContext"
 
 // Authentication Hook Import
-import { useAuthContext } from "@/hooks/useAuthContext"
 
 
 
@@ -100,13 +99,8 @@ const formSchema = zod.object({
 
 const AnnouncementEdit = ({ announcement, showEditDialog, setShowEditDialog }) => {
 
-    const { user } = useAuthContext()
     const { dispatch } = useAnnouncementsContext()
     const { toast } = useToast();
-    const [error, setError] = React.useState(null)
-
-
-    const formRef = React.useRef<HTMLFormElement>(null)
 
 
 
@@ -124,6 +118,8 @@ const AnnouncementEdit = ({ announcement, showEditDialog, setShowEditDialog }) =
 
     const { reset } = form;
     const { isSubmitting, isSubmitSuccessful } = form.formState;
+
+    console.log(isSubmitting);
 
     React.useEffect(() => {
         isSubmitSuccessful && reset()

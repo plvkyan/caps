@@ -1,5 +1,4 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MagnifierIcon, WalletIcon, ChartIcon } from "./Icons";
 import larryNotification from "../../assets/larry-notification.png";
 import { Facebook, Map, Phone, Smartphone } from 'lucide-react';
 

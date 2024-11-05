@@ -4,7 +4,6 @@
 // Imports
 // Lucide React Icons Imports
 import {
-    ArrowUpDown,
     ChevronsUpDown,
     EyeOff,
     MoveDown,

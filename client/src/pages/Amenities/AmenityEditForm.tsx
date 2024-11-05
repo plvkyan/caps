@@ -178,6 +178,8 @@ const AmenityEditForm = () => {
     // State for loading
     const [loading, setLoading] = useState(false);
 
+    console.log(loading);
+
     // State for images
     const [images, setImages] = useState<any>();
 

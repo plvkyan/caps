@@ -96,7 +96,6 @@ import { RESERVATION_DATA } from "@/data/reservation-data";
 
 // API call Imports
 import {
-    archiveManyReservations,
     getAllReservations,
 } from "@/data/reservation-api";
 // import { useAuthContext } from "@/hooks/useAuthContext";
@@ -144,6 +143,7 @@ export default function AmenityReservationTable<TData extends ReservationData, T
     const [rowSelection, setRowSelection] = useState({});
     // Reservations State
     const [reservations, setReservations] = useState<[]>([]);
+    console.log(reservations);
 
     // Custom States
     // Date Range State

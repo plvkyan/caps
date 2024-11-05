@@ -1,5 +1,3 @@
-import { UserType } from "@/types/user-type";
-
 export const UNIT_OWNER = {
     id: 1,
     value: "Unit Owner",

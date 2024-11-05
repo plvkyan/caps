@@ -9,10 +9,8 @@ import { AppSidebar } from "@/components/app-sidebar"
 import {
     Breadcrumb,
     BreadcrumbItem,
-    BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 // shadcn NavUser Imports
 import { NavUser } from "@/components/nav-user"
@@ -45,7 +43,6 @@ import UserTable from "@/pages/Users/UserTable";
 
 // Hooks Imports
 // Authentication Hook Import
-import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 
@@ -76,7 +73,6 @@ export default function UserPage() {
 
     // Contexts
     // Authentication Context
-    const { user } = useAuthContext();
 
 
 

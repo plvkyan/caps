@@ -10,10 +10,8 @@ import { AppSidebar } from "@/components/app-sidebar"
 import {
     Breadcrumb,
     BreadcrumbItem,
-    BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
 // shadcn NavUser Imports
@@ -32,17 +30,13 @@ import {
 
 
 // Custom Components Imports
+// Bills Data Table Components Imports
+import BillTable from "@/pages/Bills/BillTable"
+import { BillTableColumns } from "@/pages/Bills/BillColumns"
+
 // Theme toggle component import
 import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
-
-
-// Data table imports
-// Data table column definitions imports
-import { ReservationTableColumns } from "@/pages/Reservations/ReservationColumns";
-
-// Data table component import
-import ReservationTable from "@/pages/Reservations/ReservationTable";
 
 
 
@@ -62,20 +56,18 @@ import {
 
 
 // Types Imports
-// Reservation Type Import
-import { ReservationType } from "@/types/reservation-type"
+
 
 
 
 // Data Imports
-// All unarchived reservation data Import
-import { getUnarchivedReservations } from "@/data/reservation-api.ts";
-// All user unarchived reservation data Import
-import { getUserUnarchivedReservations } from "@/data/reservation-api.ts";
-import BillTable from "./BillTable"
-import { BillTableColumns } from "./BillColumns"
+// Bills API Import
+import { 
+    getUnarchivedBills, 
+    getUserBills 
+} from "@/data/bills-api"
+
 import { BillType } from "@/types/bill-type"
-import { getUnarchivedBills, getUserBills } from "@/data/bills-api"
 
 
 

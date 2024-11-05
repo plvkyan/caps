@@ -1,4 +1,3 @@
-import React from 'react';
 import MultipleSelector, { Option } from '@/components/custom/MultipleSelector';
 
 const OPTIONS: Option[] = [
