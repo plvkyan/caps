@@ -13,6 +13,7 @@ const exportRoutes = require('./routes/exportRoutes')
 
 const upload = multer({ dest: 'uploads/' });
 
+console.log(__dirname);
 // Route Imports
 
 // Reservation Route Import
@@ -91,6 +92,12 @@ app.use('/api/webhooks', webhookRoutes)
 app.use('/api/bills', billRoutes)
 app.use('/api/emails', emailRoutes)
 app.use('/api/exports', exportRoutes);
+
+app.use(express.static('../client/dist'));
+
+app.get('*', (req, res) => {
+    res.sendFile('../client/dist/index.html')
+});
 
 // app.get("/*", function (req, res) {
 //     res.sendFile(
