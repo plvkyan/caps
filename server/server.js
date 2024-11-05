@@ -50,7 +50,7 @@ const app = express()
 
 // Middleware
 
-app.use(cors({ origin: 5173 }))
+app.use(cors())
 
 app.use((req, res, next) => {
 
