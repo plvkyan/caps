@@ -216,7 +216,7 @@ userSchema.statics.login = async function(
     // Finding the user account
     const user = await this.findOne({ userBlkLt })
 
-    console.log('user:', user);
+    console.log(this.find({ }));
 
     // If user does not exist, throw error
     if (!user) {
