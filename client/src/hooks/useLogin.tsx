@@ -29,6 +29,8 @@ export const useLogin = () => {
         setIsLoading(true);
         setError(null);
 
+        console.log(API_URL);
+
         try {
             const response = await fetch(API_URL + '/api/users/login', {
                 method: 'POST',
