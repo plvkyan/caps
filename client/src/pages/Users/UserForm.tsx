@@ -651,7 +651,7 @@ export default function UserForm() {
                                                                 <SelectItem value="Auditor"> Auditor </SelectItem>
                                                                 <SelectItem value="Treasurer"> Treasurer </SelectItem>
                                                                 <SelectItem value="Secretary"> Secretary </SelectItem>
-                                                                <SelectItem value="Vice Presidentt"> Vice President </SelectItem>
+                                                                <SelectItem value="Vice President"> Vice President </SelectItem>
                                                                 <SelectItem value="President"> President </SelectItem>
                                                             </SelectContent>
                                                         </Select>

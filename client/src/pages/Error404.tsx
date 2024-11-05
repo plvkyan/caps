@@ -1,14 +1,74 @@
+
+
+// Imports
+
+// shadcn Component Imports
+// shadcn Button Component Import
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { useAuthContext } from '@/hooks/useAuthContext';
+
+
+
+// Utility Imports
+// React Import
 import React from 'react';
-import { Link } from 'react-router-dom';
+
+// react-router-dom useNavigate Import
+import { useNavigate } from 'react-router-dom';
+
+
+
+
 
 const Error404: React.FC = () => {
+
+
+
+    // Hooks
+    // useAuthContext Hook
+    const { user } = useAuthContext();
+
+    // useNavigate Hook
+    const navigate = useNavigate();
+
+
+
+    // Functions
+    // Navigate back to a page function
+    const navigateBack = () => {
+        if (user) {
+            navigate('/dashboard');
+        } else {
+            navigate('/home');
+        }
+    }
+
     return (
-        <div>
-            <h1>404 - Page Not Found</h1>
-            <p>The page you are looking for does not exist.</p>
-            <Link to="/">Go back to home</Link>
+        <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-center justify-center h-[100svh] md:h-[90svh] min-w-vw ">
+
+            <img
+                alt=""
+                className="max-h-[50px] md:max-h-[100px] w-auto"
+                onClick={navigateBack}
+                src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798270/grand-cedar-homes-new-logo-dark-mode_sucwgk.png"
+            />
+
+            <Separator orientation="vertical" className={"hidden md:block max-h-48"}/>
+            <Separator orientation="horizontal" className={"block md:hidden max-w-48"}/>
+
+            <div className="flex flex-col gap-2 items-center md:items-start text-center text-wrap">
+                <h1 className={"text-4xl md:text-6xl"}> 404</h1>
+                <p className="text-xs md:text-base text-wrap text-muted-foreground"> Oops. The page you're looking for doesn't exist. </p>
+                <Button className="my-6 md:my-4 text-xs md:text-base" onClick={navigateBack} size="sm" variant="outline"> Let's go back </Button>
+            </div>
+
         </div>
     );
 };
+
+
+
+
 
 export default Error404;

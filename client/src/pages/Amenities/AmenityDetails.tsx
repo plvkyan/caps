@@ -133,8 +133,6 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableHead,
-    TableHeader,
     TableRow,
 } from "@/components/ui/table"
 
@@ -1230,24 +1228,22 @@ export default function AmenityDetails() {
 
                                             <div className="shrink">
                                                 <Table className="w-fit">
-                                                    <TableHeader className=" !pt-0">
-                                                        <TableRow className=" !pt-0 hover:bg-transparent">
-                                                            <TableHead className=" !pt-0 w-[150px]"> </TableHead>
-                                                            <TableHead className=" !pt-0 w-[150px]"> Quantity </TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
                                                     <TableBody>
                                                         <TableRow key="max-stock">
                                                             <TableCell className="font-medium"> Max Stock </TableCell>
+                                                            <TableCell className="text-muted-foreground"> {amenity.amenityStockMax} </TableCell>
                                                         </TableRow>
                                                         <TableRow key="missing-stock">
                                                             <TableCell className="font-medium"> Unavailable </TableCell>
+                                                            <TableCell className="text-muted-foreground"> Idk how stocks should work </TableCell>
                                                         </TableRow>
                                                         <TableRow key="min-qty">
                                                             <TableCell className="font-medium"> Min per reservation </TableCell>
+                                                            <TableCell className="text-muted-foreground"> {amenity.amenityQuantityMin} </TableCell>
                                                         </TableRow>
                                                         <TableRow key="max-qty">
                                                             <TableCell className="font-medium"> Max per reservation </TableCell>
+                                                            <TableCell className="text-muted-foreground"> {amenity.amenityQuantityMax}</TableCell>
                                                         </TableRow>
                                                     </TableBody>
                                                 </Table>
