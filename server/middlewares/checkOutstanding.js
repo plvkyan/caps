@@ -6,7 +6,7 @@ const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 const Bill = require('../models/billModel')
 const User = require('../models/userModel')
-const fns = require('../node_modules/date-fns')
+const fns = require('date-fns')
 
 
 
