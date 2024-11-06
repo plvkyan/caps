@@ -2,10 +2,12 @@
 
 
 // Imports
-// Icon Imports from Lucide React
+// Lucide Icon Imports
 import {
     ChevronLeft,
     ChevronRight,
+    Info,
+    Save,
     TriangleAlert,
     Upload,
     X
@@ -13,34 +15,53 @@ import {
 
 
 
-// shadcn Components Imports
+// shadcn Component Imports
+// shadcn AppSidebar Component Import
+import { AppSidebar } from "@/components/app-sidebar";
+
+// shadcn Breadcrumb Imports
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+
 // shadcn Button Component Import
 import { Button } from "@/components/ui/button";
 
-// shadcn Card Component Imports
+// shadcn Card Component Import
 import {
     Card,
     CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle
 } from "@/components/ui/card";
+
+// shadcn Dialog Imports
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogTitle,
+} from "@/components/ui/dialog";
+
+// shadcn Input Component Import
+import { Input } from "@/components/ui/input";
 
 // shadcn Form Component Imports
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
-    FormMessage
+    FormMessage,
 } from "@/components/ui/form";
 
-// shadcn Input Component Import
-import { Input } from "@/components/ui/input";
-
-// shadcn Label Component Import
-import { Label } from "@/components/ui/label";
+// shadcn Nav User Component Import
+import { NavUser } from "@/components/nav-user";
 
 // shadcn Select Component Imports
 import {
@@ -48,622 +69,502 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue
+    SelectValue,
 } from "@/components/ui/select";
 
-// shadcn Skeleton Component Import
-import { Skeleton } from "@/components/ui/skeleton";
+// shadcn Sidebar Component Imports
+import {
+    SidebarInset,
+    SidebarProvider,
+    SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 // shadcn Table Component Imports
 import {
     Table,
     TableBody,
     TableCell,
-    TableRow
+    TableRow,
 } from "@/components/ui/table";
 
-// shadcn Textarea Component Import
+// shadcn Textarea Component Imports
 import { Textarea } from "@/components/ui/textarea";
 
-// shadcn Toaster Component Import
-import { Toaster } from "@/components/ui/toaster";
+// shadcn Theme Toggle Component Import
+import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
-// shadcn useToast Component Import
-import { useToast } from '@/components/ui/use-toast'
-
-
-
-// Custom Components Imports
-// LayoutWrapper Component Import
-import LayoutWrapper from "@/components/layout/LayoutWrapper";
-
+// shadcn Tooltip Component Import
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 
-// Types Imports
-// AmenityType Type Import
-import { AmenityType } from "@/types/amenity-type";
+
+// Custom Component Imports
+
+
+
+// Hooks Imports
+// Authentication Hook Import
 
 
 
 // Utility Imports
-// react Imports
+// React Imports
 import {
     useEffect,
     useState
 } from "react";
 
-// react-hook-form Imports
+// React Hook Form Imports
 import { useForm } from "react-hook-form";
 
-// zod Imports
-import * as zod from "zod";
+// Zod Imports
+import * as z from "zod";
 
-// zodResolver Import
+// Zod Resolver Import
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+
+
+
+// API Call Imports
+// All unarchived amenities API Import
+import { editAmenity, getSingleAmenity } from "@/data/amenity-api.ts";
+import { Separator } from "@/components/ui/separator";
+import { AmenityType } from "@/types/amenity-type";
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
+import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 
 
 
 
 
-// Equipment Edit Form Schema
-const equipmentEditFormSchema = zod.object({
-
-    amenityName: zod.string().min(1,
-        { message: "Equipment name cannot be empty." }
-    ),
-    amenityType: zod.string(),
-    amenityDescription: zod.string().min(1, {
-        message: "Equipment description cannot be empty."
-    }),
-    amenityStockMax: zod.coerce.number().min(1,
-        { message: "Maximum equipment stock cannot be zero or below zero." }
-    ),
-    // This should not be able to be zero, below zero, or above the maximum stock
-    amenityStock: zod.coerce.number().min(1, {
-        message: "Equipment stock cannot be zero or below zero."
-    }
-    ),
-    amenityQuantityMin: zod.coerce.number().min(1,
-        { message: "Minimum equipment quantity cannot be zero or below zero." }
-    ),
-    amenityQuantityMax: zod.coerce.number().min(1,
-        { message: "Maximum equipment quantity cannot be zero or below zero." }
-    ),
-    amenityReminder: zod.string().optional(),
-    amenityCreator: zod.string(),
-    initialAmenityName: zod.string(),
-    amenityImages: zod.any().optional(),
-    amenityVisibility: zod.string(),
-})
-
-// Facility Edit Form Schema
-const facilityEditFormSchema = zod.object({
-
-    amenityName: zod.string().min(1,
-        { message: "Facility name cannot be empty." }
-    ),
-    amenityType: zod.string(),
-    amenityDescription: zod.string().min(1, {
-        message: "Facility description cannot be empty."
-    }
-    ),
-    amenityAddress: zod.string().min(1, {
-        message: "Facility address cannot be empty."
-    }
-    ),
-    amenityReminder: zod.string().optional(),
-    amenityCreator: zod.string(),
-    initialAmenityName: zod.string(),
-    amenityImages: zod.any().optional(),    
-    amenityVisibility: zod.string().optional(),
-
+const amenityFormSchema = z.object({
+    _id: z.string(),
+    amenityName: z.string().min(1),
+    amenityType: z.string().min(1),
+    amenityAddress: z.string().optional(),
+    amenityDescription: z.string(),
+    amenityStock: z.coerce.number().min(1),
+    amenityStockMax: z.coerce.number().min(1),
+    amenityQuantityMin: z.coerce.number().min(1),
+    amenityQuantityMax: z.coerce.number().min(1),
+    amenityReminder: z.string().optional(),
+    amenityCreator: z.string().optional(),
+    amenityVisibility: z.string().optional(),
+    amenityImages: z.any().optional(),
 })
 
 
+export default function AmenityEditForm() {
 
 
 
-const AmenityEditForm = () => {
+    // Hooks
+    // Navigate context
+    const navigate = useNavigate();
 
 
 
     // States
-    // State for amenity
+    // Amenity state
     const [amenity, setAmenity] = useState<AmenityType>();
+    // Error state
+    const [error, setError] = useState<string>("");
+    // Loading state
+    const [loading, setLoading] = useState<boolean>(false);
 
-    // State for errors
-    const [error, setError] = useState<any>();
-
-    // State for loading
-    const [loading, setLoading] = useState(false);
-
-    console.log(loading);
-
-    // State for images
+    // Image-related states
+    // Images state
     const [images, setImages] = useState<any>();
-
-    // State for rotating index for image carousel
-    const [rotatingIndex, setRotatingIndex] = useState(0);
-
-    // State for current index of the image preview
-    const [currentIndex, setCurrentIndex] = useState(0);
-
-    // For toast confirmation
-    const { toast } = useToast()
+    // Image preview current index state
+    const [currentImage, setCurrentImage] = useState<number>(0);
+    // Image preview rotating index state
+    const [rotatingImage, setRotatingImage] = useState<number>(0);
+    // Image preview visibility state
+    const [showImagePreview, setShowImagePreview] = useState<boolean>(false);
 
 
 
+    // Form
+    // Form hook
+    const amenityForm = useForm<z.infer<typeof amenityFormSchema>>({
+        resolver: zodResolver(amenityFormSchema),
+
+    });
 
 
-    // useEffects
-    // useEffect to for API calls
+
+    // Effects
+    // Effect to fetch amenity
     useEffect(() => {
-
-        // Log to the console that the page has loaded
-        console.log("Amenity Edit Form Loaded");
-
-        // Set the document title
-        document.title = "Amenity | GCTMS";
-
-        // Check if there is an edited amenity in the local storage
-        if (localStorage.getItem("amenityEdited")) {
-
-            const amenityEdited = JSON.parse(localStorage.getItem("amenityEdited") as any)
-
-            toast({
-                title: amenityEdited.amenityType + " amenity edited.",
-                description: amenityEdited.amenityName + " has been successfully edited.",
-            })
-
-            localStorage.removeItem("amenityEdited")
-        }
-
-
-
-        // Function to fetch amenity
         const fetchAmenity = async () => {
+            try {
+                setLoading(true);
+                const id = location.pathname.split('/').pop() || '';
+                const response = await getSingleAmenity(id);
+                const data = await response.json();
 
-            // Fetch amenity
-            const amenityResponse = await fetch(import.meta.env.VITE_API_URL + "/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length));
-
-            // Parse the response to JSON
-            const amenityData = await amenityResponse.json();
-
-            // If the response is successful, log to the console that fetching amenity is successful  
-            if (amenityResponse.ok) {
-                console.log("Fetching amenity successful.");
-                setAmenity(amenityData);
-                setImages(amenityData.amenityImages);
+                setAmenity(data);
+                amenityForm.reset(data);
+                setImages(data.amenityImages);
+            } catch (error) {
+                setError(error instanceof Error ? error.message : 'Failed to fetch amenity');
+            } finally {
                 setLoading(false);
-            } else if (!amenityResponse.ok) {
-                console.log("Fetching amenity failed.");
             }
-
         };
 
-        // Call all API call functions
-        // Fetch Amenity
         fetchAmenity();
+    }, [amenityForm]);
 
-    }, []);
-
+    // Effect to rotate through images automatically
     useEffect(() => {
-
-        // const imagesCheck = () => {
-
-        //     if (rotatingIndex < 0) {
-        //         setRotatingIndex(0);
-        //     }
-
-        //     if (rotatingIndex >= imagess.length) {
-        //         setRotatingIndex(imagess.length - 1);
-        //     }
-
-        // }
-
-        let intervalId = setInterval(() => {
-
-            console.log(images)
-
-            if (images.length <= 0 || images.length === 1) {
-                setRotatingIndex(0);
-            } else if (rotatingIndex === images.length - 1) {
-                setRotatingIndex(0);
-            } else if (rotatingIndex >= images.length) {
-                setRotatingIndex(0);
+        const interval = setInterval(() => {
+            if (images.length <= 1) {
+                setRotatingImage(0);
+            } else {
+                setRotatingImage((prevIndex) => (prevIndex + 1) % images.length);
             }
-            else {
-                setRotatingIndex(rotatingIndex + 1);
-            }
+        }, 5000);
 
-            console.log(images);
-        }, 3000)
-
-        // Pause logic for the carousel
-        // if (paused) {
-        //   clearInterval(intervalId);
-        // } else {
-        //   return () => clearInterval(intervalId);
-        // }
-
-        return () => clearInterval(intervalId);
-
-    });
+        return () => clearInterval(interval);
+    }, [images]);
 
 
 
-    // Facility form values
-    const facilityEditForm = useForm<zod.infer<typeof facilityEditFormSchema>>({
-        resolver: zodResolver(facilityEditFormSchema),
-        defaultValues: async () => {
+    // Functions
+    // Submit function
+    const handleSubmit = async (values: z.infer<typeof amenityFormSchema>) => {
+        try {
+            setLoading(true);
 
-            const facilityDataResponse = await fetch(import.meta.env.VITE_API_URL + "/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length));
+            const updatedValues = {
+                ...values,
+                _id: location.pathname.split('/').pop() || '',
+                amenityStock: values.amenityStockMax,
+                amenityImages: images
+            };
 
-            const facilityData = await facilityDataResponse.json();
+            const response = await editAmenity(updatedValues);
+            const data = await response.json();
 
-            if (facilityDataResponse.ok) {
-                console.log("Fetching facility successful.");
-            } else if (!facilityDataResponse.ok) {
-                console.log("Fetching facility failed.");
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to edit amenity');
             }
 
-            return {
+            sessionStorage.setItem(
+                "amenityEdited",
+                `The ${data.amenityType.toLowerCase()} amenity '${data.amenityName}' has been edited successfully.`
+            );
 
-                amenityName: facilityData.amenityName,
-                amenityType: facilityData.amenityType,
-                amenityDescription: facilityData.amenityDescription,
-                amenityAddress: facilityData.amenityAddress,
-                amenityReminder: facilityData.amenityReminder,
-                amenityCreator: facilityData.amenityCreator,
-                initialAmenityName: facilityData.amenityName,
-                amenityVisibility: facilityData.amenityVisibility,
-
-            }
-        }
-    });
-
-    // Equipment form values
-    const equipmentEditForm = useForm<zod.infer<typeof equipmentEditFormSchema>>({
-        resolver: zodResolver(equipmentEditFormSchema),
-        defaultValues: async () => {
-
-            const equipmentDataResponse = await fetch(import.meta.env.VITE_API_URL + "/amenities/" + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "));
-
-            const equipmentData = await equipmentDataResponse.json();
-
-            if (equipmentDataResponse.ok) {
-                console.log("Fetching equipment successful.");
-            } else if (!equipmentDataResponse.ok) {
-                console.log("Fetching equipment failed.");
-            }
-
-            return {
-
-                amenityName: equipmentData.amenityName,
-                amenityType: equipmentData.amenityType,
-                amenityDescription: equipmentData.amenityDescription,
-                amenityStockMax: equipmentData.amenityStockMax,
-                amenityStock: equipmentData.amenityStock,
-                amenityQuantityMin: equipmentData.amenityQuantityMin,
-                amenityQuantityMax: equipmentData.amenityQuantityMax,
-                amenityReminder: equipmentData.amenityReminder,
-                amenityCreator: equipmentData.amenityCreator,
-                initialAmenityName: equipmentData.amenityName,
-                amenityVisibility: equipmentData.amenityVisibility,
-
-            }
-        },
-
-    })
-
-
-
-    // Patch submit function to update the equipment details
-    const equipmentEditSubmit = async (values: zod.infer<typeof equipmentEditFormSchema>) => {
-
-        values.amenityImages = images;
-
-        const equipmentEditResponse = await fetch(import.meta.env.VITE_API_URL + '/amenities/' + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "), {
-            method: 'PATCH',
-            body: JSON.stringify(values, null, 2),
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        })
-
-        const equipmentEditData = await equipmentEditResponse.json();
-
-        if (equipmentEditResponse.ok) {
-            console.log('Equipment successfully edited.');
-            localStorage.setItem("amenityEdited", JSON.stringify(equipmentEditData))
-            window.location.reload();
-        } else if (!equipmentEditResponse.ok) {
-            console.log('Equipment edit failed.');
-            setError(equipmentEditData.error);
-        }
-
-    }
-
-    // Patch submit function to update the facility details
-    const facilityEditSubmit = async (values: zod.infer<typeof facilityEditFormSchema>) => {
-
-        const facilityEditResponse = await fetch(import.meta.env.VITE_API_URL + '/amenities/' + location.pathname.slice(location.pathname.lastIndexOf("/") + 1, location.pathname.length).replace(/%20/g, " "), {
-            method: 'PATCH',
-            body: JSON.stringify(values, null, 2),
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        })
-
-        const facilityEditData = await facilityEditResponse.json();
-
-        if (facilityEditResponse.ok) {
-            console.log('Facility successfully edited.');
-            localStorage.setItem("amenityEdited", JSON.stringify(facilityEditData))
-            window.location.reload();
-        } else if (!facilityEditResponse.ok) {
-            console.log('Equipment edit failed.');
-            setError(facilityEditData.error);
-        }
-
-    }
-
-
-    const handleImage = (e) => {
-
-        const imageFiles = Array.from(e.target.files);
-
-        if (images.length + imageFiles.length > 3) {
-            setError("You can only upload up to 3 images. Please remove at least 1 image to upload a new one.");
-            return;
-        }
-
-        if (imageFiles.length > 3) {
-            setError("You can only upload up to 3 images.");
+            amenityForm.reset();
             setImages([]);
+            navigate("/amenities/" + location.pathname.split('/').pop());
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Failed to edit amenity');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Image handling functions
+    const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const imageFiles = Array.from(e.target.files || []);
+        const totalImages = images.length + imageFiles.length;
+
+        if (totalImages > 3 || imageFiles.length > 3) {
+            setError("Maximum of 3 images allowed");
             return;
         }
 
-        if (images.length > 3) {
-            setError("You can only upload up to 3 images.");
-            setImages([]);
-            return;
-        }
+        imageFiles.forEach(setFileToBase);
+    };
 
-
-
-        imageFiles.forEach(file => {
-            setFileToBase(file);
-        })
-
-    }
-
-    const setFileToBase = (file) => {
-
+    const setFileToBase = (file: File) => {
         const reader = new FileReader();
-        reader.readAsDataURL(file);
 
         reader.onloadend = () => {
-            console.log(reader.result);
-            setImages(oldArray => [...oldArray, { url: reader.result }]);
+            setImages(prev => [...prev, { url: reader.result }]);
+        };
+
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemoveImage = (index: number) => {
+        setImages(prev => {
+            const updatedImages = [...prev];
+            updatedImages.splice(index, 1);
+            return updatedImages;
+        });
+
+        console.log("Before", rotatingImage);
+
+        // Adjust rotating image index if needed
+        if (rotatingImage >= index && rotatingImage > 0) {
+            setRotatingImage(prev => prev - 1);
         }
 
-    }
+        console.log("After", rotatingImage);
+    };
 
-    const removeImage = (index) => {
 
-        if ((index >= images.length - 1 && rotatingIndex >= images.length - 1) || rotatingIndex >= images.length - 1 && images.length > 1) {
-            if (rotatingIndex === 0) {
-                setRotatingIndex(0);
-            } else {
-                setRotatingIndex(rotatingIndex - 1);
-            }
-        }
-
-        const updatedImagesArray = Array.from(images); // make a separate copy of the array
-        updatedImagesArray.splice(index, 1);
-        setImages(updatedImagesArray);
-    }
-
+    // Functions
 
     return (
 
+        <SidebarProvider>
+
+            <AppSidebar />
+
+            <SidebarInset>
+
+                {/* The header provided along with the sidebar */}
+                <header className="flex h-16 shrink-0 p-4 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+
+                    {/* Container within the header to organize items */}
+                    <div className="w-full flex items-center justify-between gap-2">
+
+                        {/* Container for breadcrumbs and sidebar trigger */}
+                        <div className="flex items-center gap-2 p-4">
+
+                            <SidebarTrigger className="" />
+
+                            <Separator orientation="vertical" className="mr-2 h-4" />
+
+                            {/* Page breadcrumbs */}
+                            <Breadcrumb>
+
+                                <BreadcrumbList>
+
+                                    <BreadcrumbItem className="hidden md:block">
+                                        <BreadcrumbLink href="/dashboard">
+                                            Dashboard
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
+
+                                    <BreadcrumbSeparator className="hidden md:block" />
+
+                                    <BreadcrumbItem className="hidden md:block">
+                                        <BreadcrumbLink href="/amenities">
+                                            Amenities
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
+
+                                    <BreadcrumbSeparator className="hidden md:block" />
+
+                                    <BreadcrumbItem className="hidden md:block">
+                                        <BreadcrumbPage>
+                                            Edit amenity
+                                        </BreadcrumbPage>
+                                    </BreadcrumbItem>
+
+                                </BreadcrumbList>
+
+                            </Breadcrumb>
+
+                        </div>
+
+                        {/* Account navigation */}
+                        <div className="hidden md:flex items-center gap-2">
+                            <ThemeToggle />
+                            <NavUser />
+                        </div>
+
+                    </div>
+
+                </header>
 
 
-        <LayoutWrapper>
 
+                <main>
 
+                    <Form {...amenityForm}>
 
-            <Toaster />
+                        <form className="flex flex-col gap-4 p-8 pt-4" onSubmit={amenityForm.handleSubmit(handleSubmit)}>
 
-            {amenity && amenity.amenityType === "Equipment" &&
-
-                (
-
-                    <Form {...equipmentEditForm}>
-
-                        <form onSubmit={equipmentEditForm.handleSubmit(equipmentEditSubmit)}>
-
-                            <div className="flex items-center gap-4 mb-3">
-
+                            {/* Page header */}
+                            <div className="flex flex-row items-center gap-4">
+                                {/* Return to Amenity List button */}
                                 <Button
                                     className="h-7 w-7"
                                     onClick={() => history.back()}
+                                    size="icon"
+                                    title="Back Button"
                                     type="button"
                                     variant="outline"
-                                    size="icon"
                                 >
                                     <ChevronLeft className="h-4 w-4" />
                                     <span className="sr-only"> Back </span>
-
                                 </Button>
 
-                                <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                                    Edit {amenity.amenityName}
-                                </h1>
-
-                                <div className="hidden items-center gap-2 md:ml-auto md:flex">
-
-                                    <Button size="sm" className="flex-gap-1" type="submit">
-                                        Save Changes
-                                    </Button>
-
+                                {/* Container for the header */}
+                                <div className="flex flex-col">
+                                    {/* Page header */}
+                                    <h1 className="font-semibold text-2xl"> Edit {amenity ? `${amenity.amenityName} details` : "amenity details"} </h1>
+                                    {/* Page header description */}
+                                    {amenity && amenity.amenityType === "Equipment" ?
+                                        <h3 className="font-light text-muted-foreground"> An equipment amenity for unit owners to reserve. </h3> :
+                                        <h3 className="font-light text-muted-foreground"> A facility amenity for unit owners to reserve. </h3>
+                                    }
                                 </div>
-
+                                <Button
+                                    disabled={loading}
+                                    className={"ml-auto"}
+                                    type="submit"
+                                    size="sm"
+                                    variant="default"
+                                >
+                                    <Save className={"h-7 w-7 " + (loading ? "hidden" : "block")} />
+                                    <LoadingSpinner className={"h-7 w-7 " + (loading ? "block" : "hidden")} />
+                                    Save changes
+                                </Button>
                             </div>
 
-                            {error && (
-                                <div className="bg-destructive w-full h-fit rounded-lg mb-3 py-4 px-6 flex gap-3 items-center">
-                                    <TriangleAlert className="w-6 h-6" />
+
+                            {/* Error message */}
+                            {error !== "" && (
+                                <div className="flex bg-red-500/20 border border-red-500 text-red-500 items-center gap-3 rounded-md px-4 py-3">
+                                    <TriangleAlert className="w-5 h-5" />
                                     {error}
                                 </div>
-                            )}
+                            )
+                            }
 
 
 
+                            {/* Page content */}
+                            <div className="grid gap-6 md:grid-cols-[1fr_250px] lg:grid-cols-3">
 
-                            <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
+                                <div className="grid auto-rows-max items-start gap-6 lg:col-span-2">
 
-                                <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+                                    {/* Card for amenity basic information */}
+                                    <Card>
 
-                                    <Card x-chunk="dashboard-07-chunk-0">
+                                        <CardContent className="flex flex-col gap-2 pt-5 max-h-svh">
 
-                                        <CardHeader>
+                                            <div className="flex flex-col pb-6">
 
-                                            <CardTitle> {amenity.amenityName} Details </CardTitle>
-                                            <CardDescription>
-                                                Enter the appropriate details for the new equipment.
-                                            </CardDescription>
-
-                                        </CardHeader>
-
-
-
-                                        <CardContent>
-
-
-
-                                            <div className="grid gap-6">
-
-
-
-                                                {/* Equipment Amenity Name Input */}
-                                                <FormField
-                                                    control={equipmentEditForm.control}
-                                                    name="amenityName"
-                                                    render={({ field }) => {
-
-                                                        return (
-
-                                                            <FormItem>
-
-                                                                <FormLabel className="hidden"> Equipment Name </FormLabel>
-
-                                                                <FormControl>
-
-                                                                    <div className="grid gap-2">
-
-                                                                        <Label htmlFor="amenityName"> Name </Label>
-
-                                                                        <CardDescription> The equipment name should be in plural form. </CardDescription>
-
-                                                                        <Input
-                                                                            className="w-full"
-                                                                            id="amenityName"
-                                                                            type="text"
-                                                                            {...field}
-                                                                        />
-
-                                                                    </div>
-
-                                                                </FormControl>
-
-                                                                <FormMessage />
-
-                                                            </ FormItem>
-
-                                                        )
-                                                    }}
-                                                />
-
-
-
-                                                {/* Equipment Amenity Type Input */}
-                                                <FormField
-                                                    control={equipmentEditForm.control}
-                                                    name="amenityDescription"
-                                                    render={({ field }) => {
-
-                                                        return (
-
-                                                            <FormItem>
-
-                                                                <FormLabel className="hidden"> Amenity Description </FormLabel>
-
-                                                                <FormControl>
-
-                                                                    <div className="grid gap-2">
-
-                                                                        <Label htmlFor="amenityDescription"> Description </Label>
-
-                                                                        <Textarea
-                                                                            className="min-h-32"
-                                                                            id="amenityDescription"
-                                                                            {...field}
-                                                                        />
-
-                                                                    </div>
-
-                                                                </FormControl>
-
-                                                                <FormMessage />
-
-                                                            </FormItem>
-                                                        )
-                                                    }}
-                                                />
-
-
-
-                                                {/* Equipment Amenity Reminder Input */}
-                                                <FormField
-                                                    control={equipmentEditForm.control}
-                                                    name="amenityReminder"
-                                                    render={({ field }) => {
-
-                                                        return (
-
-                                                            <FormItem>
-
-                                                                <FormLabel className="hidden"> Amenity Reminder </FormLabel>
-
-                                                                <FormControl>
-
-                                                                    <div className="grid-gap-2">
-
-                                                                        <Label htmlFor="amenityReminder"> Reminder </Label>
-                                                                        <Textarea
-                                                                            className="min-h-32"
-                                                                            id="amenityReminder"
-                                                                            {...field}
-                                                                        />
-
-                                                                    </div>
-
-                                                                </FormControl>
-
-                                                                <FormMessage />
-
-                                                            </FormItem>
-
-                                                        )
-                                                    }}
-                                                />
+                                                <Label className="text-lg font-semibold"> {amenity ? amenity.amenityType : "Amenity"} basic information </Label>
+                                                <p className="text-sm font-normal text-muted-foreground"> Enter the appropriate details for the this {amenity ? amenity.amenityType.toLowerCase() : "amenity"}. </p>
 
                                             </div>
 
+                                            <FormField
+                                                control={amenityForm.control}
+                                                name="amenityName"
+                                                render={({ field }) => {
+                                                    return (
+                                                        <FormItem className="mb-4">
+                                                            <div className="flex flex-col gap-1 mb-2">
+                                                                <FormLabel className=""> Name <span className="text-destructive"> * </span> </FormLabel>
+                                                                <FormDescription className="text-muted-foreground"> The {amenity ? amenity.amenityType.toLowerCase() : "amenity"} name should be descriptive–preferably singular. </FormDescription>
+                                                            </div>
+                                                            <FormControl>
+                                                                <Input
+                                                                    className="w-full"
+                                                                    id="amenityName"
+                                                                    placeholder="Enter equipment name"
+                                                                    required
+                                                                    type="text"
+                                                                    {...field}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
 
+                                            {/* Amenity type */}
+                                            {amenity && amenity.amenityType === "Facility" && (
+                                                <FormField
+                                                    control={amenityForm.control}
+                                                    name="amenityAddress"
+                                                    render={({ field }) => {
+
+                                                        return (
+                                                            <FormItem className="mb-4">
+                                                                <div className="flex flex-col gap-1 mb-2">
+                                                                    <FormLabel className=""> Address <span className="text-destructive"> * </span> </FormLabel>
+                                                                    <FormDescription className="text-muted-foreground"> Enter the exact location details so unit owners can locate it easily.  </FormDescription>
+                                                                </div>
+                                                                <FormControl>
+                                                                    <Textarea
+                                                                        id="amenityAddress"
+                                                                        className=""
+                                                                        placeholder="Enter facility address"
+                                                                        required
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )
+                                                    }}
+                                                />
+                                            )}
+
+                                            <FormField
+                                                control={amenityForm.control}
+                                                name="amenityDescription"
+                                                render={({ field }) => {
+
+                                                    return (
+                                                        <FormItem className="mb-4">
+                                                            <div className="flex flex-col gap-1 mb-2">
+                                                                <FormLabel className=""> Description <span className="text-destructive"> * </span> </FormLabel>
+                                                                {amenity && amenity.amenityType === "Equipment" ?
+                                                                    <FormDescription className="text-muted-foreground"> Describe the equipment in detail. For example, it's appearance and functionality. </FormDescription> :
+                                                                    <FormDescription className="text-muted-foreground"> Describe the facility in detail, including it's area and other notable features. </FormDescription>
+                                                                }
+                                                            </div>
+                                                            <FormControl>
+                                                                <Textarea
+                                                                    id="amenityDescription"
+                                                                    className=""
+                                                                    placeholder="Enter equipment description"
+                                                                    required
+                                                                    {...field}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+
+                                            <FormField
+                                                control={amenityForm.control}
+                                                name="amenityReminder"
+                                                render={({ field }) => {
+                                                    return (
+                                                        <FormItem className="mb-4">
+                                                            <div className="flex flex-col gap-1 mb-2">
+                                                                <FormLabel className=""> Reminder <span className="text-destructive"> * </span> </FormLabel>
+                                                                {amenity && amenity.amenityType === "Equipment" ?
+                                                                    <FormDescription className="text-muted-foreground"> Is there anything that the borrower needs to know? </FormDescription> :
+                                                                    <FormDescription className="text-muted-foreground"> Set a reminder with important notes or guidelines for residents to review before using the facility. </FormDescription>
+                                                                }
+                                                            </div>
+                                                            <FormControl>
+                                                                <Textarea
+                                                                    className=""
+                                                                    id="amenityReminder"
+                                                                    placeholder="Enter equipment reminder"
+                                                                    required
+                                                                    {...field}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
 
                                         </CardContent>
 
@@ -671,393 +572,238 @@ const AmenityEditForm = () => {
 
 
 
-                                    {/* Equipment Stock Card */}
-                                    <Card x-chunk="dashboard-07-chunk-1">
-
-                                        <CardHeader>
-
-                                            <CardTitle> {amenity.amenityName} Stock</CardTitle>
-                                            <CardDescription>
-                                                Enter the maximum amount per reservation and the total amount of the equipment.
-                                            </CardDescription>
-
-                                        </CardHeader>
-
-
-
-                                        <CardContent>
-
-                                            <Table>
-
-                                                <TableBody>
-
-                                                    <TableRow>
-
-                                                        <TableCell className="font-semibold">
-                                                            Maximum {amenity.amenityName} Stock
-                                                            <CardDescription className="font-normal"> Changes in the maximum stock will affect the number of current stocks. </CardDescription>
-
-                                                        </TableCell>
-
-                                                        <TableCell>
-
-                                                            <FormField
-                                                                control={equipmentEditForm.control}
-                                                                name="amenityStockMax"
-                                                                render={({ field }) => {
-
-                                                                    return (
-
-                                                                        <FormItem>
-
-                                                                            <FormLabel className="hidden"> Amenity Maximum Stock </FormLabel>
-
-                                                                            <FormControl>
-
-                                                                                <Input
-                                                                                    id="amenityStockMax"
-                                                                                    type="number"
-                                                                                    {...field}
-                                                                                />
-
-                                                                            </FormControl>
-
-                                                                            <FormMessage />
-
-                                                                        </FormItem>
-                                                                    )
-                                                                }}
-                                                            />
-
-                                                        </TableCell>
-
-                                                    </TableRow>
-
-                                                    <TableRow>
-
-                                                        <TableCell className="font-semibold">
-
-                                                            Current {amenity.amenityName} Stock
-                                                            <CardDescription className="font-normal"> This cannot be lower than 0 or higher than the maximum stock. </CardDescription>
-
-                                                        </TableCell>
-
-                                                        <TableCell>
-
-                                                            <FormField
-                                                                control={equipmentEditForm.control}
-                                                                name="amenityStock"
-                                                                render={({ field }) => {
-
-                                                                    return (
-
-                                                                        <FormItem>
-
-                                                                            <FormLabel className="hidden"> Current {amenity.amenityName} Stocks </FormLabel>
-
-                                                                            <FormControl>
-
-                                                                                <Input
-                                                                                    id="amenityStock"
-                                                                                    type="number"
-                                                                                    {...field}
-                                                                                />
-
-                                                                            </FormControl>
-
-                                                                            <FormMessage />
-
-                                                                        </FormItem>
-
-                                                                    )
-
-                                                                }}
-                                                            />
-
-                                                        </TableCell>
-
-                                                    </TableRow>
-
-                                                    <TableRow>
-
-                                                        <TableCell className="font-semibold">
-                                                            Minimum amount per reservation
-                                                        </TableCell>
-
-                                                        <TableCell>
-
-                                                            <FormField
-                                                                control={equipmentEditForm.control}
-                                                                name="amenityQuantityMin"
-                                                                render={({ field }) => {
-
-                                                                    return (
-
-                                                                        <FormItem>
-
-                                                                            <FormLabel className="hidden"> Minimum Amenity Quanitty per Reservation </FormLabel>
-
-                                                                            <FormControl>
-
-                                                                                <Input
-                                                                                    id="amenityQuantityMin"
-                                                                                    type="number"
-                                                                                    {...field}
-                                                                                />
-
-                                                                            </FormControl>
-
-                                                                            <FormMessage />
-
-                                                                        </FormItem>
-
-                                                                    )
-
-                                                                }}
-                                                            />
-
-                                                        </TableCell>
-
-                                                    </TableRow>
-
-                                                    <TableRow>
-
-                                                        <TableCell className="font-semibold">
-                                                            Maximum amount per reservation
-                                                        </TableCell>
-
-                                                        <TableCell>
-
-                                                            <FormField
-                                                                control={equipmentEditForm.control}
-                                                                name="amenityQuantityMax"
-                                                                render={({ field }) => {
-
-                                                                    return (
-
-                                                                        <FormItem>
-
-                                                                            <FormLabel className="hidden"> Maximum Amenity Quantity per Reservation </FormLabel>
-
-                                                                            <FormControl>
-                                                                                <Input
-                                                                                    id="amenityQuantityMax"
-                                                                                    type="number"
-                                                                                    {...field}
-                                                                                />
-                                                                            </FormControl>
-
-                                                                            <FormMessage />
-
-                                                                        </FormItem>
-                                                                    )
-                                                                }}
-                                                            />
-
-                                                        </TableCell>
-
-                                                    </TableRow>
-
-                                                </TableBody>
-
-                                            </Table>
-
-                                        </CardContent>
-
-                                    </Card>
+                                    {/* Card for equipment stock levels */}
+                                    {amenity && amenity.amenityType === "Equipment" && (
+                                        <Card>
+                                            <CardContent className="flex flex-col gap-2 pt-5 max-h-svh">
+                                                <div className="flex flex-col pb-2">
+                                                    <Label className="text-lg font-semibold"> Equipment stock levels </Label>
+                                                    <p className="text-sm text-muted-foreground"> Stock levels help prevent overbooking and maintain optimal availability. </p>
+                                                </div>
+
+                                                <Table>
+                                                    <TableBody>
+                                                        <TableRow>
+                                                            <TableCell className="flex flex-col gap-1">
+                                                                <Label className="font-medium"> Maximum stock <span className="text-destructive"> * </span> </Label>
+                                                                <p className="text-muted-foreground"> The total quantity of this equipment that the system can allocate to the unit owners. </p>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <FormField
+                                                                    control={amenityForm.control}
+                                                                    name="amenityStockMax"
+                                                                    render={({ field }) => {
+                                                                        return (
+                                                                            <FormItem>
+                                                                                <FormLabel className="hidden"> Equipment Maximum Stock </FormLabel>
+                                                                                <FormControl>
+                                                                                    <Input
+                                                                                        id="amenityStockMax"
+                                                                                        required
+                                                                                        type="number"
+                                                                                        {...field}
+                                                                                    />
+                                                                                </FormControl>
+
+                                                                                <FormMessage />
+
+                                                                            </FormItem>
+                                                                        )
+                                                                    }}
+                                                                />
+                                                            </TableCell>
+                                                        </TableRow>
+
+                                                        <TableRow>
+                                                            <TableCell className="flex flex-col gap-1">
+                                                                <Label className="font-medium"> Minimum quantity per reservation <span className="text-destructive"> * </span> </Label>
+                                                                <p className="text-muted-foreground"> The smallest amount of units a resident can reserve for this equipment. </p>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <FormField
+                                                                    control={amenityForm.control}
+                                                                    name="amenityQuantityMin"
+                                                                    render={({ field }) => {
+                                                                        return (
+                                                                            <FormItem>
+                                                                                <FormLabel className="hidden"> Minimum Amenity Quantity per Reservation </FormLabel>
+                                                                                <FormControl>
+                                                                                    <Input
+                                                                                        id="amenityQuantityMin"
+                                                                                        min={amenity.amenityQuantityMin}
+                                                                                        required
+                                                                                        type="number"
+                                                                                        {...field}
+                                                                                    />
+                                                                                </FormControl>
+
+                                                                                <FormMessage />
+
+                                                                            </FormItem>
+                                                                        )
+                                                                    }}
+                                                                />
+                                                            </TableCell>
+                                                        </TableRow>
+
+                                                        <TableRow>
+                                                            <TableCell className="flex flex-col gap-1">
+                                                                <Label className="font-medium"> Maximum quantity per reservation <span className="text-destructive"> * </span> </Label>
+                                                                <p className="text-muted-foreground"> The largest amount of units a resident can reserve for this equipment. </p>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <FormField
+                                                                    control={amenityForm.control}
+                                                                    name="amenityQuantityMax"
+                                                                    render={({ field }) => {
+                                                                        return (
+                                                                            <FormItem>
+                                                                                <FormLabel className="hidden"> Maximum Amenity Quantity per Reservation </FormLabel>
+                                                                                <FormControl>
+                                                                                    <Input
+                                                                                        id="amenityQuantityMax"
+                                                                                        max={amenity.amenityQuantityMax}
+                                                                                        required
+                                                                                        type="number"
+                                                                                        {...field}
+                                                                                    />
+                                                                                </FormControl>
+
+                                                                                <FormMessage />
+
+                                                                            </FormItem>
+                                                                        )
+                                                                    }}
+                                                                />
+                                                            </TableCell>
+                                                        </TableRow>
+
+                                                    </TableBody>
+
+                                                </Table>
+                                            </CardContent>
+                                        </Card>
+                                    )}
 
                                 </div>
 
-
-
-                                <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-
-                                    <Card className="overflow-hidden" x-chunk="dashboard-07-chunk-4">
-
-                                        <CardHeader>
-
-                                            <CardTitle> {amenity.amenityName} Images </CardTitle>
-                                            <CardDescription>
-                                                Attach images of the equipment. You can upload up to 3 images.
-                                            </CardDescription>
-
-                                        </CardHeader>
-
-
-
+                                {/* Card for amenity images */}
+                                <div className="grid auto-rows-max items-start gap-6 lg:gap-8">
+                                    <Card className="flex flex-col gap-2 pt-5 overflow-hidden">
                                         <CardContent>
 
+                                            <div className="flex flex-col pb-6">
+                                                <Label className="text-lg font-semibold"> {amenity ? amenity.amenityType : "Amenity"} images <span className="text-muted-foreground"> (Optional) </span> </Label>
+                                                <p className="text-sm font-normal text-muted-foreground"> Attach images of the {amenity ? amenity.amenityType.toLowerCase() : "amenity"}. You can upload up to 3 images. </p>
+                                            </div>
+
                                             <div className="grid gap-2">
-
-
-
                                                 {images && images[0] && (
-                                                    <Dialog>
-
-                                                        <DialogTrigger onClick={() => setCurrentIndex(rotatingIndex)}>
-                                                            <img
-                                                                src={images[rotatingIndex].url ? images[rotatingIndex].url : images[rotatingIndex]} className="aspect-video w-full rounded-md object-cover"
-                                                            />
-                                                        </DialogTrigger>
-
-                                                        <DialogContent className="p-0 aspect-video max-w-[80%] items-center justify-center">
-
-                                                            <Button
-                                                                className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    if (currentIndex === 0) {
-                                                                        setCurrentIndex(images.length - 1)
-                                                                    } else {
-                                                                        setCurrentIndex(currentIndex - 1)
-                                                                    }
-                                                                }}
-                                                                size="icon"
-                                                                variant="outline"
-                                                            >
-                                                                <ChevronLeft className="h-4 w-4" />
-                                                            </Button>
-
-                                                            <Button
-                                                                className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    if (currentIndex === images.length - 1) {
-                                                                        setCurrentIndex(0)
-                                                                    } else {
-                                                                        setCurrentIndex(currentIndex + 1)
-                                                                    }
-                                                                }}
-                                                                size="icon"
-                                                                variant="outline"
-                                                            >
-                                                                <ChevronRight className="h-4 w-4" />
-                                                            </Button>
-
-                                                            <img
-                                                                src={images[currentIndex].url ? images[currentIndex].url : images[currentIndex]} className="aspect-video rounded-md object-contain"
-                                                            />
-                                                        </DialogContent>
-
-                                                    </ Dialog>
+                                                    <img
+                                                        className="aspect-video w-full rounded-md object-cover cursor-pointer"
+                                                        onClick={() => { setCurrentImage(rotatingImage); setShowImagePreview(true) }}
+                                                        src={images[rotatingImage].url ? images[rotatingImage].url : images[rotatingImage]}
+                                                    />
                                                 )}
 
                                                 <div className="grid grid-cols-3 gap-2">
-
-                                                    {images[0] && images.length > 0 && images.map((image, index) => (
+                                                    {images && images.map((image: any, index: number) => (
                                                         <div className="group relative">
                                                             <Button
-                                                                className="h-5 w-5 rounded-full absolute -top-2 -right-2 group-hover:flex hidden z-50"
-                                                                variant="destructive"
+                                                                className="h-5 w-5 rounded-full absolute -top-2 -right-2 flex z-50"
+                                                                onClick={() => { handleRemoveImage(index) }}
                                                                 size="icon"
                                                                 type="button"
-                                                                onClick={() => { removeImage(index) }}>
+                                                                variant="destructive"
+                                                            >
                                                                 <X className="h-3 w-3" />
                                                             </Button>
                                                             <img
-                                                                src={image.url ? image.url : image[index]} className="cursor-pointer aspect-video w-full rounded-md object-cover h-[84] w-[84]" onClick={() => setRotatingIndex(index)}
+                                                                className="cursor-pointer aspect-video w-full rounded-md object-cover h-[84] w-[84]"
+                                                                onClick={() => setRotatingImage(index)}
+                                                                src={image.url ? image.url : image[index]}
                                                             />
                                                         </div>
-                                                    )
-                                                    )}
-
+                                                    ))}
                                                 </div>
 
-                                                {images.length !== 3 && images.length! <= 3 && (
+                                                {images && images.length! !== 3 && images.length! <= 3 && (
                                                     <button type="button" className="relative flex flex-col gap-2 aspect-video w-full items-center justify-center rounded-md border border-dashed">
-
                                                         <Upload className="h-6 w-6 text-muted-foreground" />
-
                                                         <div className="flex flex-col">
-                                                            <span className="text-muted-foreground text-base font-medium"> Click here to upload new images </span>
-                                                            <span className="text-muted-foreground text-xs font-normal"> The total file size should not exceed 15 MB. </span>
+                                                            <span className="text-muted-foreground text-base font-medium"> Click here to upload images </span>
+                                                            <span className="text-muted-foreground text-xs font-normal"> The total file size should not exceed 30 MB. </span>
                                                         </div>
-
-                                                        <span className="sr-only"> Image Upload </span>
-
+                                                        <span className="sr-only"> Upload </span>
                                                         <FormField
-                                                            control={equipmentEditForm.control}
+                                                            control={amenityForm.control}
                                                             name="amenityImages"
                                                             render={({ field: { value, onChange, ...fieldProps } }) => {
-
                                                                 return (
-
                                                                     <FormItem>
                                                                         <FormLabel className="hidden"> Amenity Image </FormLabel>
                                                                         <FormControl>
                                                                             <Input
                                                                                 accept="image/jpeg, image/png, image/jpg"
-                                                                                className="block absolute w-full h-full left-0 top-0 right-0 bottom-0 opacity-0 z-5 disabled:opacity-0 !mt-0 pointer"
-                                                                                disabled={images.length === 3 || images.length > 3}
+                                                                                className="block absolute w-full h-full left-0 top-0 right-0 bottom-0 opacity-0 z-50 disabled:opacity-0 !mt-0 pointer"
+                                                                                disabled={images.length >= 3}
                                                                                 id="amenityImages"
                                                                                 multiple
-                                                                                onChange={handleImage}
-                                                                                title=""
+                                                                                onChange={handleImages}
+                                                                                title="Drag and drop an image file or click here to upload."
                                                                                 type="file"
                                                                                 {...fieldProps}
                                                                             />
                                                                         </FormControl>
-
                                                                         <FormMessage />
-
                                                                     </FormItem>
                                                                 )
                                                             }}
                                                         />
-
                                                     </button>
                                                 )}
-
-
                                             </div>
 
-                                            <CardDescription className="mt-3 text-xs"> <b>  Note: </b>   Uploading new images will overwrite the current set of images. Please be careful as these images may be lost permanently. </CardDescription>
-
                                         </CardContent>
-
                                     </Card>
 
-
-
-                                    <Card x-chunk="dashboard-07-chunk-3">
-
-                                        <CardHeader>
-
-                                            <CardTitle> {amenity.amenityName} Status </CardTitle>
-                                            <CardDescription> The equipment's visibility to the unit owners. </CardDescription>
-
-                                        </CardHeader>
-
-                                        <CardContent>
-
-                                            <div className="grid gap-6">
-
+                                    <Card className="flex flex-col gap-2 pt-5 overflow-hidden">
+                                        <CardContent className="flex flex-col gap-2">
+                                            <div className="flex flex-col">
+                                                <Label className="flex gap-1 items-center text-lg font-semibold">
+                                                    {amenity ? amenity.amenityType : "Amenity"} visibility
+                                                    <span className="text-muted-foreground"> (Optional) </span>
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Info className="h-4 w-4 text-muted-foreground" />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p className="text-sm"> It's 'Unarchived' by default. Archiving will hide the amenity. </p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                </Label>
+                                                <p className="text-sm font-normal text-muted-foreground"> Choose if you want unit owners to see this {amenity ? amenity.amenityType.toLowerCase() : "amenity"} or not. </p>
+                                            </div>
+                                            <div>
                                                 <FormField
-                                                    control={equipmentEditForm.control}
+                                                    control={amenityForm.control}
                                                     name="amenityVisibility"
                                                     render={({ field }) => {
-
                                                         return (
-
                                                             <FormItem>
 
-                                                                <FormLabel> Status </FormLabel>
-
                                                                 <FormControl>
-
-                                                                    <Select onValueChange={field.onChange} defaultValue={amenity.amenityVisibility}>
-
-                                                                        <SelectTrigger id="amenityVisibility" aria-label="Select stsatus">
+                                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                                        <SelectTrigger id="amenityVisibility" aria-label="Select status">
                                                                             <SelectValue placeholder="Select status" />
                                                                         </SelectTrigger>
-
                                                                         <SelectContent>
                                                                             <SelectItem value="Unarchived"> Unarchived </SelectItem>
                                                                             <SelectItem value="Archived"> Archived </SelectItem>
                                                                         </SelectContent>
-
                                                                     </Select>
-
                                                                 </FormControl>
 
                                                                 <FormMessage />
@@ -1069,381 +815,65 @@ const AmenityEditForm = () => {
                                             </div>
                                         </CardContent>
                                     </Card>
-
                                 </div>
 
                             </div>
+
 
 
                         </form>
 
                     </Form>
 
+                </main>
 
 
-                )
-            }
+                {/* Image preview dialog */}
+                {images && images.length > 0 && (
+                    <Dialog open={showImagePreview} onOpenChange={setShowImagePreview}>
 
+                        <DialogContent className="p-0 max-w-[80%] max-h-[80%] items-center">
 
+                            <DialogTitle className="sr-only"> Amenity image preview </DialogTitle>
+                            <DialogDescription className="sr-only"> Preview amenity image when clicked </DialogDescription>
 
-            {amenity && amenity.amenityType === "Facility" &&
+                            <Button
+                                className="absolute top-50 left-5 w-8 h-8 !shadow-2xl"
+                                disabled={images && images.length === 1}
+                                type="button"
+                                onClick={() => setCurrentImage((prev) => prev === 0 ? images.length - 1 : prev - 1)}
+                                size="icon"
+                                variant="outline"
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
 
-                (
+                            <Button
+                                className="absolute top-50 right-5 w-8 h-8 !shadow-2xl"
+                                disabled={images && images.length === 1}
+                                type="button"
+                                onClick={() => setCurrentImage((prev) => (prev + 1) % images.length)}
+                                size="icon"
+                                variant="outline"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
 
-                    <Form {...facilityEditForm}>
+                            <img src={images[currentImage].url ? images[currentImage].url : images[currentImage]} className="aspect-video w-full h-full rounded-md object-contain" />
 
-                        <form onSubmit={facilityEditForm.handleSubmit(facilityEditSubmit)}>
+                        </DialogContent>
 
-                            <div className="flex items-center gap-4 mb-3">
+                    </Dialog>
+                )}
 
-                                <Button
-                                    className="h-7 w-7"
-                                    onClick={() => history.back()}
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                    <span className="sr-only"> Back </span>
 
-                                </Button>
 
-                                <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                                    Edit {amenity.amenityName}
-                                </h1>
+            </SidebarInset>
 
-                                <div className="hidden items-center gap-2 md:ml-auto md:flex">
-
-                                    <Button size="sm" className="flex-gap-1" type="submit">
-                                        Save Changes
-                                    </Button>
-
-                                </div>
-
-                            </div>
-
-                            {error && (
-                                <div className="bg-destructive w-full h-fit rounded-lg mb-3 py-4 px-6 flex gap-3 items-center">
-                                    <TriangleAlert className="w-6 h-6" />
-                                    {error}
-                                </div>
-                            )}
-
-
-
-
-                            <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
-
-                                <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-
-                                    <Card x-chunk="dashboard-07-chunk-0">
-
-                                        <CardHeader>
-
-                                            <CardTitle> {amenity.amenityName} Details </CardTitle>
-                                            <CardDescription>
-                                                Enter the appropriate details for the new facility.
-                                            </CardDescription>
-
-                                        </CardHeader>
-
-
-
-                                        <CardContent>
-
-
-
-                                            <div className="grid gap-6">
-
-
-
-                                                {/* Equipment Amenity Name Input */}
-                                                <FormField
-                                                    control={facilityEditForm.control}
-                                                    name="amenityName"
-                                                    render={({ field }) => {
-
-                                                        return (
-
-                                                            <FormItem>
-
-                                                                <FormLabel className="hidden"> Equipment Name </FormLabel>
-
-                                                                <FormControl>
-
-                                                                    <div className="grid gap-2">
-
-                                                                        <Label htmlFor="amenityName"> Name </Label>
-
-                                                                        <CardDescription> The equipment name should be in plural form. </CardDescription>
-
-                                                                        <Input
-                                                                            className="w-full"
-                                                                            id="amenityName"
-                                                                            type="text"
-                                                                            {...field}
-                                                                        />
-
-                                                                    </div>
-
-                                                                </FormControl>
-
-                                                                <FormMessage />
-
-                                                            </ FormItem>
-
-                                                        )
-                                                    }}
-                                                />
-
-
-
-                                                {/* Equipment Amenity Type Input */}
-                                                <FormField
-                                                    control={facilityEditForm.control}
-                                                    name="amenityDescription"
-                                                    render={({ field }) => {
-
-                                                        return (
-
-                                                            <FormItem>
-
-                                                                <FormLabel className="hidden"> Amenity Description </FormLabel>
-
-                                                                <FormControl>
-
-                                                                    <div className="grid gap-2">
-
-                                                                        <Label htmlFor="amenityDescription"> Description </Label>
-
-                                                                        <Textarea
-                                                                            className="min-h-32"
-                                                                            id="amenityDescription"
-                                                                            {...field}
-                                                                        />
-
-                                                                    </div>
-
-                                                                </FormControl>
-
-                                                                <FormMessage />
-
-                                                            </FormItem>
-                                                        )
-                                                    }}
-                                                />
-
-
-
-                                                {/* Equipment Amenity Type Input */}
-                                                <FormField
-                                                    control={facilityEditForm.control}
-                                                    name="amenityAddress"
-                                                    render={({ field }) => {
-
-                                                        return (
-
-                                                            <FormItem>
-
-                                                                <FormLabel className="hidden"> Amenity Address </FormLabel>
-
-                                                                <FormControl>
-
-                                                                    <div className="grid gap-2">
-
-                                                                        <Label htmlFor="amenityAddress"> Address </Label>
-
-                                                                        <Textarea
-                                                                            className="min-h-32"
-                                                                            id="amenityDescription"
-                                                                            {...field}
-                                                                        />
-
-                                                                    </div>
-
-                                                                </FormControl>
-
-                                                                <FormMessage />
-
-                                                            </FormItem>
-                                                        )
-                                                    }}
-                                                />
-
-
-
-                                                {/* Equipment Amenity Reminder Input */}
-                                                <FormField
-                                                    control={facilityEditForm.control}
-                                                    name="amenityReminder"
-                                                    render={({ field }) => {
-
-                                                        return (
-
-                                                            <FormItem>
-
-                                                                <FormLabel className="hidden"> Amenity Reminder </FormLabel>
-
-                                                                <FormControl>
-
-                                                                    <div className="grid-gap-2">
-
-                                                                        <Label htmlFor="amenityReminder"> Reminder </Label>
-                                                                        <Textarea
-                                                                            className="min-h-32"
-                                                                            id="amenityReminder"
-                                                                            {...field}
-                                                                        />
-
-                                                                    </div>
-
-                                                                </FormControl>
-
-                                                                <FormMessage />
-
-                                                            </FormItem>
-
-                                                        )
-                                                    }}
-                                                />
-
-                                            </div>
-
-
-
-                                        </CardContent>
-
-                                    </Card>
-
-
-
-                                </div>
-
-
-
-                                <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-
-                                    <Card className="overflow-hidden" x-chunk="dashboard-07-chunk-4">
-
-                                        <CardHeader>
-
-                                            <CardTitle> {amenity.amenityName} Images </CardTitle>
-                                            <CardDescription>
-                                                Attach images of the facility. You can upload up to 3 imagess.
-                                            </CardDescription>
-
-                                        </CardHeader>
-
-
-
-                                        <CardContent>
-
-                                            <div className="grid gap-2">
-
-
-                                                <Skeleton
-                                                    className="aspect-square w-full rounded-md object-cover h-[300] w-[300]"
-                                                />
-
-                                                <div className="grid grid-cols-3 gap-2">
-
-                                                    <button type="button">
-                                                        <Skeleton className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"></Skeleton>
-                                                    </button>
-
-                                                    <button type="button">
-                                                        <img
-                                                            src={images as string | undefined} className="aspect-square w-full rounded-md object-cover h-[84] w-[84]"
-                                                        />
-                                                    </button>
-
-                                                    <button type="button" className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
-                                                        <Upload className="h-4 w-4 text-muted-foreground" />
-                                                        <span className="sr-only"> Upload </span>
-                                                    </button>
-                                                </div>
-
-                                            </div>
-
-                                        </CardContent>
-
-                                    </Card>
-
-
-
-                                    <Card x-chunk="dashboard-07-chunk-3">
-
-                                        <CardHeader>
-
-                                            <CardTitle> {amenity.amenityName} Status </CardTitle>
-                                            <CardDescription> The facility's visibility to the unit owners. </CardDescription>
-
-                                        </CardHeader>
-
-                                        <CardContent>
-
-                                            <div className="grid gap-6">
-
-                                                <FormField
-                                                    control={facilityEditForm.control}
-                                                    name="amenityVisibility"
-                                                    render={({ field }) => {
-
-                                                        return (
-
-                                                            <FormItem>
-
-                                                                <FormLabel> Status </FormLabel>
-
-                                                                <FormControl>
-
-                                                                    <Select onValueChange={field.onChange} defaultValue={amenity.amenityVisibility}>
-
-                                                                        <SelectTrigger id="amenityVisibility" aria-label="Select stsatus">
-                                                                            <SelectValue placeholder="Select status" />
-                                                                        </SelectTrigger>
-
-                                                                        <SelectContent>
-                                                                            <SelectItem value="Unarchived"> Unarchived </SelectItem>
-                                                                            <SelectItem value="Archived"> Archived </SelectItem>
-                                                                        </SelectContent>
-
-                                                                    </Select>
-
-                                                                </FormControl>
-
-                                                                <FormMessage />
-
-                                                            </FormItem>
-                                                        )
-                                                    }}
-                                                />
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-
-                                </div>
-
-                            </div>
-
-
-                        </form>
-
-                    </Form>
-
-
-
-                )
-            }
-
-
-
-        </LayoutWrapper>
-
-
+        </ SidebarProvider>
 
     )
 
-}
 
-export default AmenityEditForm;
+
+}

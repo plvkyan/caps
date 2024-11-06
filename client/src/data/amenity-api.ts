@@ -32,6 +32,16 @@ export const archiveAmenity = async (id: string) => {
     }));
 }
 
+export const editAmenity = async (amenityData: any) => {
+    return (await fetch(apiAmenitiesUrl + '/' + amenityData._id, {
+        body: JSON.stringify(amenityData),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'PATCH',
+    }));
+}
+
 
 
 

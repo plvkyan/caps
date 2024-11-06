@@ -205,10 +205,11 @@ import { ReservationType } from "@/types/reservation-type";
 
 // Data Imports
 // Amenity API calls Import
-import { archiveAmenity, getSingleAmenity } from "@/data/amenity-api";
+import { archiveAmenity, deleteAmenity, getSingleAmenity } from "@/data/amenity-api";
 
 // Reservation API calls Import
 import { getAmenityReservations } from "@/data/reservation-api";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -255,6 +256,8 @@ export default function AmenityDetails() {
     // Contexts
     // Authentication Context
     const { user } = useAuthContext();
+    // Navigation Hook
+    const navigate = useNavigate();
 
 
 
@@ -332,7 +335,7 @@ export default function AmenityDetails() {
     // Effects
     // Effect for changing page title
     useEffect(() => {
-        document.title = amenity?.amenityName + " Details | GCTMS";
+        document.title = amenity?.amenityName + " details | GCTMS";
     }, [amenity]);
 
     // Effect for fetching data
@@ -484,11 +487,23 @@ export default function AmenityDetails() {
         setChartData(chartDataArray);
     }, [date, reservations]);
 
+    // Effect for checking any session storage messages
+    useEffect(() => {
+
+        if (sessionStorage.getItem('amenityEdited')) {
+            toast.success('Amenity edited successfully', {
+                closeButton: true,
+                description: sessionStorage.getItem('amenityEdited'),
+            });
+            sessionStorage.removeItem('archiveSuccess');
+        }
+    }, []);
+
 
 
     // Functions
     // Export excel file function
-    const exportExcel = async () => {
+    const handleExport = async () => {
 
         try {
 
@@ -656,15 +671,39 @@ export default function AmenityDetails() {
 
             const res = await archiveAmenity(amenity._id);
 
-            if (!res.ok) throw new Error('Failed to archive amenity');
+            if (!res.ok) throw new Error('Failed to archive amenity.');
 
-            sessionStorage.setItem('archiveSuccess', 'Amenity archived successfully');
-            history.back();
+            sessionStorage.setItem('archiveSuccess', 'Amenity archived successfully.');
+            navigate('/amenities');
         } catch (error) {
             console.error(error);
-            toast.error(error instanceof Error ? error.message : 'Failed to archive amenity');
+            toast.error(error instanceof Error ? error.message : 'Failed to archive amenity.');
         }
     };
+
+    // Archive amenity function
+    const handleDeleteAmenity = async () => {
+        try {
+            if (!amenity) throw new Error('Amenity data not available');
+
+            const res = await deleteAmenity(amenity._id);
+
+            if (!res.ok) throw new Error('Failed to delete amenity.');
+
+            sessionStorage.setItem('deleteSuccess', 'Amenity deleted successfully.');
+            navigate('/amenities');
+        } catch (error) {
+            console.error(error);
+            toast.error(error instanceof Error ? error.message : 'Failed to delete amenity.');
+        }
+    };
+
+    // Navigate to amenity edit form page
+    // Redirect to Amenity Details Function
+    const navToEditForm = (id: String) => {
+        const editFormPath = "/amenities/edit/" + id;
+        navigate(editFormPath);
+    }
 
 
 
@@ -791,7 +830,13 @@ export default function AmenityDetails() {
 
                                 <DropdownMenuContent align="end" className="mt-1">
                                     <DropdownMenuGroup>
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={handleArchiveAmenity}
+                                        >
+                                            <Archive className="h-4 w-4" />
+                                            Archive
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => navToEditForm(amenity._id)}>
                                             <Pencil className="h-4 w-4" />
                                             Edit
                                         </DropdownMenuItem>
@@ -799,17 +844,14 @@ export default function AmenityDetails() {
                                             <Share className="h-4 w-4" />
                                             Export .xslx
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            onClick={handleArchiveAmenity}
-                                        >
-                                            <Archive className="h-4 w-4" />
-                                            Archive
-                                        </DropdownMenuItem>
 
                                     </DropdownMenuGroup>
 
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="text-destructive focus:text-red-500">
+                                    <DropdownMenuItem
+                                        className="text-destructive focus:text-red-500"
+                                        onClick={handleDeleteAmenity}
+                                    >
                                         <Trash2 className="h-4 w-4" />
                                         Delete
                                     </DropdownMenuItem>
@@ -838,7 +880,7 @@ export default function AmenityDetails() {
 
                                         {/* Basic information header */}
                                         <div className="flex flex-col pb-2">
-                                            <Label className="text-lg font-semibold"> {amenity.amenityName + " Basic Information"} </Label>
+                                            <Label className="text-lg font-semibold"> {amenity.amenityType + " basic information"} </Label>
                                             <p className="text-sm font-normal text-muted-foreground"> An overview of the key characteristics of the {amenity.amenityType.toLowerCase()}. </p>
                                         </div>
 
@@ -1012,7 +1054,7 @@ export default function AmenityDetails() {
                                             {/* Visibility header */}
                                             <Label className="flex flex-row gap-2 items-center text-lg font-semibold">
 
-                                                {amenity.amenityName + " Visibility"}
+                                                {amenity.amenityType + " visibility"}
 
                                                 <TooltipProvider>
                                                     <Tooltip>
@@ -1064,7 +1106,7 @@ export default function AmenityDetails() {
                                         <div className="flex flex-row justify-between mb-2">
 
                                             <div className="flex flex-col">
-                                                <Label className="text-lg font-semibold"> {amenity.amenityName + " Stocks"} </Label>
+                                                <Label className="text-lg font-semibold"> {amenity.amenityType + " stocks"} </Label>
                                                 <p className="text-sm font-normal text-muted-foreground"> Manage the availability and allocation of equipment to manage reservations. </p>
                                             </div>
 
@@ -1277,8 +1319,8 @@ export default function AmenityDetails() {
 
                                     {/* Reservations header */}
                                     <div className="flex flex-col">
-                                        <Label className="text-lg font-semibold"> {amenity.amenityName + " Reservations"} </Label>
-                                        <p className="text-sm font-normal text-muted-foreground"> A list of all reservations for {amenity.amenityName}. </p>
+                                        <Label className="text-lg font-semibold"> {amenity.amenityType + " reservations"} </Label>
+                                        <p className="text-sm font-normal text-muted-foreground"> A list of all reservations for this {amenity.amenityType.toLowerCase()}. </p>
                                     </div>
 
                                     <div className="flex flex-col">
@@ -1316,7 +1358,7 @@ export default function AmenityDetails() {
                                 <div className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 "
                                     + (!includeBasicInfo ? "text-muted-foreground/50" : "text-white/90")
                                 }>
-                                    <Label className="text-sm"> Amenity Basic Information </Label>
+                                    <Label className="text-sm"> Amenity basic information </Label>
                                     <Checkbox
                                         checked={includeBasicInfo}
                                         onCheckedChange={(checked) => setIncludeBasicInfo(!!checked)}
@@ -1708,7 +1750,7 @@ export default function AmenityDetails() {
                                     <Button
                                         className=""
                                         disabled={!includeBasicInfo && !includeReservationOptions}
-                                        onClick={exportExcel}
+                                        onClick={handleExport}
                                         size="sm"
                                     >
                                         <Download className="h-7 w-7" />

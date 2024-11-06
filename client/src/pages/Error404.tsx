@@ -5,7 +5,12 @@
 // shadcn Component Imports
 // shadcn Button Component Import
 import { Button } from '@/components/ui/button';
+
+// shadcn Separator Component Import
 import { Separator } from '@/components/ui/separator';
+
+// Hooks
+// useAuthContext Hook Import
 import { useAuthContext } from '@/hooks/useAuthContext';
 
 
@@ -60,7 +65,7 @@ const Error404: React.FC = () => {
             <div className="flex flex-col gap-2 items-center md:items-start text-center text-wrap">
                 <h1 className={"text-4xl md:text-6xl"}> 404</h1>
                 <p className="text-xs md:text-base text-wrap text-muted-foreground"> Oops. The page you're looking for doesn't exist. </p>
-                <Button className="my-6 md:my-4 text-xs md:text-base" onClick={navigateBack} size="sm" variant="outline"> Let's go back </Button>
+                <Button className="my-6 md:my-4 text-xs md:text-base font-normal" onClick={navigateBack} size="sm" variant="outline"> Let's go back </Button>
             </div>
 
         </div>

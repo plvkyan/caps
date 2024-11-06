@@ -212,7 +212,7 @@ export default function ReservationDetails() {
         resolver: zodResolver(reservationCommentsSchema),
         defaultValues: {
             commentContent: "",
-            commentAuthorId: user.id,
+            commentAuthorId: user._id,
             commentAuthor: user.userBlkLt,
             commentAuthorPosition: user.userPosition,
         }
@@ -477,7 +477,7 @@ export default function ReservationDetails() {
         try {
             const response = await setReservationApproved(
                 reservation._id,
-                user.id,
+                user._id,
                 user.userBlkLt,
                 user.userPosition
             );
@@ -603,7 +603,7 @@ export default function ReservationDetails() {
         try {
             const response = await setReservationReturned(
                 reservation._id,
-                user.id,
+                user._id,
                 user.userBlkLt,
                 user.userPosition
             );
@@ -1231,7 +1231,7 @@ export default function ReservationDetails() {
                                                 )}
 
                                                 <div className="grid grid-cols-3 gap-2">
-                                                    {images && user.id === reservation?.reserveeId && images.map((index: number) => (
+                                                    {images && user._id === reservation?.reserveeId && images.map((index: number) => (
                                                         <div className="group relative">
                                                             <Button
                                                                 className="h-5 w-5 rounded-full absolute -top-2 -right-2 flex z-50"

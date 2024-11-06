@@ -112,12 +112,14 @@ const updateAmenity = async (req, res) => {
     //     return res.status(400).json({ error: 'No such amenity' })
     // }
 
-    const { initialAmenityName, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility } = req.body
+    console.log(req.body);
+
+    const { _id, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility } = req.body
 
     try {
 
         const amenity = await Amenity.editAmenity(
-            initialAmenityName, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility
+            _id, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility
         )
 
         res.status(200).json(amenity)
@@ -141,21 +143,16 @@ const archiveAmenity = async (req, res) => {
         if (!existingAmenity) {
             return res.status(404).json({ error: 'Amenity not found' })
         }
-        console.log("it exists");
 
         if (existingAmenity.amenityVisibility === "Archived") {
             return res.status(400).json({ error: 'Amenity is already archived' })
         }
-
-        console.log("it is not archived");
 
         const amenity = await Amenity.findOneAndUpdate(
             { _id: id }, 
             { amenityVisibility: "Archived" }, 
             { new: true }
         )
-
-        console.log("successfully archived");
 
         res.status(200).json(amenity)
     } catch (error) {

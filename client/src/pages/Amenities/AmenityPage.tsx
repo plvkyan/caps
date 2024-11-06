@@ -92,6 +92,9 @@ export default function AmenityPage() {
         
         sessionStorage.getItem("archiveSuccess") && toast.success("Amenity archived successfully.", { closeButton: true });
         sessionStorage.removeItem("archiveSuccess");
+
+        sessionStorage.getItem("deleteSuccess") && toast.success("Amenity deleted successfully.", { closeButton: true });
+        sessionStorage.removeItem("archiveSuccess");
         
     })
 

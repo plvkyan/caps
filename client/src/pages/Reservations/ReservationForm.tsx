@@ -237,9 +237,6 @@ const reservationFormSchema = z.object({
             amenityVisibility: z.string().optional(),
         }
     )),
-    // .refine((value) => value.some((amenity) => amenity), {
-    //     message: "At least one amenity is required. Please select at least one amenity to reserve."
-    // }),
     reservationStatus: z.array(z.object(
         {
             status: z.string().optional(),
@@ -271,7 +268,7 @@ export default function ReservationForm() {
     const reservationForm = useForm<z.infer<typeof reservationFormSchema>>({
         resolver: zodResolver(reservationFormSchema),
         defaultValues: {
-            reserveeId: user.id,
+            reserveeId: user._id,
             reserveeBlkLt: user.userBlkLt,
             reserveePosition: user.userPosition,
             reservationType: "Equipment",
@@ -282,7 +279,7 @@ export default function ReservationForm() {
                 {
                     status: "Pending",
                     statusDate: new Date(),
-                    statusAuthorId: user.id,
+                    statusAuthorId: user._id,
                     statusAuthor: user.userBlkLt,
                     statusAuthorPosition: user.userPosition,
                 }

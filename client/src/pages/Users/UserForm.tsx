@@ -219,14 +219,17 @@ export default function UserForm() {
                 throw new Error(data.error || 'Error creating new user.');
             }
 
-            toast.success("New user created", {
+            toast.success("User created successfully.", {
                 description: "A new '" + values.userRole + "' user has been created.",
                 closeButton: true,
             });
 
-            // Clear the form and reset states
+            // Reset error state
             setError(null);
+            // Clear the form 
             userForm.reset();
+            // The user role radiogroup doesn't reset along with the form so reset it manually.
+            userForm.setValue("userRole", "Unit Owner");
         } catch (error: any) {
             setError(error.error || "Error creating new user.");
             toast.error((error as { error?: string }).error || "Error creating new user.", {

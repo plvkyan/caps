@@ -189,7 +189,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
                     <Button className="" onClick={navToAmenityForm} size="sm" variant="default" >
                         <CirclePlus className="h-4 w-4" />
-                        Create Amenity
+                        Create amenity
                     </Button>
 
                 </div>

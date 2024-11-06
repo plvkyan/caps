@@ -37,7 +37,7 @@ export default function PrivateRoute({ component: Component, ...rest }: PrivateR
 
     // If the user is archived, redirect to the error page
     if (user.userVisibility === "Archived") {
-        return <Navigate to="/error" replace={true} />
+        return <Navigate to="/archived" replace={true} />
     }
 
     // Return the protected component

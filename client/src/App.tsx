@@ -27,13 +27,19 @@ import { useAuthContext } from "@/hooks/useAuthContext.tsx"
 
 
 // Page Imports
-// Amenity-related Imports
+// Amenity-related Page Imports
 // Amenity List Page Import
 import AmenityPage from '@/pages/Amenities/AmenityPage.tsx';
+// Amenity Form Page Import
+import AmenityForm from '@/pages/Amenities/AmenityForm.tsx';
 // Amenity Details Page Import
+import AmenityDetails from '@/pages/Amenities/AmenityDetails';
 // import AmenityDetails from '@/pages/Amenities/AmenityDetails.tsx';
-// Amenity Edit Form Page Import
-import AmenityEditForm from '@/pages/Amenities/AmenityEditForm.tsx';
+import AmenityEditForm from './pages/Amenities/AmenityEditForm';
+
+
+
+// Announcement-related Page Imports
 // Announcements Page Import
 import Announcements from '@/pages/Announcements/Announcements.tsx';
 
@@ -41,14 +47,17 @@ import Announcements from '@/pages/Announcements/Announcements.tsx';
 
 // Archive-related Import
 // Archives Page Import
+import ArchivePage from '@/pages/Archives/ArchivePage';
 
 
 
-// Bill-related Imports
-// Bill Details Page Import
+// Bill-related Page Imports
+// Bill List Page Import
 import BillPage from '@/pages/Bills/BillPage.tsx';
-// Bills List Page Import
-// import BillList from '@/pages/Bills/BillsList.tsx';
+// Bill Form Page Import
+import BillForm from '@/pages/Bills/BillForm';
+// Bill Preset Form Page Import
+import BillPresetForm from '@/pages/Bills/BillPresetForm';
 // Bill Payment Cancelled Page Import
 import Cancelled from '@/pages/PaymentCancelled.tsx';
 // Bill Payment Success Page Import
@@ -80,29 +89,37 @@ import Home from '@/pages/Home/Home.tsx';
 // Login Page Import
 import Login from '@/pages/Login/Login.tsx';
 
-// Reservation-related Imports
-// Reservation Details Page Import
-// import { ReservationPage } from '@/pages/Reservations/ReservationPage.tsx';
 
+
+// Settings-related Imports
+// Settings Page Import
+import Settings from '@/pages/Settings.tsx';
+
+
+
+// Reservation-related Imports
 // Reservations List Page Import
 import ReservationPage from '@/pages/Reservations/ReservationPage.tsx';
+// Reservation Form Page Import
+import ReservationForm from '@/pages/Reservations/ReservationForm.tsx';
+// Reservation Details Page Import
+import ReservationDetails from '@/pages/Reservations/ReservationDetails.tsx';
 
 
 
 // User-related Imports
 // Users List Page Import
-import Settings from '@/pages/Settings.tsx';
-import ReservationForm from '@/pages/Reservations/ReservationForm.tsx';
-import PrivateRoute from '@/PrivateRoute.tsx';
-import AmenityForm from '@/pages/Amenities/AmenityForm.tsx';
-import ReservationDetails from '@/pages/Reservations/ReservationDetails.tsx';
 import UserPage from '@/pages/Users/UserPage.tsx';
+// User Form Page Import
 import UserForm from '@/pages/Users/UserForm';
-import UserBulkForm from './pages/Users/UserBulkForm';
-import AmenityDetails from './pages/Amenities/AmenityDetails';
-import { BillForm } from './pages/Bills/BillForm';
-import BillPresetForm from './pages/Bills/BillPresetForm';
-import ArchivePage from './pages/Archives/ArchivePage';
+// Bulk User Form Page Import
+import UserBulkForm from '@/pages/Users/UserBulkForm';
+
+
+// Custom Component Imports
+// Private Route Import for securing routes and requiring authentication
+import PrivateRoute from '@/PrivateRoute.tsx';
+
 
 
 
@@ -134,237 +151,91 @@ function App() {
 
                     <Routes>
 
+
+
                         {/* Unprotected Routes */}
-                        {/* Redirect Empty Link to Home Page */}
-                        <Route
-                            path="/"
-                            element={<Home />}
-                        >
-                        </Route>
+                        {/* Empty link to home page */}
+                        <Route path="/" element={<Home />} />
 
-                        {/* Home Page */}
-                        <Route
-                            path="/home"
-                            element={<Home />}
-                        >
-                        </Route>
+                        {/* Home page */}
+                        <Route path="/home" element={<Home />} />
 
-                        {/* Login Page */}
-                        <Route
-                            path="/login"
-                            element={!user ? <Login /> : <Navigate to="/dashboard" />}
-                        >
-                        </Route>
+                        {/* Login page */}
+                        <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
 
 
+
+                        {/* Error pages */}
+                        {/* If a page is not found, redirect to Error 404 Page */}
+                        <Route path="*" element={<Error404 />} />
+                        {/* If an account is archived, redirect to Error 403 Page */}
+                        <Route path="/archived" element={<ErrorArchivedAccount />} />
 
 
 
                         {/* Protected routes */}
+                        {/* Dashboard page */}
                         <Route path="/dashboard" element={<PrivateRoute component={DashboardPage} />} />
+                        {/* Settings page */}
                         <Route path="/settings" element={<PrivateRoute component={Settings} />} />
-                        {/* Amenity routes */}
-                        <Route
-                            path="/amenities/create"
-                            element={<PrivateRoute component={AmenityForm} />}
-                        />
-                        <Route
-                            path="/amenities"
-                            element={<PrivateRoute component={AmenityPage} />}
-                        />
-                        <Route
-                            path="/amenities/:id"
-                            element={<PrivateRoute component={AmenityDetails} />}
-                        />
 
+
+
+                        {/* Amenity routes */}
+                        {/* Amenities list page */}
+                        <Route path="/amenities" element={<PrivateRoute component={AmenityPage} />} />
+                        {/* Create new amenity page */}
+                        <Route path="/amenities/create" element={<PrivateRoute component={AmenityForm} />} />
+                        {/* Amenity details page */}
+                        <Route path="/amenities/:id" element={<PrivateRoute component={AmenityDetails} />} />
+                        {/* Edit amenity page */}
+                        <Route path="/amenities/edit/:id" element={<PrivateRoute component={AmenityEditForm} />} />
+
+
+
+
+                        {/* Announcement routes */}
+                        {/* Announcements page*/}
+                        <Route path="/announcements" element={<PrivateRoute component={Announcements} />} />
 
 
 
                         {/* Archive Routes */}
-                        <Route
-                            path="/archives"
-                            element={<PrivateRoute component={ArchivePage} />}
-                        />
+                        <Route path="/archives" element={<PrivateRoute component={ArchivePage} />} />
 
 
 
-
-                        {/* Bill Routes */}
-                        <Route
-                            path="/bills"
-                            element={<PrivateRoute component={BillPage} />}
-                        />
-
-                        <Route
-                            path="/bills/create/"
-                            element={<PrivateRoute component={BillForm} />}
-                        />
-
-                        <Route
-                            path="/bills/preset-create/"
-                            element={<PrivateRoute component={BillPresetForm} />}
-                        />
-
+                        {/* Bill routes */}
+                        {/* Bill list page */}
+                        <Route path="/bills" element={<PrivateRoute component={BillPage} />} />
+                        {/* Create new bill page */}
+                        <Route path="/bills/create/" element={<PrivateRoute component={BillForm} />} />
+                        {/* Create new bill preset page */}
+                        <Route path="/bills/preset-create/" element={<PrivateRoute component={BillPresetForm} />} />
+                        {/* Bill payment successful page */}
+                        <Route path="/bills/success" element={<PrivateRoute component={Success} />} />
+                        {/* Bill payment cancelled page */}
+                        <Route path="/bills/cancelled" element={<PrivateRoute component={Cancelled} />} />
 
 
 
                         {/* Reservation routes */}
-                        <Route
-                            path="/reservations"
-                            element={<PrivateRoute component={ReservationPage} />}
-                        />
-                        <Route
-                            path="/reservations/create"
-                            element={<PrivateRoute component={ReservationForm} />}
-                        />
-                        <Route
-                            path="/reservations/:id"
-                            element={<PrivateRoute component={ReservationDetails} />}
-                        />
-
-
+                        {/* Reservation list page */}
+                        <Route path="/reservations" element={<PrivateRoute component={ReservationPage} />} />
+                        {/* Create new reservation page */}
+                        <Route path="/reservations/create" element={<PrivateRoute component={ReservationForm} />} />
+                        {/* Reservation details page */}
+                        <Route path="/reservations/:id" element={<PrivateRoute component={ReservationDetails} />} />
 
 
 
                         {/* User routes */}
-                        <Route
-                            path="/users"
-                            element={<PrivateRoute component={UserPage} />}
-                        />
-                        <Route
-                            path="/users/create"
-                            element={<PrivateRoute component={UserForm} />}
-                        />
-                        <Route
-                            path="/users/bulk-create"
-                            element={<PrivateRoute component={UserBulkForm} />}
-                        />
-
-
-                        {(user && user.stat != "Archived") &&
-                            (
-                                <>
-
-                                    {/*
-                        
-                                    As of September 7, 2024 10:15 PM, I organized every route. I will update this again to remind how the links work,
-                                    especially regarding the separation of admin and unit owner accounts.
-
-                                    */}
-
-                                    {/* If not logged in, redirect to Login Page */}
-                                    <Route
-                                        path="/login"
-                                        element={!user ? <Login /> : <Navigate to="/dashboard" />}
-                                    >
-                                    </Route>
-
-                                    {/* Dashboard Page */}
-                                    <Route
-                                        path="/dashboard"
-                                        element={!user ? <Login /> : <DashboardPage />}
-                                    >
-                                    </Route>
-
-                                    {/* Announcements Page */}
-                                    <Route
-                                        path="/announcements"
-                                        element={!user ? <Login /> : <Announcements />}
-                                    >
-                                    </Route>
-
-                                    {/* Reservations Page */}
-                                    <Route
-                                        path="/reservations"
-                                        element={<PrivateRoute component={ReservationPage} />}
-                                    >
-                                    </Route>
-
-                                    {/* Reservation Form Page */}
-                                    <Route
-                                        path="/reservations/new"
-                                        element={!user ? <Login /> : <ReservationForm />}
-                                    >
-                                    </Route>
-
-                                    {/* Reservation Details Page */}
-                                    {/* <Route
-                                        path="/reservations/details/:id"
-                                        element={!user ? <Login /> : <ReservationPage />}
-                                    >
-                                    </Route> */}
-
-                                    {/* Bills Page */}
-                                    <Route
-                                        path="/bills"
-                                        element={!user ? <Login /> : <BillPage />}
-                                    >
-                                    </Route>
-
-                                    {/* Bill Form Page (Bill Creation for Admins) */}
-                                    {/* <Route
-                                        path="/bills/form"
-                                        element={!user ? <Login /> : <BillsList />}
-                                    >
-                                    </Route> */}
-
-                                    {/* Bill Details Page */}
-                                    <Route
-                                        path="/bills/details/:id"
-                                        element={!user ? <Login /> : <BillPage />}
-                                    >
-                                    </Route>
-
-                                    {/* Bill Payment Successful Page */}
-                                    <Route
-                                        path="/bills/success"
-                                        element={!user ? <Login /> : <Success />}
-                                    >
-                                    </Route>
-
-                                    {/* Bill Payment Cancelled Page */}
-                                    <Route
-                                        path="/bills/cancelled"
-                                        element={!user ? <Login /> : <Cancelled />}
-                                    >
-                                    </Route>
-
-                                    {/* Archives Page */}
-
-                                    <Route
-                                        path="/amenities"
-                                        element={<AmenityPage />}
-                                    >
-                                    </Route>
-
-                                    <Route
-                                        path="/amenities/edit/:id"
-                                        element={<AmenityEditForm />}
-                                    >
-                                    </Route>
-
-
-                                    {/* If a page is not found, redirect to Error 404 Page */}
-                                    <Route
-                                        path="*"
-                                        element={<Error404 />}
-                                    >
-                                    </Route>
-
-                                </>
-                            )
-                        }
-
-                        {(user && user.stat == "Archived") &&
-                            (
-                                <Route
-                                    path="*"
-                                    element={<ErrorArchivedAccount />}
-                                >
-                                </Route>
-                            )
-                        }
-
+                        {/* User list page */}
+                        <Route path="/users" element={<PrivateRoute component={UserPage} />} />
+                        {/* Create new user page */}
+                        <Route path="/users/create" element={<PrivateRoute component={UserForm} />} />
+                        {/* Bulk create new users page */}
+                        <Route path="/users/bulk-create" element={<PrivateRoute component={UserBulkForm} />} />
 
 
 

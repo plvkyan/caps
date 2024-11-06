@@ -266,8 +266,8 @@ amenitySchema.statics.createAmenity = async function (
 
 // Static method to edit an amenity
 amenitySchema.statics.editAmenity = async function (
-    initialAmenityName,
-    newAmenityName,
+    _id,
+    amenityName,
     amenityType,
     amenityAddress,
     amenityDescription,
@@ -281,29 +281,28 @@ amenitySchema.statics.editAmenity = async function (
     amenityVisibility
 ) {
 
-    console.log("The new amenity name is: " + newAmenityName);
-
     // Check if the initial amenity exists and store its data
-    const oldAmenityExists = await this.findOne({ amenityName: initialAmenityName });
+    const oldAmenityExists = await this.findById({ _id });
     // Check if there's an amenity with the new amenity name
-    const newAmenityExists = await this.findOne({ amenityName: newAmenityName })
+    const newAmenityExists = await this.findOne({ amenityName: amenityName, _id: { $ne: _id } })
     // Store the old amenity's images
     const oldAmenityImages = oldAmenityExists.amenityImages;
-
-    // Amenity images buffer
-    let newImages = newAmenityImages;
 
     // Amenity images buffer
     let imagesBuffer = [];
 
     // Check if the amenity's name already exists, if it does, throw an error
-    if (newAmenityExists && initialAmenityName !== newAmenityName) {
-        throw Error('Amenity already exists.');
+    if (!oldAmenityExists) {
+        throw Error('Cannot find the amenity you are trying to edit.');
+    }
+
+    if (newAmenityExists) {
+        throw Error('An amenity with this name already exists.');
     }
 
     // Amenity data validation
     amenityDataValidation(
-        newAmenityName,
+        amenityName,
         amenityType,
         amenityAddress,
         amenityDescription,
@@ -463,10 +462,14 @@ amenitySchema.statics.editAmenity = async function (
             console.log("\nNow, let's upload the rest of the new images.")
             for (let k = imagesBuffer.length; k < newAmenityImages.length; k++) {
 
+                console.log("Uploading")
+
                 // Upload each individual image to cloudinary
                 const newImageUpload = await cloudinary.uploader.upload(newAmenityImages[k].url, {
                     folder: "gctms_imgs/amenities",
                 });
+
+                console.log("Upload finished")
 
                 // Push the uploaded image data to the imagesBuffer array
                 imagesBuffer.push({
@@ -487,8 +490,8 @@ amenitySchema.statics.editAmenity = async function (
 
     newAmenityImages = imagesBuffer;
 
-    const amenity = await this.findOneAndUpdate({ amenityName: initialAmenityName }, {
-        amenityName: newAmenityName,
+    const amenity = await this.findOneAndUpdate({ _id: _id }, {
+        amenityName,
         amenityType,
         amenityAddress,
         amenityDescription,
@@ -501,8 +504,6 @@ amenitySchema.statics.editAmenity = async function (
         amenityImages: newAmenityImages,
         amenityVisibility
     });
-
-    console.log("\nAmenity edited successfully.\n");
 
     return amenity;
 }

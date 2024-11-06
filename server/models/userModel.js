@@ -201,9 +201,6 @@ userSchema.statics.login = async function(
     userVisibility,
 ) {
 
-    console.log('userBlkLt:', userBlkLt);
-    console.log('userPassword:', userPassword);
-
     // Validation if login fields are filled
     if (!userBlkLt) {
         throw Error('Block and lot is required.')
@@ -215,10 +212,6 @@ userSchema.statics.login = async function(
 
     // Finding the user account
     const user = await this.findOne({ userBlkLt })
-
-    console.log( await this.find({ }));
-    console.log( await this.findOne({ userBlkLt }));
-    console.log( await this.findOne({ userBlkLt: userBlkLt }));
 
     // If user does not exist, throw error
     if (!user) {

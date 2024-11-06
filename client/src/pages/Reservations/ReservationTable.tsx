@@ -262,7 +262,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     const handleApproveButton = async () => {
         try {
             const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await approveManyReservations(selectedRowIds, user.id, user.userBlkLt, user.userPosition);
+            const response = await approveManyReservations(selectedRowIds, user._id, user.userBlkLt, user.userPosition);
 
             if (response.ok) {
                 sessionStorage.setItem("approveSuccessful", selectedRowIds.length.toString() + " reservations approved successfully.");
@@ -284,7 +284,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     const handleRejectButton = async () => {
         try {
             const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await rejectManyReservations(selectedRowIds, user.id, user.userBlkLt, user.userPosition);
+            const response = await rejectManyReservations(selectedRowIds, user._id, user.userBlkLt, user.userPosition);
 
             if (response.ok) {
                 sessionStorage.setItem("rejectedSuccessful", "true");

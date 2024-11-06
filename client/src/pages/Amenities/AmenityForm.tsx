@@ -4,6 +4,16 @@
 "use client";
 
 // Imports
+// Lucide Icon Imports
+import { 
+    ChevronLeft, 
+    ChevronRight, 
+    CirclePlus, 
+    TriangleAlert, 
+    Upload, 
+    X 
+} from "lucide-react";
+
 // shadcn Components Imports
 // shadcn AppSidebar Imports
 import { AppSidebar } from "@/components/app-sidebar"
@@ -16,6 +26,16 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+
+// shadcn Button Component Import
+import { Button } from "@/components/ui/button";
+
+// shadcn Card Component Imports
+import {
+    Card,
+    CardContent,
+} from "@/components/ui/card";
+
 // shadcn Dialog Imports
 import {
     Dialog,
@@ -33,8 +53,22 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+
+// shadcn Input Component Import
+import { Input } from "@/components/ui/input";
+
+// shadcn Label Component Import
+import { Label } from "@/components/ui/label";
+
 // shadcn NavUser Imports
 import { NavUser } from "@/components/nav-user"
+
+// shadcn Radio Group Imports
+import { 
+    RadioGroup, 
+    RadioGroupItem 
+} from "@/components/ui/radio-group";
+
 // shadcn Select Component Imports
 import {
     Select,
@@ -63,11 +97,18 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
+// shadcn Textarea Component Imports
+import { Textarea } from "@/components/ui/textarea";
+
+// shadcn Theme toggle component import
+import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
 
 // Custom Components Imports
-// Theme toggle component import
-import { ThemeToggle } from "@/components/custom/ThemeToggle";
+// LoadingSpinner Component Import
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
+
+
 
 
 
@@ -95,24 +136,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 
 
-// Types Imports
-
-
-
 // Data Imports
 // All unarchived amenities API Import
 import { createAmenity } from "@/data/amenity-api.ts";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, CirclePlus, TriangleAlert, Upload, X } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-    Card,
-    CardContent,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
+
+
 
 
 
@@ -191,8 +219,8 @@ export default function AmenityForm() {
         document.title = "Amenities | GCTMS";
 
         if (sessionStorage.getItem("amenityCreated")) {
-            toast.success("New equipment amenity created.", {
-                description: "The new equipment amenity has been successfully created.",
+            toast.success("Amenity created successfully.", {
+                description: sessionStorage.getItem("amenityCreated"),
                 closeButton: true,
             });
             sessionStorage.removeItem("amenityCreated");
@@ -227,26 +255,21 @@ export default function AmenityForm() {
 
             // Post the data to the server
             const response = await createAmenity(values);
+            const data = await response.json();
 
             if (!response.ok) {
-                const data = await response.json();
                 throw new Error(data.error || 'Error creating new equipment amenity.');
             }
 
-            toast.success("New equipment amenity created.", {
-                description: "The new equipment amenity has been successfully created.",
-                closeButton: true,
-            });
-
             // Clear the form and reset states
-            sessionStorage.setItem("amenityCreated", "true");
+            sessionStorage.setItem("amenityCreated", "The new " + data.amenityType.toLowerCase() + " has been created successfully.");
             amenityForm.reset();
             setAmenityType("");
             setImages([]);
             window.location.reload();
         } catch (error: any) {
             setError(error.message);
-            toast.error("Error creating new equipment amenity.", {
+            toast.error("Error creating new amenity.", {
                 description: error.message,
                 closeButton: true,
             });

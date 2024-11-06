@@ -105,8 +105,8 @@ export const Navbar = () => {
                             <SheetContent side={"left"}>
 
                                 <SheetHeader className="items-start">
-                                    <SheetTitle className="font-bold text-xl">
-                                        Shadcn/React
+                                    <SheetTitle className="font-bold text-lg">
+                                        Grand Cedar Homes
                                     </SheetTitle>
                                 </SheetHeader>
 
