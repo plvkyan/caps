@@ -20,7 +20,7 @@ function Home() {
   
 
   useEffect(() => {
-    document.title = "Home | GCTMS"
+    document.title = "Home | Grand Cedar Homes"
   }, []);
 
 

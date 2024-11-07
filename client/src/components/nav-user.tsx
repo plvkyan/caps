@@ -144,7 +144,7 @@ export function NavUser() {
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold"> {user.userBlkLt} </span>
-                  <span className={"truncate text-xs " + (user.memberStatus === "Outstanding" ? "text-primary" : "text-warning")}> {user.userPosition} </span>
+                  <span className={"truncate text-xs " + (user.userStatus === "Outstanding" ? "text-primary" : "text-warning")}> {user.userPosition} </span>
                 </div>
               </div>
             </DropdownMenuLabel>

@@ -126,6 +126,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // Data Imports
 // User API Imports
 import { bulkCreateUsers } from "@/data/user-api";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -160,7 +161,8 @@ export default function UserBulkForm() {
     // Contexts
     // Authentication Context
     // const { user } = useAuthContext();
-
+    const navigate = useNavigate();
+    
 
 
     // Form
@@ -182,7 +184,6 @@ export default function UserBulkForm() {
     const [loading, setLoading] = useState(false);
     // State for dialog open
     const [open, setOpen] = useState(false);
-
 
 
 
@@ -238,14 +239,13 @@ export default function UserBulkForm() {
             const totalLots = (values.endLot - values.startLot + 1);
             const totalBlocks = (values.endBlock - values.startBlock + 1);
             const totalAccounts = totalLots * totalBlocks;
-            toast.success("New users created successfully.", {
-                description: `A total of ${totalAccounts} new users have been created.`,
-                closeButton: true,
-            });
+
+            sessionStorage.setItem("bulkUsersSuccessful", `A total of ${totalAccounts} new users have been created.`)
 
             // Clear the form and reset states
             setError(null);
             userForm.reset();
+            navigate("/users")
         } catch (error: any) {
             setError(error.error || error.message || "Error creating new users.");
             toast.error(error.error || error.message || "Error creating new users.", {

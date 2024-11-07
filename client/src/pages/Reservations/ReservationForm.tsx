@@ -2493,7 +2493,7 @@ export default function ReservationForm() {
                                                         <TabsTrigger
                                                             type="button"
                                                             value="All dates"
-                                                            className="rounded-none px-4 !bg-transparent data-[state=active]:border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"
+                                                            className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"
                                                         >
                                                             All dates
                                                         </TabsTrigger>
@@ -2502,7 +2502,7 @@ export default function ReservationForm() {
                                                                 type="button"
                                                                 key={index}
                                                                 value={amenity.amenityName}
-                                                                className="rounded-none px-4 !bg-transparent data-[state=active]:border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"
+                                                                className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"
                                                             >
                                                                 {amenity.amenityName}
                                                             </TabsTrigger>

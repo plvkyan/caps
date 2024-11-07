@@ -50,6 +50,10 @@ export const bulkCreateUsers = async (startBlock: number, endBlock: number, star
     }));
 }
 
+
+
+
+
 // GET request to get all users
 // GET request to get a single user
 export const getSingleUser = async (userId: String) => {
@@ -59,6 +63,11 @@ export const getSingleUser = async (userId: String) => {
 // GET request to get all users
 export const getAllUsers = async () => {
     return (await fetch(apiUsersUrl));
+}
+
+// GET request to get all users
+export const getArchivedUsers = async () => {
+    return (await fetch(apiUsersUrl + "/archived"));
 }
 
 // GET request to get unarchived unit owners
@@ -72,6 +81,19 @@ export const getUnitOwners = async () => {
 // PATCH functions
 export const bulkArchiveUsers = async (archiverId: String, userIds: Array<String>) => {
     return (await fetch(apiUsersUrl + '/archive/bulk', {
+        body: JSON.stringify({
+            archiverId: archiverId,
+            userIds: userIds,
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'PATCH',
+    }));
+}
+
+export const bulkUnarchivedUsers = async (archiverId: String, userIds: Array<String>) => {
+    return (await fetch(apiUsersUrl + '/unarchive/bulk', {
         body: JSON.stringify({
             archiverId: archiverId,
             userIds: userIds,

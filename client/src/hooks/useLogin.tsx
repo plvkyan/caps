@@ -16,9 +16,6 @@ import { useAuthContext } from '@/hooks/useAuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-console.log(API_URL);
-
-
 export const useLogin = () => {
 
     const [error, setError] = useState<string | null>(null);
@@ -29,8 +26,6 @@ export const useLogin = () => {
     const login = async (userBlkLt: string, userPassword: string) => {
         setIsLoading(true);
         setError(null);
-
-        console.log(API_URL);
 
         try {
             const response = await fetch(API_URL + '/users/login', {

@@ -2,6 +2,10 @@
 
 
 // Imports
+// Lucide icon imports
+import { Info } from "lucide-react"
+
+
 
 // shadcn Components Imports
 // shadcn AppSidebar Imports
@@ -28,45 +32,86 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+// shadcn Tab Component Imports
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs"
 
-
-// Custom Components Imports
-// Theme toggle component import
+// Shadcn toggle component import
 import { ThemeToggle } from "@/components/custom/ThemeToggle";
+
+// shadcn Tooltip Component Import
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+import { toast } from "sonner";
 
 
 
 // Data table imports
+// Archived amenities table import
+import ArchiveAmenitytable from "@/pages/Archives/ArchiveAmenityTable"
+
+// Archived amenities columns import
+import { AmenityTableColumns } from "@/pages/Amenities/AmenityColumns"
+
+// Archived reservations table import
+import ArchiveReservationTable from "@/pages/Archives/ArchiveReservationTable"
+
+// Archived reservations columns import
+import { ReservationTableColumns } from "@/pages/Reservations/ReservationColumns"
+
+// Archived users table import
+import ArchiveUserTable from "@/pages/Archives/ArchiveUserTable"
+
+// Archived users column import
+import { UserTableColumns } from "@/pages/Users/UserColumns"
 
 
 
-// Hooks Imports
-// Authentication Hook Import
-import { useAuthContext } from "@/hooks/useAuthContext";
+// Hook Imports
+// Announcements hook import
+import { useAnnouncementsContext } from "@/hooks/useAnnouncementsContext";
 
 
 
 // Utility Imports
 // React Imports
-import { 
-    useEffect, 
-    useState 
+import {
+    useEffect,
+    useState
 } from "react"
 
 
 
 // Types Imports
-// Reservation Type Import
+// Amenity type import
+import { AmenityType } from "@/types/amenity-type"
+
+// Reservation type import
 import { ReservationType } from "@/types/reservation-type"
 
+// User type import
+import { UserType } from "@/types/user-type"
 
 
 // Data Imports
+// All unarchived amenity data import
+import { getArchivedAmenities } from "@/data/amenity-api"
+
 // All unarchived reservation data Import
-import { getUnarchivedReservations } from "@/data/reservation-api.ts";
+import { getArchivedReservations } from "@/data/reservation-api.ts";
 
 // All user unarchived reservation data Import
-import { getUserUnarchivedReservations } from "@/data/reservation-api.ts";
+import { getArchivedUsers } from "@/data/user-api"
+import AnnouncementDetails from "../Announcements/AnnouncementDetails"
+
 
 
 
@@ -76,63 +121,117 @@ export default function ArchivePage() {
 
 
     // Contexts
-    // Authentication Context
-    const { user } = useAuthContext();
+    // Announcements Context
+    const { announcements, dispatch } = useAnnouncementsContext()
 
 
 
     // States
+    // Amenities state
+    const [amenities, setAmenities] = useState<AmenityType[]>([]);
     // Reservations state
     const [reservations, setReservations] = useState<ReservationType[]>([]);
+    // Reservations state
+    const [users, setUsers] = useState<UserType[]>([]);
 
-    console.log(reservations);
+
 
     // Use Effects
     // Page title effect
     useEffect(() => {
-        document.title = "Reservations | GCTMS";
+        document.title = "Archives | GCTMS";
+    }, []);
+
+    useEffect(() => {
+
+        if (sessionStorage.getItem("unarchiveSuccessful")) {
+            toast.success("Users unarchived successfully", { 
+                closeButton: true,
+                description: sessionStorage.getItem("unarchiveSuccessful"),
+                duration: 10000
+            });
+            sessionStorage.removeItem("unarchiveSuccessful");
+        }
+        
     }, []);
 
     // Fetching unarchived reservations effect
     useEffect(() => {
+        const fetchArchivedReservations = async () => {
+            try {
+                const response = await getArchivedReservations();
+                if (!response.ok) throw new Error('Failed to fetch archived reservations');
 
+                const data = await response.json();
+                setReservations(data);
+            } catch (error) {
+                toast.error('Error fetching archived reservations', {
+                    closeButton: true,
+                    duration: 5000,
+                });
+            }
+        };
 
-        async function fetchUnarchivedReservations() {
+        fetchArchivedReservations();
+    }, [reservations]);
 
-            setReservations([]);
+    // Fetching unarchived amenities effect
+    useEffect(() => {
+        const fetchArchivedAmenities = async () => {
+            try {
+                const response = await getArchivedAmenities();
+                if (!response.ok) throw new Error('Failed to fetch archived amenities');
 
-            if (user.userPosition === "Admin") {
-                const unarchivedReservationsResult = await getUnarchivedReservations();
-                const unarchivedReservations = await unarchivedReservationsResult.json();
-                if (!ignore && unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetched successfully: ", unarchivedReservations);
-                    setReservations(unarchivedReservations);
-                }
-                if (!ignore && !unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetch failed.");
-                }
-            } else {
-                const userUnarchivedReservationsResult = await getUserUnarchivedReservations(user._id);
-                const userUnarchivedReservations = await userUnarchivedReservationsResult.json();
-                if (!ignore && userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetched successfully.");
-                    setReservations(userUnarchivedReservations);
-                }
-                if (!ignore && !userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetch failed.");
-                }
+                const data = await response.json();
+                setAmenities(data);
+            } catch (error) {
+                toast.error('Error fetching archived amenities', {
+                    closeButton: true,
+                    duration: 5000,
+                });
+            }
+        };
+
+        fetchArchivedAmenities();
+    }, [amenities]);
+
+    useEffect(() => {
+
+        const fetchArchivedAnnouncements = async () => {
+
+            const response = await fetch(import.meta.env.VITE_API_URL + '/announcements/archived');
+
+            const data = await response.json();
+
+            if (response.ok) {
+                dispatch({ type: 'SET_ANNOUNCEMENTS', payload: data });
             }
 
         }
 
-        let ignore = false;
-        fetchUnarchivedReservations();
-        return () => {
-            ignore = true;
-        }
-    }, []);
+        fetchArchivedAnnouncements();
 
+    }, [announcements])
 
+    // Fetching unarchived amenities effect
+    useEffect(() => {
+        const fetchArchivedUsers = async () => {
+            try {
+                const response = await getArchivedUsers();
+                if (!response.ok) throw new Error('Failed to fetch archived users');
+
+                const data = await response.json();
+                setUsers(data);
+            } catch (error) {
+                toast.error('Error fetching archived users', {
+                    closeButton: true,
+                    duration: 5000,
+                });
+            }
+        };
+
+        fetchArchivedUsers();
+    }, [users]);
 
 
 
@@ -190,9 +289,56 @@ export default function ArchivePage() {
                 <main className="flex flex-col gap-4 p-8 pt-4">
 
                     <div className="flex flex-col">
-                        <h1 className="font-semibold text-2xl"> Archives </h1>
-                        <p className="font-light text-muted-foreground"> View all archived data, which will be retained for one year from its creation date before permanent deletion. </p>
+                        <h1 className="flex gap-2 items-center font-semibold text-2xl">
+                            Archives
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="rounded-full w-fit h-fit cursor-pointer text-gray-200/30">
+                                        <Info className="w-4 h-4" />
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent align="center">
+                                    <p> Wait nakalimutan ko ilalagay ko, gagi. </p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </h1>
+                        <p className="font-light text-muted-foreground"> View all archived data hidden from unit owners, which will be retained for one year from its creation date before permanent deletion. </p>
                     </div>
+
+                    <Tabs defaultValue="amenities">
+
+                        <TabsList className="p-0 mb-6 justify-start h-fit w-full rounded-none border-b bg-transparent overflow-x-hidden overflow-y-auto">
+                            <TabsTrigger value="amenities" className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"> Amenities </TabsTrigger>
+                            <TabsTrigger value="announcements" className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"> Announcements </TabsTrigger>
+                            <TabsTrigger value="reservations" className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"> Reservations </TabsTrigger>
+                            <TabsTrigger value="users" className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"> Users </TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="amenities" className="flex flex-col gap-4 m-0">
+                            <ArchiveAmenitytable data={amenities} columns={AmenityTableColumns} />
+                        </TabsContent>
+
+                        <TabsContent value="announcements" className="flex flex-col gap-4 m-0">
+                            {announcements && announcements.map( announcement => (
+                                <AnnouncementDetails key={announcement._id} announcement={announcement} />
+                            ))}
+                            {announcements != null && announcements.length < 1 && (
+                                <div className="text-center my-20"> No archived announcements found. </div>
+                            )}
+                        </TabsContent>
+
+                        <TabsContent value="reservations" className="flex flex-col gap-4 m-0">
+                            <ArchiveReservationTable data={reservations} columns={ReservationTableColumns} />
+                        </TabsContent>
+
+                        <TabsContent value="users" className="flex flex-col gap-4 m-0">
+                            <ArchiveUserTable data={users} columns={UserTableColumns} />
+                        </TabsContent>
+
+                    </Tabs>
+
+
+
 
                 </main>
 

@@ -3,9 +3,10 @@
 
 
 // Imports
+
 // Lucide React Icons Imports
 import {
-    CalendarRange,
+    ArchiveX,
     X
 } from "lucide-react";
 
@@ -14,13 +15,8 @@ import {
 // shadcn Components Imports
 // shadcn Button Component Import
 import { Button } from "@/components/ui/button";
-
-// shadcn Calendar Component Import
-import { Calendar } from "@/components/ui/calendar"
-
 // shadcn Input Component Import
 import { Input } from "@/components/ui/input";
-
 // shadcn Table Imports
 import {
     Table,
@@ -31,21 +27,13 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-// shadcn Popover Component Imports
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
 
 
 // Custom Component Imports
-// Custom Data Table Faceted Filter
-import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
-
 // Custom Data Table Pagination Import
 import { BottomDataTablePagination } from "@/components/custom/BottomDataTablePagination";
-
+// Custom Data Table Faceted Filter
+import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
 // Custom Data Table View Options
 import { DataTableViewOptions } from "@/components/custom/DataTableViewOptions";
 
@@ -68,20 +56,8 @@ import {
 
 
 // Utility Imports
-// date-fns format Function Import
-import {
-    format
-} from "date-fns"
-
-// React Day Picker DateRange Import
-import { DateRange } from "react-day-picker"
-
 // React Import
-import {
-    useEffect,
-    useState
-} from "react";
-
+import { useState } from "react";
 // React Router Imports
 // React Router Navigate Hook Import
 import { useNavigate } from "react-router-dom";
@@ -89,39 +65,39 @@ import { useNavigate } from "react-router-dom";
 
 
 // Types
-// Reservation Status Type
-import { RESERVATION_DATA } from "@/data/reservation-data";
+import { toast } from "sonner";
+import { bulkUnarchivedUsers } from "@/data/user-api";
+import { STATUS_FILTER_OPTIONS } from "@/types/user-type";
+import { useAuthContext } from "@/hooks/useAuthContext";
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 
 
 
 
 
-interface ReservationData {
-    _id: string;
-}
 
-interface AmenityReservationTableProps<TData extends ReservationData, TValue> {
+interface UserTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
-    amenityType: string,
 }
 
 
 
 
 
-export default function AmenityReservationTable<TData extends ReservationData, TValue>({
+export default function UserTable<TData, TValue>({
     columns,
     data,
-}: AmenityReservationTableProps<TData, TValue>) {
+}: UserTableProps<TData, TValue>) {
 
 
 
     // Hooks
     // useNavigate Hook
     const navigate = useNavigate();
-    // useAuthContext Hook
-    // const { user } = useAuthContext();
+    // useAuthContext hook for user account
+    const { user } = useAuthContext();
+
 
 
     // States
@@ -129,19 +105,12 @@ export default function AmenityReservationTable<TData extends ReservationData, T
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     // Global Filter State
     const [globalFilter, setGlobalFilter] = useState<any>("");
+    // Loading state
+    const [loading, setLoading] = useState<boolean>(false);
     // Sorting State
     const [sorting, setSorting] = useState<SortingState>([]);
     // Selected Rows State
     const [rowSelection, setRowSelection] = useState({});
-
-    // Custom States
-    // Date Range State
-    const [date, setDate] = useState<DateRange | undefined>({
-        from: undefined,
-        to: undefined,
-    })
-
-
 
 
 
@@ -171,95 +140,101 @@ export default function AmenityReservationTable<TData extends ReservationData, T
 
 
 
-    
-    useEffect(() => {
-
-        if (date?.from && date?.to) {
-            table.getColumn('reservationDate')?.setFilterValue({
-                from: date.from,
-                to: date.to,
-            });
-        } else {
-            table.getColumn('reservationDate')?.setFilterValue(undefined);
+    // Functions
+    // Archive selected users function
+    const handleUnarchiveButton = async () => {
+        if (!user?._id) {
+            toast.error("You must be logged in to archive users", { closeButton: true });
+            return;
         }
 
-    }, [date, table]);
+        setLoading(true);
 
+        try {
+            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as any)._id);
+            const response = await bulkUnarchivedUsers(user._id, selectedRowIds);
+            const data = await response.json();
 
+            if (!response.ok) {
+                const errorMessages: Record<number, string> = {
+                    400: data.error === 'Some users are already unarchived'
+                        ? "Some selected users are already unarchived"
+                        : data.error === 'Invalid or empty user IDs array'
+                            ? "Invalid selection of users"
+                            : data.error,
+                    404: "No users were unarchived",
+                    500: "Server error occurred while unarchiving users"
+                };
 
-    // Functions
-    // Update the table filter when date range changes
-    const navigateToReservationDetails = (id: String) => {
-        navigate("/reservations/" + id);
+                throw new Error(errorMessages[response.status] || "Error unarchiving users");
+            }
+
+            sessionStorage.setItem("unarchiveSuccessful", data.message);
+            window.location.reload();
+
+        } catch (error) {
+            toast.error((error as Error).message, { closeButton: true });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Navigate functions
+    // Navigate to a user's details page
+    const navToUserDetails = (id: String) => {
+        navigate("/users/" + id);
     }
 
 
 
-
-    
     return (
 
-        <div className="flex flex-col gap-4">
+        <>
 
-            {/* Table Toolbar */}
-            <div className="flex justify-between gap-2">
+            <div className="flex items-center justify-between">
 
-                {/* Search bar */}
+                <div className="flex flex-col">
+                    <h1 className="font-medium"> Archived users </h1>
+                    <p className="text-sm text-muted-foreground"> Archived users aren't given access to the system. </p>
+                </div>
+
+                <div className="flex items-end gap-2">
+
+                    <Button
+                        disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+                        onClick={() => handleUnarchiveButton()}
+                        variant="outline"
+                    >
+                        {loading ? <LoadingSpinner className="h-4 w-4" /> : <ArchiveX className="h-4 w-4" />}
+                        Unarchive
+                    </Button>
+
+                </div>
+
+            </div>
+
+            <div className="flex gap-2">
+
                 <Input
-                    className="w-[250px] lg:w-[350px]"
+                    value={globalFilter}
                     onChange={e => table.setGlobalFilter(String(e.target.value))}
                     placeholder="Search..."
-                    value={globalFilter}
                 />
 
-                {/* Filtering and sorting options */}
-                <div className="flex gap-2">
+                <DataTableViewOptions table={table} label="Toggle Columns" />
 
-                    {/* Date Range Filter Button */}
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                className="font-normal"
-                                id="date"
-                                variant="outline"
-                            >
-                                <CalendarRange className="mr-2 h-4 w-4" />
-                                {date?.from && date?.to && isFiltered
-                                    ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
-                                    : "Reservation Date Range"}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-fit">
-                            <Calendar
-                                initialFocus
-                                mode="range"
-                                defaultMonth={date?.from}
-                                selected={date}
-                                onSelect={setDate}
-                                numberOfMonths={2}
-                            />
-                        </PopoverContent>
-                    </Popover>
+                <DataTableFacetedFilter column={table.getColumn("userStatus")} title="Filter" options={STATUS_FILTER_OPTIONS} />
 
-
-                    {/* Column Toggle Button */}
-                    <DataTableViewOptions table={table} label="Toggle" />
-
-                    {/* Reservation Status Filter Button */}
-                    <DataTableFacetedFilter column={table.getColumn("reservationStatus")} title="Status" options={RESERVATION_DATA} />
-
-                    {/* Reseration Status Filter Reset Button */}
-                    {isFiltered && (
-                        <Button
-                            variant="ghost"
-                            onClick={() => table.resetColumnFilters()}
-                            className="p-1 items-center"
-                        >
-                            <X className="h-4 w-4" />
-                            Reset Filters
-                        </Button>
-                    )}
-                </div>
+                {isFiltered && (
+                    <Button
+                        variant="ghost"
+                        onClick={() => table.resetColumnFilters()}
+                        className="items-center"
+                    >
+                        <X className="h-4 w-4" />
+                        Reset
+                    </Button>
+                )}
 
             </div>
 
@@ -267,7 +242,7 @@ export default function AmenityReservationTable<TData extends ReservationData, T
 
             <div className="rounded-md border">
 
-                <Table className="bg-card rounded-md">
+                <Table className="bg-card">
 
                     <TableHeader>
 
@@ -276,10 +251,6 @@ export default function AmenityReservationTable<TData extends ReservationData, T
                                 {headerGroup.headers.map((header) => {
 
                                     if (header.id === "_id") {
-                                        return null;
-                                    }
-
-                                    if (header.id === "select") {
                                         return null;
                                     }
 
@@ -314,21 +285,18 @@ export default function AmenityReservationTable<TData extends ReservationData, T
                                             }
 
                                             if (cell.column.id === "select") {
-                                                // return (
-                                                //     <TableCell
-                                                //         key={cell.id}
-                                                //     >
-                                                //         {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                //     </TableCell>
-                                                // )
-                                                return null;
-                                            }
-
-                                            return (
+                                                return (
+                                                    <TableCell
+                                                        key={cell.id}
+                                                    >
+                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                    </TableCell>
+                                                )
+                                            } else return (
                                                 <TableCell
                                                     className="cursor-pointer"
                                                     key={cell.id}
-                                                    onClick={() => navigateToReservationDetails(row.original._id)}
+                                                    onClick={() => navToUserDetails((row.original as any)._id)}
                                                 >
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                 </TableCell>
@@ -340,7 +308,7 @@ export default function AmenityReservationTable<TData extends ReservationData, T
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No reservations found.
+                                    No users found.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -352,7 +320,7 @@ export default function AmenityReservationTable<TData extends ReservationData, T
 
             <BottomDataTablePagination table={table} />
 
-        </div>
+        </>
 
 
 

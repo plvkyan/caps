@@ -45,7 +45,7 @@ import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
 // Hooks Imports
 // Authentication Hook Import
-import { useAuthContext } from "@/hooks/useAuthContext";
+// import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 
@@ -53,23 +53,12 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 // React Imports
 import { 
     useEffect, 
-    useState 
 } from "react"
 
 
 
 // Types Imports
-// Reservation Type Import
-import { ReservationType } from "@/types/reservation-type"
 
-
-
-// Data Imports
-// All unarchived reservation data Import
-import { getUnarchivedReservations } from "@/data/reservation-api.ts";
-
-// All user unarchived reservation data Import
-import { getUserUnarchivedReservations } from "@/data/reservation-api.ts";
 
 
 
@@ -80,15 +69,12 @@ export default function Settings() {
 
     // Contexts
     // Authentication Context
-    const { user } = useAuthContext();
+    // const { user } = useAuthContext();
 
 
 
     // States
     // Reservations state
-    const [reservations, setReservations] = useState<ReservationType[]>([]);
-
-    console.log(reservations);
 
     // Use Effects
     // Page title effect
@@ -99,40 +85,6 @@ export default function Settings() {
     // Fetching unarchived reservations effect
     useEffect(() => {
 
-
-        async function fetchUnarchivedReservations() {
-
-            setReservations([]);
-
-            if (user.userPosition === "Admin") {
-                const unarchivedReservationsResult = await getUnarchivedReservations();
-                const unarchivedReservations = await unarchivedReservationsResult.json();
-                if (!ignore && unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetched successfully: ", unarchivedReservations);
-                    setReservations(unarchivedReservations);
-                }
-                if (!ignore && !unarchivedReservationsResult.ok) {
-                    console.log("All unarchived reservations fetch failed.");
-                }
-            } else {
-                const userUnarchivedReservationsResult = await getUserUnarchivedReservations(user._id);
-                const userUnarchivedReservations = await userUnarchivedReservationsResult.json();
-                if (!ignore && userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetched successfully.");
-                    setReservations(userUnarchivedReservations);
-                }
-                if (!ignore && !userUnarchivedReservationsResult.ok) {
-                    console.log("User unarchived reservations fetch failed.");
-                }
-            }
-
-        }
-
-        let ignore = false;
-        fetchUnarchivedReservations();
-        return () => {
-            ignore = true;
-        }
     }, []);
 
 

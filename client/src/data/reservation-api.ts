@@ -32,8 +32,12 @@ export const getAllReservations = async () => {
     return (await fetch(apiReservationsUrl));
 }
 
+export const getArchivedReservations = async () => {
+    return (await fetch(apiReservationsUrl + '/archived/_'));
+}
+
 export const getUnarchivedReservations = async () => {
-    return (await fetch(apiReservationsUrl + '/unarchived/a'));
+    return (await fetch(apiReservationsUrl + '/unarchived/_'));
 }
 
 export const getSingleReservation = async (reservationId: String) => {
@@ -107,11 +111,9 @@ export const archiveManyReservations = async (reservationIds) => {
     }));
 }
 
-
-
 // PATCH request to unarchive many reservations
 export const unarchiveManyReservations = async (reservationIds) => {
-    return (await fetch(apiReservationsUrl + "/update/batch", {
+    return (await fetch(apiReservationsUrl + "/update/visibility/batch/unarchive", {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json'

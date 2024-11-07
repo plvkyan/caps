@@ -96,6 +96,16 @@ export default function UserPage() {
             });
             sessionStorage.removeItem("archiveSuccessful");
         }
+
+        if (sessionStorage.getItem("bulkUsersSuccessful")) {
+            toast.success("New users created successfully.", {
+                description: sessionStorage.getItem("bulkUsersSuccessful"),
+                duration: 5000,
+                closeButton: true,
+            });
+            sessionStorage.removeItem("bulkUsersSuccessful");
+        }
+        
     })
 
     // Fetching unarchived reservations effect

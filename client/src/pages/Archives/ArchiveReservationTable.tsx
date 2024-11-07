@@ -6,11 +6,8 @@
 
 // Lucide React Icons Imports
 import {
-    Archive,
+    ArchiveX,
     CalendarRange,
-    CircleCheck,
-    CirclePlus,
-    CircleX,
     X
 } from "lucide-react";
 
@@ -87,9 +84,9 @@ import { useNavigate } from "react-router-dom";
 // Types
 import { RESERVATION_DATA } from "@/data/reservation-data";
 import { toast } from "sonner";
-import { approveManyReservations, archiveManyReservations, getAllReservations, rejectManyReservations } from "@/data/reservation-api";
-import { useAuthContext } from "@/hooks/useAuthContext";
+import { unarchiveManyReservations } from "@/data/reservation-api";
 import { DateRange } from "react-day-picker";
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 
 
 
@@ -99,7 +96,7 @@ interface ReservationData {
     _id: string;
 }
 
-interface ReservationTableProps<TData extends ReservationData, TValue> {
+interface ArchiveReservationTableProps<TData extends ReservationData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
 }
@@ -112,18 +109,17 @@ interface ReservationTableProps<TData extends ReservationData, TValue> {
 
 
 
-export default function ReservationTable<TData extends ReservationData, TValue>({
+export default function ArchiveReservationTable<TData extends ReservationData, TValue>({
     columns,
     data,
-}: ReservationTableProps<TData, TValue>) {
+}: ArchiveReservationTableProps<TData, TValue>) {
 
 
 
     // Hooks
     // useNavigate Hook
     const navigate = useNavigate();
-    // useAuthContext Hook
-    const { user } = useAuthContext();
+
 
 
     // States
@@ -135,10 +131,10 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     const [sorting, setSorting] = useState<SortingState>([]);
     // Selected Rows State
     const [rowSelection, setRowSelection] = useState({});
-    // Reservations State
-    const [reservations, setReservations] = useState<[]>([]);
 
-    console.log(reservations);
+    const [loading, setLoading] = useState<boolean>(false);
+
+
 
     // Custom States
     // Date Range State
@@ -177,54 +173,12 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     // Effects
     useEffect(() => {
 
-        if (sessionStorage.getItem("approveSuccessful")) {
-            console.log(sessionStorage.getItem("approveSuccessful"));
-            toast.success(sessionStorage.getItem("approveSuccesful"), { closeButton: true });
-            sessionStorage.removeItem("approveSuccessful");
-        }
-
-        if (sessionStorage.getItem("rejectedSuccessful")) {
-            toast.success("Reservation/s rejected successfully", { closeButton: true });
-            sessionStorage.removeItem("rejectedSuccessful");
-        }
-
-        if (sessionStorage.getItem("archiveSuccessful")) {
-            toast.success("Reservation/s archived successfully", { closeButton: true });
-            sessionStorage.removeItem("archiveSuccessful");
+        if (sessionStorage.getItem("unarchiveSuccessful")) {
+            toast.success("Reservation/s unarchived successfully", { closeButton: true });
+            sessionStorage.removeItem("unarchiveSuccessful");
         }
 
     }, []);
-
-    useEffect(() => {
-
-
-        async function fetchUnarchivedReservations() {
-            try {
-                const fetchFunction = getAllReservations;
-                const result = await fetchFunction();
-                const data = await result.json();
-
-                if (!ignore) {
-                    if (result.ok) {
-                        console.log("All reservations fetched successfully.");
-                        setReservations(data);
-                    } else {
-                        console.log("All reservations fetch failed.");
-                    }
-                }
-            } catch (error) {
-                if (!ignore) {
-                    console.error("Error fetching reservations: ", error);
-                }
-            }
-        }
-
-        let ignore = false;
-        fetchUnarchivedReservations();
-        return () => {
-            ignore = true;
-        };
-    }, [])
 
     // Update the table filter when date range changes
     useEffect(() => {
@@ -240,74 +194,28 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     }, [date, table]);
 
 
-
+    
     // Functions
     // Handle Archive Button Function
-    const handleArchiveButton = async () => {
+    const handleUnarchiveButton = async () => {
         try {
+            setLoading(true);
+
             const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await archiveManyReservations(selectedRowIds);
+            const response = await unarchiveManyReservations(selectedRowIds);
 
             if (response.ok) {
-                sessionStorage.setItem("archiveSuccessful", "true");
+                sessionStorage.setItem("unarchiveSuccessful", "true");
                 window.location.reload();
             } else {
-                throw new Error("Error archiving reservations");
+                throw new Error("Error unarchiving reservations");
             }
         } catch (error) {
             toast.error((error as Error).message, { closeButton: true });
+        } finally {
+            setLoading(false);
         }
     };
-    // Handle Archive Button Function
-    const handleApproveButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await approveManyReservations(selectedRowIds, user._id, user.userBlkLt, user.userPosition);
-
-            if (response.ok) {
-                sessionStorage.setItem("approveSuccessful", selectedRowIds.length.toString() + " reservations approved successfully.");
-                window.location.reload();
-            } else {
-                const errorData = await response.json();
-                throw errorData;
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error((error as { error?: string }).error || "Error approving reservations", {
-                closeButton: true,
-                description: (error as { description?: string }).description || "Please make sure that selected reservations are still pending."
-            });
-        }
-    };
-
-    // Handle Reject Button Function
-    const handleRejectButton = async () => {
-        try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as ReservationData)._id);
-            const response = await rejectManyReservations(selectedRowIds, user._id, user.userBlkLt, user.userPosition);
-
-            if (response.ok) {
-                sessionStorage.setItem("rejectedSuccessful", "true");
-                window.location.reload();
-            } else {
-                const errorData = await response.json();
-                throw errorData;
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error((error as { error?: string }).error || "Error rejecting reservations", {
-                closeButton: true,
-                description: (error as { description?: string }).description || "Please make sure that selected reservations are still pending."
-            });
-        }
-    };
-
-
-    // Redirect to Reservation Form Function
-    const navToReservationForm = () => {
-        const reservationFormPath = "/reservations/create";
-        navigate(reservationFormPath);
-    }
 
 
 
@@ -323,56 +231,21 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
         <>
 
-            <div className="flex justify-between">
+            <div className="flex items-center justify-between">
 
                 <div className="flex flex-col">
-                    <h1 className="font-semibold text-2xl"> Reservations </h1>
-                    <h3 className="font-light text-muted-foreground"> All reservations with their dates and statuses. </h3>
+                    <h1 className="font-medium"> Archived reservations </h1>
+                    <p className="text-sm text-muted-foreground"> Reservations inaccessible from unit owners. </p>
                 </div>
 
-                <div className="flex items-end gap-2">
-
-                    {user.userRole === "Admin" && (
-                        <>
-
-                            <Button
-                                disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                                onClick={() => handleArchiveButton()}
-                                size="sm"
-                                variant="outline"
-                            >
-                                <Archive className="h-4 w-4" />
-                                Archive
-                            </Button>
-
-                            <Button
-                                disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                                onClick={() => handleRejectButton()}
-                                variant="outline"
-                                size="sm"
-                            >
-                                <CircleX className="h-4 w-4 text-destructive" />
-                                Mark as Rejected
-                            </Button>
-                            <Button
-                                disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                                onClick={() => handleApproveButton()}
-                                variant="outline"
-                                size="sm"
-                            >
-                                <CircleCheck className="h-4 w-4 text-primary" />
-                                Mark as Approved
-                            </Button>
-
-                        </>
-                    )}
-
-                    <Button className="" onClick={navToReservationForm} size="sm" variant="default" >
-                        <CirclePlus className="h-4 w-4" />
-                        Create Reservation
-                    </Button>
-
-                </div>
+                <Button
+                    disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+                    onClick={() => handleUnarchiveButton()}
+                    variant="outline"
+                >
+                    {loading ? <LoadingSpinner className="h-4 w-4" /> : <ArchiveX className="h-4 w-4" />}
+                    Unarchive
+                </Button>
 
             </div>
 
