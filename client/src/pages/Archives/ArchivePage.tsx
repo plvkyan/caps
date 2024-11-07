@@ -189,6 +189,10 @@ export default function ArchivePage() {
 
                 <main className="flex flex-col gap-4 p-8 pt-4">
 
+                    <div className="flex flex-col">
+                        <h1 className="font-semibold text-2xl"> Archives </h1>
+                        <p className="font-light text-muted-foreground"> View all archived data, which will be retained for one year from its creation date before permanent deletion. </p>
+                    </div>
 
                 </main>
 

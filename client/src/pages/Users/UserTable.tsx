@@ -58,7 +58,7 @@ import {
 
 // Utility Imports
 // React Import
-import { useEffect, useState } from "react";
+import { useState } from "react";
 // React Router Imports
 // React Router Navigate Hook Import
 import { useNavigate } from "react-router-dom";
@@ -67,8 +67,10 @@ import { useNavigate } from "react-router-dom";
 
 // Types
 import { toast } from "sonner";
-import { getAllUsers } from "@/data/user-api";
+import { bulkArchiveUsers } from "@/data/user-api";
 import { STATUS_FILTER_OPTIONS } from "@/types/user-type";
+import { useAuthContext } from "@/hooks/useAuthContext";
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 
 
 
@@ -94,6 +96,8 @@ export default function UserTable<TData, TValue>({
     // Hooks
     // useNavigate Hook
     const navigate = useNavigate();
+    // useAuthContext hook for user account
+    const { user } = useAuthContext();
 
 
 
@@ -102,14 +106,13 @@ export default function UserTable<TData, TValue>({
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     // Global Filter State
     const [globalFilter, setGlobalFilter] = useState<any>("");
+    // Loading state
+    const [loading, setLoading] = useState<boolean>(false);
     // Sorting State
     const [sorting, setSorting] = useState<SortingState>([]);
     // Selected Rows State
     const [rowSelection, setRowSelection] = useState({});
-    // Users State
-    const [users, setUsers] = useState([]);
 
-    console.log(users);
 
 
     // React Table
@@ -138,84 +141,58 @@ export default function UserTable<TData, TValue>({
 
 
 
-    // onClick Functions
-    // Handle Archive Button Function
-    // const handleArchiveButton = async () => {
-    //     try {
-    //         const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as any)._id);
-    //         const response = await archiveManyReservations(selectedRowIds);
-
-    //         if (response.ok) {
-    //             sessionStorage.setItem("archiveSuccessful", "true");
-    //             window.location.reload();
-    //         } else {
-    //             throw new Error("Error archiving reservations");
-    //         }
-    //     } catch (error) {
-    //         toast.error((error as Error).message, { closeButton: true });
-    //     }
-    // };
-
-    
-
-
-    useEffect(() => {
-
-        // const intervalId = setInterval(() => {
-        //     console.log("Is some page rows selected:", table.getIsSomePageRowsSelected());
-        //     console.log("Selected rows:", table.getSelectedRowModel().rows);
-        // }, 1000000);
-
-        // return () => clearInterval(intervalId);
-
-    })
-
-    useEffect(() => {
-
-        if (sessionStorage.getItem("archiveSuccessful")) {
-            toast.success("User archived successfully.", { closeButton: true });
-            sessionStorage.removeItem("archiveSuccessful");
+    // Functions
+    // Archive selected users function
+    const handleArchiveButton = async () => {
+        if (!user?._id) {
+            toast.error("You must be logged in to archive users", { closeButton: true });
+            return;
         }
+        
+        setLoading(true);
+        
+        try {
+            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as any)._id);
+            const response = await bulkArchiveUsers(user._id, selectedRowIds);
+            const data = await response.json();
 
-        async function fetchUnarchivedUsers() {
-            try {
-                const fetchFunction = getAllUsers;
-                const result = await fetchFunction();
-                const data = await result.json();
+            if (!response.ok) {
+                const errorMessages: Record<number, string> = {
+                    400: data.error === 'Some users are already archived' 
+                        ? "Some selected users are already archived"
+                        : data.error === 'Invalid or empty user IDs array'
+                        ? "Invalid selection of users"
+                        : data.error,
+                    404: "No users were archived",
+                    500: "Server error occurred while archiving users"
+                };
 
-                if (!ignore) {
-                    if (result.ok) {
-                        toast.success("All users fetched successfully.", { closeButton: true });
-                        setUsers(data);
-                    } else {
-                        toast.error("Error fetching users.", { closeButton: true });
-                    }
-                }
-            } catch (error) {
-                if (!ignore) {
-                    toast.error("Error fetching reservations.", { closeButton: true });
-                }
+                throw new Error(errorMessages[response.status] || "Error archiving users");
             }
+
+            sessionStorage.setItem("archiveSuccessful", data.message);
+            window.location.reload();
+            
+        } catch (error) {
+            toast.error((error as Error).message, { closeButton: true });
+        } finally {
+            setLoading(false);
         }
+    };
 
-        let ignore = false;
-        fetchUnarchivedUsers();
-        return () => {
-            ignore = true;
-        };
-    }, [])
-
+    // Navigate functions
+    // Navigate to a user's details page
     const navToUserDetails = (id: String) => {
         navigate("/users/" + id);
     }
 
-    // Redirect to Reservation Form Function
+    // Navigate to new user form page
     const navToUserForm = () => {
         const userFormPath = "/users/create";
         navigate(userFormPath);
     }
 
-    // Redirect to Reservation Form Function
+    // Navigate to new bulk users page
     const navToBulkUser = () => {
         const bulkUserFormPath = "/users/bulk-create";
         navigate(bulkUserFormPath);
@@ -238,11 +215,11 @@ export default function UserTable<TData, TValue>({
 
                     <Button
                         disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                        // onClick={() => handleArchiveButton()}
+                        onClick={() => handleArchiveButton()}
                         size="sm"
                         variant="outline"
                     >
-                        <Archive className="h-4 w-4" />
+                    {loading ? <LoadingSpinner className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
                         Archive
                     </Button>
 

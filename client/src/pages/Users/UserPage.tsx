@@ -87,6 +87,17 @@ export default function UserPage() {
         document.title = "Reservations | GCTMS";
     }, []);
 
+    useEffect(() => {
+
+        if (sessionStorage.getItem("archiveSuccessful")) {
+            toast.success("Users archived successfully", { 
+                closeButton: true,
+                description: sessionStorage.getItem("archiveSuccessful"),
+            });
+            sessionStorage.removeItem("archiveSuccessful");
+        }
+    })
+
     // Fetching unarchived reservations effect
     useEffect(() => {
 
@@ -101,7 +112,6 @@ export default function UserPage() {
                     throw data;
                 }
 
-                toast.success("All users fetched successfully.", { closeButton: true });
                 setUsers(data);
             } catch (error) {
                 toast.error((error as {error?: string}).error || "Error fetching reservations.", { 

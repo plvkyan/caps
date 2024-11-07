@@ -65,3 +65,20 @@ export const getAllUsers = async () => {
 export const getUnitOwners = async () => {
     return (await fetch(apiUsersUrl + '/unarchived/unit-owners'));
 }
+
+
+
+
+// PATCH functions
+export const bulkArchiveUsers = async (archiverId: String, userIds: Array<String>) => {
+    return (await fetch(apiUsersUrl + '/archive/bulk', {
+        body: JSON.stringify({
+            archiverId: archiverId,
+            userIds: userIds,
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'PATCH',
+    }));
+}

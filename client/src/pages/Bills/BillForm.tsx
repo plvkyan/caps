@@ -806,88 +806,86 @@ export const BillForm = () => {
                                             }}
                                         />
 
-                                        {options.length > 0 && (
-                                            <FormField
-                                                control={billForm.control}
-                                                name="billPayors"
-                                                render={({ field }) => {
-                                                    return (
+                                        <FormField
+                                            control={billForm.control}
+                                            name="billPayors"
+                                            render={({ field }) => {
+                                                return (
 
-                                                        <FormItem>
+                                                    <FormItem>
 
-                                                            <div className="flex gap-6 items-center justify-between pt-3" >
+                                                        <div className="flex gap-6 items-center justify-between pt-3" >
 
-                                                                <FormLabel className="w-[30%] flex gap-1 font-normal">
-                                                                    Bill Payor/s
-                                                                    <span className="text-destructive"> * </span>
-                                                                    <TooltipProvider>
-                                                                        <Tooltip>
-                                                                            <TooltipTrigger asChild>
-                                                                                <Info className="h-4 w-4 text-muted-foreground" />
-                                                                            </TooltipTrigger>
-                                                                            <TooltipContent>
-                                                                                <p className="text-sm"> The name of the preset and the default name of bills. </p>
-                                                                            </TooltipContent>
-                                                                        </Tooltip>
-                                                                    </TooltipProvider>
-                                                                </FormLabel>
+                                                            <FormLabel className="w-[30%] flex gap-1 font-normal">
+                                                                Bill Payor/s
+                                                                <span className="text-destructive"> * </span>
+                                                                <TooltipProvider>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Info className="h-4 w-4 text-muted-foreground" />
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <p className="text-sm"> The name of the preset and the default name of bills. </p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </TooltipProvider>
+                                                            </FormLabel>
 
-                                                                <MultipleSelector
-                                                                    {...field}
-                                                                    defaultOptions={options}
-                                                                    placeholder="Select the receiving users"
-                                                                    emptyIndicator={
-                                                                        <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                                                                            No results found.
-                                                                        </p>
-                                                                    }
-                                                                />
+                                                            <MultipleSelector
+                                                                {...field}
+                                                                defaultOptions={options}
+                                                                placeholder="Select the receiving users"
+                                                                emptyIndicator={
+                                                                    <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                                                                        No results found.
+                                                                    </p>
+                                                                }
+                                                            />
 
-                                                            </div>
+                                                        </div>
 
-                                                            <div className="flex w-full gap-4 pt-2 justify-end">
+                                                        <div className="flex w-full gap-4 pt-2 justify-end">
 
-                                                                <Button
-                                                                    className="justify-end"
-                                                                    onClick={clearUsers}
-                                                                    size="sm"
-                                                                    type="button"
-                                                                    variant="outline"
-                                                                >
-                                                                    <UserX className="h-4 w-4" />
-                                                                    Clear Users
-                                                                </Button>
+                                                            <Button
+                                                                className="justify-end"
+                                                                onClick={clearUsers}
+                                                                size="sm"
+                                                                type="button"
+                                                                variant="outline"
+                                                            >
+                                                                <UserX className="h-4 w-4" />
+                                                                Clear Users
+                                                            </Button>
 
-                                                                <Button
-                                                                    className="justify-end"
-                                                                    onClick={addUsers}
-                                                                    size="sm"
-                                                                    type="button"
-                                                                >
-                                                                    <UserPlus className="h-4 w-4 text-primary-foreground" />
-                                                                    Add All Users
-                                                                </Button>
-                                                            </div>
+                                                            <Button
+                                                                className="justify-end"
+                                                                onClick={addUsers}
+                                                                size="sm"
+                                                                type="button"
+                                                            >
+                                                                <UserPlus className="h-4 w-4 text-primary-foreground" />
+                                                                Add All Users
+                                                            </Button>
+                                                        </div>
 
-                                                            <div className="grid grid-cols-4 items-center gap-4">
+                                                        <div className="grid grid-cols-4 items-center gap-4">
 
-                                                                <div className=""></div>
+                                                            <div className=""></div>
 
-                                                                <div className="col-span-3">
+                                                            <div className="col-span-3">
 
-                                                                    <FormMessage />
-
-                                                                </div>
+                                                                <FormMessage />
 
                                                             </div>
 
-                                                        </FormItem>
+                                                        </div>
 
-                                                    )
-                                                }
-                                                }
-                                            />
-                                        )}
+                                                    </FormItem>
+
+                                                )
+                                            }
+                                            }
+                                        />
 
 
                                         <FormField
