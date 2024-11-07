@@ -231,8 +231,9 @@ export default function UserForm() {
             // The user role radiogroup doesn't reset along with the form so reset it manually.
             userForm.setValue("userRole", "Unit Owner");
         } catch (error: any) {
-            setError(error.error || "Error creating new user.");
-            toast.error((error as { error?: string }).error || "Error creating new user.", {
+            console.log(error.message);
+            setError(error.message || "Error creating new user.");
+            toast.error((error.message) || "Error creating new user.", {
                 closeButton: true,
                 description: (error as { description?: string }).description || null,
             });
