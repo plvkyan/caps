@@ -22,6 +22,7 @@ router.post('/', (req, res) => {
    const webhookEvent = req.body;
 
    console.log('Received webhook: ', webhookEvent);
+   console.log('Data: ', webhookEvent.data)
 
    res.status(200).send('Webhook received');
 });
