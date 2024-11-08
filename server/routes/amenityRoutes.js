@@ -16,6 +16,8 @@ const {
    getSpecificAmenity,
    updateAmenity,
    archiveAmenity,
+   archiveMultipleAmenities,
+   unarchiveMultipleAmenities,
 
 } = require('../controllers/amenityController')
 
@@ -30,9 +32,40 @@ const requireAuth = require('../middlewares/requireAuth')
 // router.use(requireAuth)
 
 
+
+
+
+// POST routes
+// POST a new amenity
+router.post('/', createAmenity);
+
+
+
+
+
+// DELETE route
 // DELETE an amenity
 router.delete('/:id', deleteAmenity);
 
+
+
+
+
+// PATCH routes
+// UPDATE an amenity
+router.patch('/:id', updateAmenity);
+
+// ARCHIVE an amenity
+router.patch('/archive/:id', archiveAmenity);
+
+// ARCHIVE multiple amenities
+router.patch('/update/visibility/batch/archive', archiveMultipleAmenities);
+
+router.patch('/update/visibility/batch/unarchive', unarchiveMultipleAmenities);
+
+
+
+// GET routes
 // GET all unarchived amenities
 router.get('/all/unarchived', getAmenities);
 
@@ -42,14 +75,7 @@ router.get('/all/archived', getArchivedAmenities);
 // GET a specific amenity
 router.get('/:id', getSpecificAmenity);
 
-// POST a new amenity
-router.post('/', createAmenity);
 
-// UPDATE an amenity
-router.patch('/:id', updateAmenity)
-
-// ARCHIVE an amenity
-router.patch('/archive/:id', archiveAmenity)
 
 
 

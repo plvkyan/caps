@@ -51,6 +51,7 @@ const {
    setReservationCompleted,
    uploadReservationImages,
    batchArchiveReservations,
+   batchUnarchiveReservations,
 } = require('../controllers/reservationController');
 const { set } = require('mongoose');
 
@@ -74,7 +75,7 @@ router.get('/', getAllReservations);
 router.get('/:id', getReservation);
 
 // Unarchived reservations
-router.get('/unarchived/a', getUnarchivedReservations);
+router.get('/unarchived/_', getUnarchivedReservations);
 
 // Unarchived and pending reservations
 router.get('/unarchived/pending', getUnarchivedPendingReservations);
@@ -83,7 +84,7 @@ router.get('/unarchived/pending', getUnarchivedPendingReservations);
 router.get('/unarchived/approved', getUnarchivedApprovedReservations);
 
 // Archived reservations
-router.get('/archived', getArchivedReservations);
+router.get('/archived/_', getArchivedReservations);
 
 // Archived and pending reservations
 router.get('/archived/pending', getArchivedPendingReservations);
@@ -163,6 +164,7 @@ router.patch('/update/status/returned/:id', setReservationReturned);
 router.patch('/update/status/completed/:id', setReservationCompleted);
 router.patch('/update/images/:id', uploadReservationImages);
 router.patch('/update/visibility/batch/archive', batchArchiveReservations)
+router.patch('/update/visibility/batch/unarchives', batchUnarchiveReservations)
 
 router.patch('/update/status/batch/approve', batchApproveReservations)
 router.patch('/update/status/batch/reject',  batchRejectReservations)

@@ -2,6 +2,8 @@
 
 
 // Requires
+// The bcrypt module is used to hash the user's password before saving it to the database
+const bcrypt = require('bcrypt')
 // The jwt module is used to create a token for the user
 const jwt = require('jsonwebtoken')
 // The mongoose module is used to interact with the MongoDB database
@@ -52,8 +54,6 @@ const createUser = async (req, res) => {
 
 }
 
-
-
 // Login user
 const loginUser = async (req, res) => {
 
@@ -78,13 +78,15 @@ const loginUser = async (req, res) => {
         const token = createToken(user._id)
 
         const _id = user._id;
+        const userEmail = user.userEmail;
+        const userMobileNo = user.userMobileNo;
         const userRole = user.userRole;
         const userPosition = user.userPosition;
         const userStatus = user.userStatus;
         const userVisibility = user.userVisibility;
 
         // Return the user and token
-        res.status(200).json({ _id, userBlkLt, userRole, userPosition, userStatus, userVisibility, token })
+        res.status(200).json({ _id, userBlkLt, userEmail, userMobileNo, userRole, userPosition, userStatus, userVisibility, token })
     } catch (error) {
         res.status(400).json({ error: error.message })
     }
@@ -106,6 +108,198 @@ const bulkCreateUsers = async (req, res) => {
 
 
 
+
+
+// DELETE a user
+const deleteUser = async (req, res) => {
+    const { id } = req.params
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'No such user' })
+    }
+
+    const user = await User.findOneAndDelete({ _id: id })
+
+    if (!user) {
+        return res.status(400).json({ error: 'No such user' })
+    }
+
+    res.status(200).json(user)
+
+}
+
+// Bulk delete users
+const bulkDeleteUsers = async (req, res) => {
+    const { userIds } = req.body;
+
+    try {
+        // Validate input
+        if (!Array.isArray(userIds) || userIds.length === 0) {
+            return res.status(400).json({ error: 'Invalid or empty user IDs array.' });
+        }
+
+        // Validate all IDs are valid MongoDB ObjectIDs
+        const areValidIds = userIds.every(id => mongoose.Types.ObjectId.isValid(id));
+        if (!areValidIds) {
+            return res.status(400).json({ error: 'Invalid user ID format.' });
+        }
+
+        // Delete multiple users
+        const result = await User.deleteMany({ _id: { $in: userIds } });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'No users were deleted.' });
+        }
+
+        res.status(200).json({ 
+            message: `Successfully deleted ${result.deletedCount} users`
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+
+
+
+// UPDATE a user
+const updateUser = async (req, res) => {
+    const { id } = req.params
+    const updateData = { ...req.body }
+
+    try {
+        delete updateData.user.token
+        
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'Invalid user ID' })
+        }
+
+        // If password is provided, hash it before updating
+        if (updateData.user.userPassword) {
+            const salt = await bcrypt.genSalt(10)
+            updateData.user.userPassword = await bcrypt.hash(updateData.user.userPassword, salt)
+        } else {
+            // If no password provided, remove it from update data to prevent overwriting
+            delete updateData.user.userPassword
+        }
+
+        console.log(updateData)
+
+        const user = await User.findByIdAndUpdate(
+            id,
+            updateData.user,
+            { new: true, select: '-userPassword' }
+        )
+
+        console.log(user); 
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' })
+        }
+
+        res.status(200).json(user)
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+// Bulk archive users
+const bulkArchiveUsers = async (req, res) => {
+    const { archiverId, userIds } = req.body;
+
+    try {
+        // Validate input
+        if (!Array.isArray(userIds) || userIds.length === 0) {
+            return res.status(400).json({ error: 'Invalid or empty user IDs array.' });
+        }
+
+        // Validate all IDs are valid MongoDB ObjectIDs
+        const areValidIds = userIds.every(id => mongoose.Types.ObjectId.isValid(id));
+        if (!areValidIds) {
+            return res.status(400).json({ error: 'Invalid user ID format.' });
+        }
+
+        // Check if archiver is trying to archive themselves
+        if (userIds.includes(archiverId)) {
+            return res.status(400).json({ error: 'You cannot archive your own account.' });
+        }
+
+        // Check if any users are already archived
+        const existingUsers = await User.find({ _id: { $in: userIds } });
+        const alreadyArchived = existingUsers.filter(user => user.userVisibility === "Archived");
+        
+        if (alreadyArchived.length > 0) {
+            return res.status(400).json({ 
+                error: 'Some users are already archived.',
+            });
+        }
+
+        // Update multiple users
+        const result = await User.updateMany(
+            { _id: { $in: userIds } },
+            { $set: { userVisibility: "Archived" } }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ error: 'No users were archived.' });
+        }
+
+        res.status(200).json({ 
+            message: `Successfully archived ${result.modifiedCount} users`
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+// Bulk unarchive users
+const bulkUnarchiveUsers = async (req, res) => {
+    const { userIds } = req.body;
+
+    try {
+        // Validate input
+        if (!Array.isArray(userIds) || userIds.length === 0) {
+            return res.status(400).json({ error: 'Invalid or empty user IDs array.' });
+        }
+
+        // Validate all IDs are valid MongoDB ObjectIDs
+        const areValidIds = userIds.every(id => mongoose.Types.ObjectId.isValid(id));
+        if (!areValidIds) {
+            return res.status(400).json({ error: 'Invalid user ID format.' });
+        }
+
+        // Check if any users are already unarchived
+        const existingUsers = await User.find({ _id: { $in: userIds } });
+        const alreadyUnarchived = existingUsers.filter(user => user.userVisibility === "Unarchived");
+        
+        if (alreadyUnarchived.length > 0) {
+            return res.status(400).json({ 
+                error: 'Some users are already unarchived.',
+            });
+        }
+
+        // Update multiple users
+        const result = await User.updateMany(
+            { _id: { $in: userIds } },
+            { $set: { userVisibility: "Unarchived" } }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ error: 'No users were unarchived.' });
+        }
+
+        res.status(200).json({ 
+            message: `Successfully unarchived ${result.modifiedCount} users`
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+
+
+
+
 // GET all users
 const getUsers = async (req, res) => {
     try {
@@ -119,19 +313,17 @@ const getUsers = async (req, res) => {
     }
 }
 
-
 // GET all archived users
 const getArchivedUsers = async (req, res) => {
 
     const initUsers = await User.find({}).sort({ createdAt: -1 })
 
     const users = initUsers.filter(function (user) {
-        return user.stat === "Archived";
+        return user.userVisibility === "Archived";
     });
 
     res.status(200).json(users)
 }
-
 
 // GET all users
 const getUnitOwners = async (req, res) => {
@@ -148,7 +340,6 @@ const getUnitOwners = async (req, res) => {
         res.status(500).json({ error: "Failed to fetch unit owners" })
     }
 }
-
 
 // GET single user
 const getUser = async (req, res) => {
@@ -191,51 +382,46 @@ const getUser = async (req, res) => {
 
 
 
-// DELETE a user
-const deleteUser = async (req, res) => {
-    const { id } = req.params
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ error: 'No such user' })
-    }
 
-    const user = await User.findOneAndDelete({ _id: id })
 
-    if (!user) {
-        return res.status(400).json({ error: 'No such user' })
-    }
 
-    res.status(200).json(user)
 
+
+
+
+
+
+
+
+
+module.exports = { 
+
+
+
+    // DELETE controllers
+    deleteUser, 
+    bulkDeleteUsers,
+
+
+
+    // POST controllers
+    createUser, 
+    bulkCreateUsers, 
+    loginUser,
+    
+
+
+    // PATCH controllers
+    updateUser, 
+    bulkArchiveUsers,
+    bulkUnarchiveUsers,
+    
+    
+    
+    // GET controllers
+    getUser, 
+    getUsers, 
+    getArchivedUsers, 
+    getUnitOwners, 
 }
-
-
-
-
-
-// UPDATE an announcement
-const updateUser = async (req, res) => {
-    const { id } = req.params
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ error: 'No such user' })
-    }
-
-    const user = await User.findOneAndUpdate({ _id: id }, {
-        ...req.body
-    })
-
-    if (!user) {
-        return res.status(400).json({ error: 'No such user' })
-    }
-
-    res.status(200).json(user)
-}
-
-
-
-
-
-
-
-module.exports = { bulkCreateUsers, createUser, getArchivedUsers, getUsers, getUnitOwners, getUser, deleteUser, updateUser, loginUser }

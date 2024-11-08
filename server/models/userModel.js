@@ -98,6 +98,19 @@ userSchema.statics.signup = async function(
             throw Error('User account already exists.');
         }
 
+        // Validate unique positions for officers
+        const uniquePositions = ['Auditor', 'Treasurer', 'Secretary', 'Vice President', 'President'];
+        if (uniquePositions.includes(userPosition)) {
+            const existingOfficer = await this.findOne({
+                userPosition: userPosition,
+                userVisibility: 'Unarchived'
+            });
+
+            if (existingOfficer) {
+                throw Error(`There is already an unarchived user with the position of '${userPosition}.'`);
+            }
+        }
+
         // Hash the user's password
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(userPassword, salt)
@@ -193,12 +206,6 @@ userSchema.statics.bulkSignup = async function(
 userSchema.statics.login = async function(
     userBlkLt, 
     userPassword, 
-    userEmail,
-    userMobileNo,
-    userRole, 
-    userPosition, 
-    userStatus, 
-    userVisibility,
 ) {
 
     // Validation if login fields are filled
@@ -211,11 +218,14 @@ userSchema.statics.login = async function(
     }
 
     // Finding the user account
-    const user = await this.findOne({ userBlkLt })
-
+    const user = await this.findOne({ 
+        userBlkLt, 
+        userVisibility: 'Unarchived' 
+    })   
+    
     // If user does not exist, throw error
     if (!user) {
-        throw Error('Incorrect block and lot.')
+        throw Error('User not found')
     }
 
     // Compare the user's password with the hashed password

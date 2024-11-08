@@ -14,7 +14,9 @@ const {
     getUnitOwners,
     loginUser, 
     updateUser, 
-    bulkCreateUsers
+    bulkCreateUsers,
+    bulkArchiveUsers,
+    bulkUnarchiveUsers
 } = require('../controllers/userController')
 
 
@@ -32,6 +34,13 @@ const router = express.Router()
 
 
 // Routes
+// DELETE routes
+// DELETE a new user
+router.delete('/:id', deleteUser)
+
+
+
+
 // POST routes
 // Login route
 router.post('/login', loginUser)
@@ -56,11 +65,18 @@ router.get('/archived', getArchivedUsers)
 // GET a single user
 router.get('/single/:id', getUser)
 
-// DELETE a new user
-router.delete('/:id', deleteUser)
 
+
+
+
+
+// PATCH functions
 // UPDATE a user
 router.patch('/:id', updateUser)
+// ARCHIVE multiple users
+router.patch('/archive/bulk', bulkArchiveUsers)
+// UNARCHIVE multiple users
+router.patch('/unarchive/bulk', bulkUnarchiveUsers)
 
 
 

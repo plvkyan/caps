@@ -1515,6 +1515,89 @@ const batchArchiveReservations = async (req, res) => {
     }
 }
 
+const batchUnarchiveReservations = async (req, res) => {
+    const { reservationIds } = req.body;
+
+    // Input validation
+    if (!reservationIds?.length) {
+        return res.status(400).json({
+            success: false,
+            error: "Missing required field: reservationIds"
+        });
+    }
+
+    if (!Array.isArray(reservationIds)) {
+        return res.status(400).json({
+            success: false,
+            error: "reservationIds must be an array"
+        });
+    }
+
+    // Validate all IDs are valid MongoDB ObjectIds
+    const validIds = reservationIds.every(id => mongoose.Types.ObjectId.isValid(id));
+    if (!validIds) {
+        return res.status(400).json({
+            success: false,
+            error: "One or more invalid reservation IDs"
+        });
+    }
+
+    try {
+        // First check if all reservations exist
+        const count = await Reservation.countDocuments({
+            _id: { $in: reservationIds }
+        });
+
+        if (count !== reservationIds.length) {
+            return res.status(404).json({
+                success: false,
+                error: "Some reservations were not found"
+            });
+        }
+
+        // Check if any reservations are already unarchived
+        const alreadyUnarchived = await Reservation.find({
+            _id: { $in: reservationIds },
+            reservationVisibility: "Unarchived"
+        });
+
+        if (alreadyUnarchived.length > 0) {
+            return res.status(400).json({
+                success: false,
+                error: "Some reservations are already unarchived"
+            });
+        }
+
+        // Perform the update
+        const result = await Reservation.updateMany(
+            { _id: { $in: reservationIds } },
+            { reservationVisibility: "Unarchived" },
+            { new: true }
+        );
+
+        // Get updated documents
+        const updatedReservations = await Reservation.find({
+            _id: { $in: reservationIds }
+        });
+
+        console.log(`Successfully unarchived ${result.modifiedCount} reservations`);
+
+        return res.status(200).json({
+            success: true,
+            modifiedCount: result.modifiedCount,
+            updatedReservations
+        });
+
+    } catch (error) {
+        console.error("Batch unarchive error:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Failed to unarchive reservations",
+            details: error.message
+        });
+    }
+}
+
 // Batch approve reservations
 const batchApproveReservations = async (req, res) => {
     const { reservationIds, updateData } = req.body;
@@ -1792,6 +1875,7 @@ module.exports = {
 
     // PATCH controllers
     batchArchiveReservations,
+    batchUnarchiveReservations,
     addReservationComment,
     approveReservation,
     rejectReservation,

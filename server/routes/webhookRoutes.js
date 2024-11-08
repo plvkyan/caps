@@ -10,13 +10,22 @@ const {
    disableWebhook,
    enableWebhook,
    getWebhook,
-   getWebhooks,
+   // getWebhooks,
    updateWebhook,
 } = require('../controllers/webhookController')
 
 
 
-router.get('/', getWebhooks)
+// router.get('/', getWebhooks)
+
+router.post('/', (req, res) => {
+   const webhookEvent = req.body;
+
+   console.log('Received webhook: ', webhookEvent);
+
+   res.status(200).send('Webhook received');
+});
+
 
 
 // // GET all announcements
