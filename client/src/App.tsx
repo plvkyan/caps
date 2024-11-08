@@ -119,6 +119,7 @@ import UserBulkForm from '@/pages/Users/UserBulkForm';
 // Custom Component Imports
 // Private Route Import for securing routes and requiring authentication
 import PrivateRoute from '@/PrivateRoute.tsx';
+import UserDetails from './pages/Users/UserDetails';
 
 
 
@@ -236,7 +237,8 @@ function App() {
                         <Route path="/users/create" element={<PrivateRoute component={UserForm} />} />
                         {/* Bulk create new users page */}
                         <Route path="/users/bulk-create" element={<PrivateRoute component={UserBulkForm} />} />
-
+                        {/* User details */}
+                        <Route path="/users/:id" element={<PrivateRoute component={UserDetails} />} />
 
 
                     </Routes>

@@ -83,6 +83,7 @@ import { useNavigate } from "react-router-dom";
 // Types
 import { toast } from "sonner";
 import { DateRange } from "react-day-picker";
+import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 
@@ -116,7 +117,7 @@ export default function BillTable<TData extends BillData, TValue>({
     // useNavigate Hook
     const navigate = useNavigate();
     // useAuthContext Hook
-    // const { user } = useAuthContext();
+    const { user } = useAuthContext();
 
 
     // States
@@ -238,9 +239,9 @@ export default function BillTable<TData extends BillData, TValue>({
                     <h3 className="font-light text-muted-foreground"> An overview of all bills and their key details. </h3>
                 </div>
 
-                <div className="flex items-end gap-2">
-
-                    <Button className="" onClick={navToBillPresetForm} size="sm" variant="outline" >
+                    {user && user.userRole === "Admin" && (
+                        <div className="flex items-end gap-2">
+                         <Button className="" onClick={navToBillPresetForm} size="sm" variant="outline" >
                         <CirclePlus className="h-4 w-4" />
                         Create Bill Preset
                     </Button>
@@ -250,7 +251,9 @@ export default function BillTable<TData extends BillData, TValue>({
                         Create Bill
                     </Button>
 
-                </div>
+                        
+                        </ div>
+                    )}
 
             </div>
 

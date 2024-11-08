@@ -9,6 +9,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
+import { useAuthContext } from "@/hooks/useAuthContext"
+
 export function NavSecondary({
   items,
   ...props
@@ -19,11 +21,20 @@ export function NavSecondary({
     icon: LucideIcon
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+
+  const { user } = useAuthContext();
+
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
+          {items.map((item) => {
+
+            if (user && user.userRole === "Unit Owner" && item.title === "Archives") {
+              return;
+            }
+            
+            return (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild size="sm">
                 <a href={item.url}>
@@ -32,7 +43,7 @@ export function NavSecondary({
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          ))}
+          )})}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

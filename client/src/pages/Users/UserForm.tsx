@@ -591,7 +591,7 @@ export default function UserForm() {
                                                             >
                                                                 <FormItem className="flex items-center gap-3">
                                                                     <FormControl>
-                                                                        <RadioGroupItem value="Unit Owner"/>
+                                                                        <RadioGroupItem checked={field.value === "Unit Owner"} value="Unit Owner"/>
                                                                     </FormControl>
                                                                     <FormLabel className="font-normal">
                                                                         Unit Owner
@@ -599,7 +599,7 @@ export default function UserForm() {
                                                                 </FormItem>
                                                                 <FormItem className="flex items-center gap-3">
                                                                     <FormControl>
-                                                                        <RadioGroupItem disabled={user.userPosition != "President"} value="Admin" />
+                                                                        <RadioGroupItem checked={field.value === "Admin"} disabled={user.userPosition != "President"} value="Admin" />
                                                                     </FormControl>
                                                                     <FormLabel className="font-normal">
                                                                         Admin

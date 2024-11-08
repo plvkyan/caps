@@ -35,11 +35,11 @@ export const BILLS = {
     items: [
         {
             title: "Create Bill",
-            url: "/bills/form",
+            url: "/bills/create",
         },
         {
             title: "Create Bill Type",
-            url: "#",
+            url: "/bills/preset-create",
         },
         {
             title: "Export Bills",
@@ -56,7 +56,7 @@ export const RESERVATIONS = {
     items: [
         {
             title: "Create Reservation",
-            url: "/reservations/form",
+            url: "/reservations/create",
         },
         {
             title: "Export Reservations",
@@ -73,7 +73,7 @@ export const AMENITIES = {
     items: [
         {
             title: "Create Amenity",
-            url: "#",
+            url: "/amenities/create",
         },
         {
             title: "Export Amenities",
@@ -90,7 +90,11 @@ export const USERS = {
     items: [
         {
             title: "Create User",
-            url: "#",
+            url: "/users/create",
+        },
+        {
+            title: "Bulk Create User",
+            url: "/users/bulk-create",
         },
         {
             title: "Export Users",
