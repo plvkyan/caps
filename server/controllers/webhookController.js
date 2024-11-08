@@ -2,6 +2,8 @@
 
 
 // import sdk from '@api/paymongo';
+const Bill = require("../models/billModel")
+const mongoose = require('mongoose')
 
 
 
@@ -61,44 +63,77 @@ const getWebhooks = () => {
 
 }
 
-const options = {
-  method: 'POST',
-  headers: {
-    accept: 'application/json',
-    'content-type': 'application/json',
-    authorization: 'Basic c2tfdGVzdF8xUXRDR2pxOWVWSGRoSDlkR21HQUJ6RTM6'
-  },
-  body: JSON.stringify({
-    data: {
-      attributes: {
-        cancel_url: 'https://www.google.com',
-        success_url: 'https://www.google.com',
-        show_line_items: true,
-        show_description: false,
-        send_email_receipt: true,
-        billing: { email: 'kyanacademics@gmail.com' },
-        line_items: [{ amount: 20000, currency: 'PHP', name: 'May 2024 Monthly Due', quantity: 1 }],
-        payment_method_types: [
-          'billease',
-          'card',
-          'dob',
-          'dob_ubp',
-          'brankas_bdo',
-          'brankas_landbank',
-          'brankas_metrobank',
-          'gcash',
-          'grab_pay',
-          'paymaya'
-        ]
-      }
-    }
-  })
-};
 
-fetch('https://api.paymongo.com/v1/checkout_sessions', options)
-  .then(response => response.json())
-  .then(response => console.log(response))
-  .catch(err => console.error(err));
+const receiveBillWebhook = async (req, res) => {
+
+  const webhookEvent = req.body;
+
+  const billDetails = JSON.parse(webhookEvent.data.attributes.data.attributes.description);
+
+  console.log(billDetails);
+
+
+
+  if (webhookEvent.data.attributes.type === "checkout_session.payment.paid") {
+
+    const paidBill = await Bill.setPaid(billDetails.billId, billDetails.payorId);
+
+    if (paidBill) {
+      res.status(200).send('Webhook received.');
+    }
+
+  } else {
+    res.status(200).send('Webhook received')
+  }
+
+  // console.log('Received webhook: ', webhookEvent);
+  // console.log('Data: ', webhookEvent.data)
+  // console.log('Attributes: ', webhookEvent.data.attributes.data.attributes)
+
+
+  // res.status(200).send('Webhook received');
+}
+
+// const options = {
+//   method: 'POST',
+//   headers: {
+//     accept: 'application/json',
+//     'content-type': 'application/json',
+//     authorization: 'Basic c2tfdGVzdF8xUXRDR2pxOWVWSGRoSDlkR21HQUJ6RTM6'
+//   },
+//   body: JSON.stringify({
+//     data: {
+//       attributes: {
+//         cancel_url: 'https://www.google.com',
+//         success_url: 'https://www.google.com',
+//         show_line_items: true,
+//         show_description: false,
+//         send_email_receipt: true,
+//         billing: { email: 'kyanacademics@gmail.com' },
+//         line_items: [{ amount: 20000, currency: 'PHP', name: 'May 2024 Monthly Due', quantity: 1 }],
+//         payment_method_types: [
+//           'billease',
+//           'card',
+//           'dob',
+//           'dob_ubp',
+//           'brankas_bdo',
+//           'brankas_landbank',
+//           'brankas_metrobank',
+//           'gcash',
+//           'grab_pay',
+//           'paymaya'
+//         ]
+//       }
+//     }
+//   })
+// };
+
+// fetch('https://api.paymongo.com/v1/checkout_sessions', options)
+//   .then(response => response.json())
+//   .then(response => console.log(response))
+//   .catch(err => console.error(err));
+
+
 
 // GET a webhook
 const getWebhook = (id) => {
@@ -184,5 +219,5 @@ const updateWebhook = (id) => {
 
 
 
-module.exports = { createWebHook, getWebhooks, getWebhook, updateWebhook, disableWebhook, enableWebhook }
+module.exports = { createWebHook, getWebhooks, getWebhook, receiveBillWebhook, updateWebhook, disableWebhook, enableWebhook }
 

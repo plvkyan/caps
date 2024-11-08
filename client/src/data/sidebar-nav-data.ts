@@ -19,12 +19,6 @@ export const DASHBOARD = {
     url: "/dashboard",
     icon: LayoutDashboard,
     isActive: false,
-    items: [
-        {
-            title: "Exports",
-            url: "#",
-        },
-    ]
 }
 
 export const BILLS = {
@@ -41,10 +35,6 @@ export const BILLS = {
             title: "Create Bill Type",
             url: "/bills/preset-create",
         },
-        {
-            title: "Export Bills",
-            url: "#",
-        },
     ]
 }
 
@@ -58,10 +48,6 @@ export const RESERVATIONS = {
             title: "Create Reservation",
             url: "/reservations/create",
         },
-        {
-            title: "Export Reservations",
-            url: "#",
-        },
     ]
 }
 
@@ -74,10 +60,6 @@ export const AMENITIES = {
         {
             title: "Create Amenity",
             url: "/amenities/create",
-        },
-        {
-            title: "Export Amenities",
-            url: "#",
         },
     ]
 }
@@ -95,10 +77,6 @@ export const USERS = {
         {
             title: "Bulk Create User",
             url: "/users/bulk-create",
-        },
-        {
-            title: "Export Users",
-            url: "#",
         },
     ]
 }

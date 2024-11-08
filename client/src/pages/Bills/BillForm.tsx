@@ -263,12 +263,10 @@ export const BillForm = () => {
 
     // handleBillPresets function
     const handleBillPresets = (preset) => {
-
         billForm.setValue("billTitle", preset.billPresetTitle);
         billForm.setValue("billType", preset.billPresetType);
         billForm.setValue("billDescription", preset.billPresetDescription);
         billForm.setValue("billAmount", preset.billPresetAmount);
-
     };
 
     // Submit function
@@ -508,38 +506,42 @@ export const BillForm = () => {
                                             <p className="text-sm text-muted-foreground"> Bill details provide the necessary fields to create and configure a new bill. </p>
                                         </div>
 
-                                        <div className="flex flex-col gap-2">
-                                            <Label className="flex gap-1 font-normal">
-                                                Bill preset
-                                                <span className="text-muted-foreground"> (Optional) </span>
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Info className="h-4 w-4 text-muted-foreground" />
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p className="text-sm">A template for your bills.</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            </Label>
-                                            <Select>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select bill preset" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {billPresets.length > 0 ? billPresets.map((preset) => (
-                                                        <SelectItem key={preset._id} value={preset.billPresetTitle} onClick={() => handleBillPresets(preset)}>
-                                                            {preset.billPresetTitle}
-                                                        </SelectItem>
-                                                    )) : (
-                                                        <SelectItem value="No presets found">
-                                                            No presets found
-                                                        </SelectItem>
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
+                                        {billPresets && (
+                                            <div className="flex flex-col gap-2">
+                                                <Label className="flex gap-1 font-normal">
+                                                    Bill preset
+                                                    <span className="text-muted-foreground"> (Optional) </span>
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Info className="h-4 w-4 text-muted-foreground" />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p className="text-sm">A template for your bills.</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                </Label>
+                                                <Select onValueChange={console.log(billForm.watch())}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select bill preset" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {billPresets.length > 0 ? billPresets.map((preset) => (
+                                                            <SelectItem key={preset._id} value={preset.billPresetTitle} onClick={() => handleBillPresets(preset)}>
+                                                                {preset.billPresetTitle}
+                                                            </SelectItem>
+                                                        )) : (
+                                                            <SelectItem value="No presets found">
+                                                                No presets found
+                                                            </SelectItem>
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        )}
+
+
 
 
 

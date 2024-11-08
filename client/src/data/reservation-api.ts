@@ -17,6 +17,14 @@ const apiReservationsUrl = apiBaseUrl + '/reservations';
 
 
 
+// DELETE request
+export const deleteReservation = async (reservationId) => {
+    return (await fetch(apiReservationsUrl + '/' + reservationId, {
+        method: 'DELETE',
+    }));
+}
+
+
 // POST request to create a new reservation
 export const createReservation = async (reservationData) => {
     return (await fetch(apiReservationsUrl, {
@@ -299,5 +307,23 @@ export const updateReservationImages = async (reservationId, reservationImages) 
         body: JSON.stringify({
             reservationImages: reservationImages
         })
+    }));
+}
+
+export const archiveReservation = async (reservationId) => {
+    return (await fetch(apiReservationsUrl + '/update/visibility/archive/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    }));
+}
+
+export const unarchiveReservation = async (reservationId) => {
+    return (await fetch(apiReservationsUrl + '/update/visibility/unarchive/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
     }));
 }

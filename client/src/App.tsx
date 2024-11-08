@@ -120,6 +120,9 @@ import UserBulkForm from '@/pages/Users/UserBulkForm';
 // Private Route Import for securing routes and requiring authentication
 import PrivateRoute from '@/PrivateRoute.tsx';
 import UserDetails from './pages/Users/UserDetails';
+import BillDetails from './pages/Bills/BillDetails';
+import { useEffect } from 'react';
+import { getSingleUser } from './data/user-api';
 
 
 
@@ -131,10 +134,26 @@ function App() {
 
     // Contexts
     // User Context
-    const { user } = useAuthContext()
+    const { user, dispatch } = useAuthContext()
 
 
+    useEffect(() => {
 
+        const fetchSingleUser = async () => {
+
+            const response = await getSingleUser(user._id);
+
+            const data = await response.json();
+
+            localStorage.setItem('user', JSON.stringify(data));
+
+            dispatch({ type: "UPDATE_USER", payload: data})
+        }
+
+
+        fetchSingleUser();
+
+    }, [])
 
 
     return (
@@ -213,6 +232,7 @@ function App() {
                         <Route path="/bills/create/" element={<PrivateRoute component={BillForm} />} />
                         {/* Create new bill preset page */}
                         <Route path="/bills/preset-create/" element={<PrivateRoute component={BillPresetForm} />} />
+                        <Route path="/bills/:id" element={<PrivateRoute component={BillDetails} />} />
                         {/* Bill payment successful page */}
                         <Route path="/bills/success" element={<PrivateRoute component={Success} />} />
                         {/* Bill payment cancelled page */}

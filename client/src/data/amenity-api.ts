@@ -42,6 +42,12 @@ export const archiveAmenity = async (id: string) => {
     }));
 }
 
+export const unarchiveAmenity = async (id: string) => {
+    return (await fetch(apiAmenitiesUrl + '/unarchive/' + id, {
+        method: 'PATCH',
+    }));
+}
+
 export const archiveManyAmenities = async (ids) => {
     return (await fetch(apiAmenitiesUrl + "/update/visibility/batch/archive", {
         method: 'PATCH',

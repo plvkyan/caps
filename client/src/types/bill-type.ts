@@ -9,14 +9,17 @@ export type BillType = {
     billQuantity: number,
     billCurrency: string,
     billAmount: number,
+    billRecurringDate?: Date,
     billDueDate: Date,
-    billPayors: {
-        payorId: string,
-        payorBlkLt: string,
-        payorEmail: string,
-        billStatus: string,
-        billPaidDate: Date,
-    },
+    billPayors: [
+        {
+            payorId: string,
+            payorBlkLt: string,
+            payorEmail: string,
+            billStatus: string,
+            billPaidDate: Date,
+        }
+    ],
     billCreatorId: string,
     billCreatorBlkLt: string,
     billCreatorPosition: string,
@@ -43,21 +46,21 @@ export type BillPresetType = {
 
 
 export const PAID = {
-    id: 1, 
+    id: 1,
     value: "paid",
     label: "Paid",
     color: "default" as const
 }
 
 export const PENDING = {
-    id: 2, 
+    id: 2,
     value: "pending",
     label: "Pending",
     color: "warning" as const
 }
 
 export const OVERDUE = {
-    id: 3, 
+    id: 3,
     value: "overdue",
     label: "Overdue",
     color: "destructive" as const

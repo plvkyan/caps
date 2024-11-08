@@ -5,6 +5,7 @@
 // Lucide Icon Imports
 import {
     Archive,
+    ArchiveX,
     ChevronLeft,
     ChevronRight,
     CircleCheck,
@@ -158,6 +159,8 @@ import { ReservationType } from "@/types/reservation-type"
 // Reservation API calls Imports
 import {
     addCommentToReservation,
+    archiveReservation,
+    deleteReservation,
     getEquipmentsAvailableStocks,
     getSingleReservation,
     setReservationApproved,
@@ -166,12 +169,14 @@ import {
     // setReservationOngoing,
     setReservationRejected,
     setReservationReturned,
+    unarchiveReservation,
     updateReservationImages,
 } from "@/data/reservation-api.ts";
 
 // User API calls Imports
 import { getSingleUser } from "@/data/user-api";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -199,6 +204,7 @@ export default function ReservationDetails() {
     // Authentication Context
     const { user } = useAuthContext();
 
+    const navigate = useNavigate();
 
 
     // Forms
@@ -656,6 +662,85 @@ export default function ReservationDetails() {
         }
     };
 
+    const handleArchive = async () => {
+        if (!reservation?._id) {
+            toast.error("Reservation ID not found");
+            return;
+        }
+
+        try {
+            const response = await archiveReservation(reservation._id,);
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw data;
+            }
+
+            sessionStorage.setItem("archiveSuccessful", "true");
+            navigate("/reservations");
+        } catch (error) {
+            console.log(error);
+            toast.error((error as { error?: string }).error || "Failed to archive reservation.", {
+                closeButton: true,
+                description: (error as { description?: string }).description || null,
+            });
+        }
+    }
+
+    const handleUnarchive = async () => {
+        if (!reservation?._id) {
+            toast.error("Reservation ID not found");
+            return;
+        }
+
+        try {
+            const response = await unarchiveReservation(reservation._id,);
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw data;
+            }
+
+            sessionStorage.setItem("unarchiveSuccessful", "true");
+            navigate("/reservations");
+        } catch (error) {
+            console.log(error);
+            toast.error((error as { error?: string }).error || "Failed to unarchive reservation.", {
+                closeButton: true,
+                description: (error as { description?: string }).description || null,
+            });
+        }
+    }
+
+    const handleDelete = async () => {
+        if (!reservation?._id) {
+            toast.error("Reservation ID not found");
+            return;
+        }
+
+        try {
+            const response = await deleteReservation(reservation._id,);
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw data;
+            }
+
+            sessionStorage.setItem("deleteSuccessful", "true");
+            navigate("/reservations");
+        } catch (error) {
+            console.log(error);
+            toast.error((error as { error?: string }).error || "Failed to delete reservation.", {
+                closeButton: true,
+                description: (error as { description?: string }).description || null,
+            });
+        }
+    }
+
+
     return (
 
         // The sidebar provider - no changes here
@@ -771,15 +856,23 @@ export default function ReservationDetails() {
 
                                     <DropdownMenuContent align="end" className="mt-1">
                                         <DropdownMenuGroup>
-                                            <DropdownMenuItem>
-                                                <Archive className="h-4 w-4" />
-                                                Archive
-                                            </DropdownMenuItem>
+                                            {user.userRole === "Admin" && reservation && reservation.reservationVisibility === "Unarchived" && (
+                                                <DropdownMenuItem onClick={handleArchive}>
+                                                    <Archive className="h-4 w-4" />
+                                                    Archive
+                                                </DropdownMenuItem>
+                                            )}
 
+                                            {user.userRole === "Admin" && reservation && reservation.reservationVisibility === "Archived" && (
+                                                <DropdownMenuItem onClick={handleUnarchive}>
+                                                    <ArchiveX className="h-4 w-4" />
+                                                    Unarchive
+                                                </DropdownMenuItem>
+                                            )}
                                         </DropdownMenuGroup>
 
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem className="text-destructive focus:text-red-500">
+                                        <DropdownMenuItem className="text-destructive focus:text-red-500" onClick={handleDelete}>
                                             <Trash2 className="h-4 w-4" />
                                             Delete
                                         </DropdownMenuItem>
@@ -929,12 +1022,16 @@ export default function ReservationDetails() {
                                                         {format(
                                                             new Date(reservation.reservationStatus.find(s =>
                                                                 s.status === item.step)?.statusDate || ""),
-                                                            "PPp"
+                                                            "Pp"
                                                         )}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground">
                                                         {reservation.reservationStatus.find(s =>
-                                                            s.status === item.step)?.statusAuthor}
+                                                            s.status === item.step)?.statusAuthor},
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {reservation.reservationStatus.find(s =>
+                                                            s.status === item.step)?.statusAuthorPosition}
                                                     </span>
                                                 </>
                                             )}

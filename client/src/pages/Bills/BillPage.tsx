@@ -52,7 +52,7 @@ import {
     useEffect, 
     useState 
 } from "react"
-
+import {toast} from "sonner";
 
 
 // Types Imports
@@ -104,13 +104,14 @@ export default function BillPage() {
                 const unarchivedBillsResult = await getUnarchivedBills();
                 const unarchivedBills = await unarchivedBillsResult.json();
                 if (!ignore && unarchivedBillsResult.ok) {
-                    console.log("All unarchived bills fetched successfully: ", unarchivedBills);
                     setBills(unarchivedBills);
                 }
                 if (!ignore && !unarchivedBillsResult.ok) {
                     console.log("All unarchived bills fetch failed.");
                 }
-            } else {
+            } 
+            
+            if (user.userRole !== "Admin" && user.userPosition === "Unit Owner") {
                 const userUnarchivedBillsResult = await getUserBills(user._id);
                 const userUnarchivedBills = await userUnarchivedBillsResult.json();
                 if (!ignore && userUnarchivedBillsResult.ok) {
@@ -131,7 +132,15 @@ export default function BillPage() {
     }, []);
    
 
-
+    useEffect(() => {
+        if (sessionStorage.getItem("unarchiveSuccessful")) {
+            toast.success("Bill successfully unarchived", {
+                duration: 10000,
+                closeButton: true,
+            })
+            sessionStorage.removeItem("unarchiveSuccessful");
+        }
+    }, [])
 
 
 

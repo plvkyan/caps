@@ -12,6 +12,30 @@ const apiBillsUrl = apiBaseUrl + '/bills';
 
 
 
+export const unarchiveBill = async (billId) => {
+    return await fetch(apiBillsUrl + '/visibility/unarchive/' + billId, {
+        method: 'PATCH',
+    })
+}
+
+export const archiveBill = async (billId) => {
+    return await fetch(apiBillsUrl + '/visibility/archive/' + billId, {
+        method: 'PATCH',
+    })
+}
+
+export const updateBillPayorStatus = async (billId, payorId) => {
+    return await fetch(apiBillsUrl + '/status/paid', {
+        method: 'PATCH',
+        body: JSON.stringify({
+            billId: billId,
+            payorId: payorId,
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+}
 
 // Functions
 // GET functions
@@ -26,7 +50,7 @@ export const getUnarchivedBills = async () => {
 
 // Fetch a single bill
 export const getBill = async (id: string) => {
-    return await fetch(apiBillsUrl + '/' + id);
+    return await fetch(apiBillsUrl + '/single/' + id);
 }
 
 export const getUserBills = async (id: string) => {

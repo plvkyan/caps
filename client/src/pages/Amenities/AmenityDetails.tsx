@@ -5,6 +5,7 @@
 // Lucide Icon Imports
 import {
     Archive,
+    ArchiveX,
     CalendarRange,
     ChevronDown,
     ChevronLeft,
@@ -205,7 +206,7 @@ import { ReservationType } from "@/types/reservation-type";
 
 // Data Imports
 // Amenity API calls Import
-import { archiveAmenity, deleteAmenity, getSingleAmenity } from "@/data/amenity-api";
+import { archiveAmenity, deleteAmenity, getSingleAmenity, unarchiveAmenity } from "@/data/amenity-api";
 
 // Reservation API calls Import
 import { getAmenityReservations } from "@/data/reservation-api";
@@ -412,7 +413,6 @@ export default function AmenityDetails() {
                 };
 
                 setChartData(processChartData());
-                toast.success("Data loaded successfully");
 
             } catch (error) {
                 console.error(error);
@@ -495,7 +495,7 @@ export default function AmenityDetails() {
                 closeButton: true,
                 description: sessionStorage.getItem('amenityEdited'),
             });
-            sessionStorage.removeItem('archiveSuccess');
+            sessionStorage.removeItem('amenityEdited');
         }
     }, []);
 
@@ -682,6 +682,23 @@ export default function AmenityDetails() {
     };
 
     // Archive amenity function
+    const handleUnarchiveAmenity = async () => {
+        try {
+            if (!amenity) throw new Error('Amenity data not available');
+
+            const res = await unarchiveAmenity(amenity._id);
+
+            if (!res.ok) throw new Error('Failed to unarchive amenity.');
+
+            sessionStorage.setItem('unarchiveSuccess', 'Amenity unarchived successfully.');
+            navigate('/amenities');
+        } catch (error) {
+            console.error(error);
+            toast.error(error instanceof Error ? error.message : 'Failed to unarchive amenity.');
+        }
+    };
+
+    // Archive amenity function
     const handleDeleteAmenity = async () => {
         try {
             if (!amenity) throw new Error('Amenity data not available');
@@ -830,16 +847,28 @@ export default function AmenityDetails() {
 
                                 <DropdownMenuContent align="end" className="mt-1">
                                     <DropdownMenuGroup>
-                                        <DropdownMenuItem
+                                        {amenity && amenity.amenityVisibility === "Archived" && (
+                                            <DropdownMenuItem
+                                            onClick={handleUnarchiveAmenity}
+                                        >
+                                            <ArchiveX className="h-4 w-4" />
+                                            Unarchive
+                                        </DropdownMenuItem>
+                                        )}
+                                        {amenity && amenity.amenityVisibility === "Unarchived" && (
+                                            <DropdownMenuItem
                                             onClick={handleArchiveAmenity}
                                         >
                                             <Archive className="h-4 w-4" />
                                             Archive
                                         </DropdownMenuItem>
+                                        )}
+                                        
                                         <DropdownMenuItem onClick={() => navToEditForm(amenity._id)}>
                                             <Pencil className="h-4 w-4" />
                                             Edit
                                         </DropdownMenuItem>
+
                                         <DropdownMenuItem onClick={() => setShowExportDialog(true)}>
                                             <Share className="h-4 w-4" />
                                             Export .xslx
@@ -848,13 +877,17 @@ export default function AmenityDetails() {
                                     </DropdownMenuGroup>
 
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem
+
+                                    {user && user.userPosition === "President" && (
+                                        <DropdownMenuItem
                                         className="text-destructive focus:text-red-500"
                                         onClick={handleDeleteAmenity}
                                     >
                                         <Trash2 className="h-4 w-4" />
                                         Delete
                                     </DropdownMenuItem>
+                                    )}
+                                    
                                 </DropdownMenuContent>
                             </DropdownMenu>
 

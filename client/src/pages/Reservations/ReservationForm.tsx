@@ -360,7 +360,6 @@ export default function ReservationForm() {
 
                 const data = await response.json();
                 setAmenityList(data);
-                toast.success("Amenities fetched successfully");
             } catch (error) {
                 toast.error((error as Error).message);
             }

@@ -90,11 +90,14 @@ export default function AmenityPage() {
 
     useEffect(() => {
         
-        sessionStorage.getItem("archiveSuccess") && toast.success("Amenity archived successfully.", { closeButton: true });
+        sessionStorage.getItem("archiveSuccess") && toast.success("Amenity archived successfully.", { closeButton: true, duration: 10000 });
         sessionStorage.removeItem("archiveSuccess");
 
-        sessionStorage.getItem("deleteSuccess") && toast.success("Amenity deleted successfully.", { closeButton: true });
-        sessionStorage.removeItem("archiveSuccess");
+        sessionStorage.getItem("unarchiveSuccess") && toast.success("Amenity unarchived successfully.", { closeButton: true, duration: 10000 });
+        sessionStorage.removeItem("unarchiveSuccess");
+
+        sessionStorage.getItem("deleteSuccess") && toast.success("Amenity deleted successfully.", { closeButton: true, duration: 10000 });
+        sessionStorage.removeItem("deleteSuccess");
         
     })
 

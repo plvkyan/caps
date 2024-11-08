@@ -243,6 +243,118 @@ const updateBill = async (req, res) => {
 }
 
 
+// UPDATE a bill payor's status to paid
+const updateBillPayorStatus = async (req, res) => {
+    const { billId, payorId } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(billId)) {
+        return res.status(404).json({ error: "Invalid bill ID" });
+    }
+
+    try {
+        const bill = await Bill.findOneAndUpdate(
+            { 
+                _id: billId,
+                "billPayors.payorId": payorId 
+            },
+            { 
+                $set: {
+                    "billPayors.$.billStatus": "Paid",
+                    "billPayors.$.billPaidDate": new Date()
+                }
+            },
+            { new: true, runValidators: true }
+        ).lean();
+
+        if (!bill) {
+            return res.status(404).json({ error: "Bill or payor not found" });
+        }
+
+        res.status(200).json(bill);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Unarchive a single bill
+const unarchiveBill = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Find the bill first
+        const bill = await Bill.findById(id);
+
+        if (!bill) {
+            return res.status(400).json({
+                error: 'Bill not found',
+                description: 'There might be internal errors. Please try again later.'
+            });
+        }
+
+        // Check if bill is already unarchived
+        if (bill.billVisibility === "Unarchived") {
+            return res.status(400).json({
+                error: 'Bill is already unarchived',
+                description: 'This bill has already been unarchived.'
+            });
+        }
+
+        // Update bill visibility to unarchived
+        const updatedBill = await Bill.findByIdAndUpdate(
+            id,
+            { billVisibility: "Unarchived" },
+            { new: true }
+        );
+
+        console.log("Bill unarchived successfully.");
+        res.status(200).json(updatedBill);
+
+    } catch (error) {
+        console.log("Error unarchiving bill: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Archive a single bill
+const archiveBill = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Find the bill first
+        const bill = await Bill.findById(id);
+
+        if (!bill) {
+            return res.status(400).json({
+                error: 'Bill not found',
+                description: 'There might be internal errors. Please try again later.'
+            });
+        }
+
+        // Check if bill is already archived
+        if (bill.billVisibility === "Archived") {
+            return res.status(400).json({
+                error: 'Bill is already archived',
+                description: 'This bill has already been archived.'
+            });
+        }
+
+        // Update bill visibility to archived
+        const updatedBill = await Bill.findByIdAndUpdate(
+            id,
+            { billVisibility: "Archived" },
+            { new: true }
+        );
+
+        console.log("Bill archived successfully.");
+        res.status(200).json(updatedBill);
+
+    } catch (error) {
+        console.log("Error archiving bill: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+
 
 
 module.exports = {
@@ -253,6 +365,9 @@ module.exports = {
     getUnarchivedBillPresets,
 
 
+    updateBillPayorStatus,
+    archiveBill,
+    unarchiveBill,
 
     // POST functions
     createBillPreset,

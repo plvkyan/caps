@@ -12,21 +12,14 @@ const {
    getWebhook,
    // getWebhooks,
    updateWebhook,
+   receiveBillWebhook,
 } = require('../controllers/webhookController')
 
 
 
 // router.get('/', getWebhooks)
 
-router.post('/', (req, res) => {
-   const webhookEvent = req.body;
-
-   console.log('Received webhook: ', webhookEvent);
-   console.log('Data: ', webhookEvent.data)
-   console.log('Attributes: ', webhookEvent.data.attributes.data.attributes)
-
-   res.status(200).send('Webhook received');
-});
+router.post('/', receiveBillWebhook);
 
 
 

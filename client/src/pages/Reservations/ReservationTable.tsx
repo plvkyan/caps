@@ -179,18 +179,43 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
         if (sessionStorage.getItem("approveSuccessful")) {
             console.log(sessionStorage.getItem("approveSuccessful"));
-            toast.success(sessionStorage.getItem("approveSuccesful"), { closeButton: true });
+            toast.success(sessionStorage.getItem("approveSuccesful"), { 
+                closeButton: true,
+                duration: 10000,
+            });
             sessionStorage.removeItem("approveSuccessful");
         }
 
         if (sessionStorage.getItem("rejectedSuccessful")) {
-            toast.success("Reservation/s rejected successfully", { closeButton: true });
+            toast.success("Reservation/s rejected successfully", { 
+                closeButton: true,
+                duration: 10000,
+            });
             sessionStorage.removeItem("rejectedSuccessful");
         }
 
+        if (sessionStorage.getItem("deleteSuccessful")) {
+            toast.success("Reservation deleted successfully", {
+                closeButton: true,
+                duration: 10000,
+            })
+            sessionStorage.removeItem("deleteSuccessful");
+        }
+
         if (sessionStorage.getItem("archiveSuccessful")) {
-            toast.success("Reservation/s archived successfully", { closeButton: true });
+            toast.success("Reservation/s archived successfully", { 
+                closeButton: true,
+                duration: 10000,
+             });
             sessionStorage.removeItem("archiveSuccessful");
+        }
+
+        if (sessionStorage.getItem("unarchiveSuccessful")) {
+            toast.success("Reservation/s unarchived successfully", { 
+                closeButton: true,
+                duration: 10000,
+             });
+            sessionStorage.removeItem("unarchiveSuccessful");
         }
 
     }, []);

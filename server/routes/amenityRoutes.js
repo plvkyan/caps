@@ -18,6 +18,7 @@ const {
    archiveAmenity,
    archiveMultipleAmenities,
    unarchiveMultipleAmenities,
+   unarchiveAmenity,
 
 } = require('../controllers/amenityController')
 
@@ -57,6 +58,9 @@ router.patch('/:id', updateAmenity);
 
 // ARCHIVE an amenity
 router.patch('/archive/:id', archiveAmenity);
+
+// UNARCHIVE an amenity
+router.patch('/unarchive/:id', unarchiveAmenity);
 
 // ARCHIVE multiple amenities
 router.patch('/update/visibility/batch/archive', archiveMultipleAmenities);

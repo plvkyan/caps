@@ -35,6 +35,7 @@ const {
    deleteReservation,
 
    // PATCH controllers
+   archiveReservation,
    updateReservation,
    batchApproveReservations,
    batchRejectReservations,
@@ -52,6 +53,7 @@ const {
    uploadReservationImages,
    batchArchiveReservations,
    batchUnarchiveReservations,
+   unarchiveReservation,
 } = require('../controllers/reservationController');
 const { set } = require('mongoose');
 
@@ -166,6 +168,8 @@ router.patch('/update/images/:id', uploadReservationImages);
 router.patch('/update/visibility/batch/archive', batchArchiveReservations)
 router.patch('/update/visibility/batch/unarchives', batchUnarchiveReservations)
 
+router.patch('/update/visibility/archive/:id', archiveReservation);
+router.patch('/update/visibility/unarchive/:id', unarchiveReservation);
 router.patch('/update/status/batch/approve', batchApproveReservations)
 router.patch('/update/status/batch/reject',  batchRejectReservations)
 router.patch('/update/comment/create/:id',  addReservationComment)

@@ -27,6 +27,9 @@ const {
     getUnarchivedBills,
     getUserBills,
     updateBill,
+    updateBillPayorStatus,
+    archiveBill,
+    unarchiveBill,
 
 } = require('../controllers/billController')
 
@@ -82,7 +85,11 @@ router.delete('/:id', deleteBill)
 // UPDATE a bill
 router.patch('/:id', updateBill)
 
+router.patch('/status/paid', updateBillPayorStatus);
 
+router.patch('/visibility/archive/:id', archiveBill);
+
+router.patch('/visibility/unarchive/:id', unarchiveBill);
 
 
 

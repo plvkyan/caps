@@ -2,6 +2,7 @@
 
 
 const mongoose = require('mongoose')
+const User = require('../models/userModel')
 
 
 
@@ -48,9 +49,8 @@ const billSchema = new Schema({
         required: true,
         default: new Date(new Date().setMonth(new Date().getMonth() + 1))
     },
-    billPayors: {
-        type: Array,
-        properties: {
+    billPayors: [
+        {
             payorId: {
                 type: String,
                 required: true,
@@ -73,7 +73,7 @@ const billSchema = new Schema({
                 required: false,
             }
         }
-    },
+    ],
     billCreatorId: {
         type: String,
         required: true,
@@ -97,7 +97,55 @@ const billSchema = new Schema({
 
 
 
+billSchema.statics.setPaid = async function(billId, userId) {
+    try {
+        const bill = await this.findById(billId);
+        if (!bill) {
+            throw Error('Bill not found');
+        }
 
+        const updatedBill = await this.findOneAndUpdate(
+            { 
+                _id: billId,
+                'billPayors.payorId': userId 
+            },
+            {
+                $set: {
+                    'billPayors.$.billStatus': 'Paid',
+                    'billPayors.$.billPaidDate': new Date()
+                }
+            },
+            { new: true }
+        );
+
+        if (!updatedBill) {
+            throw Error('User is not a payor for this bill');
+        }
+
+        // Check for other overdue bills
+        const overdueBills = await this.find({
+            'billPayors.payorId': userId,
+            'billPayors.billStatus': 'Overdue',
+            'billDueDate': { $lte: new Date() },
+            'billVisibility': 'Unarchived'
+        });
+
+        // If no overdue bills and user is Delinquent, update status to Outstanding
+        if (overdueBills.length === 0) {
+            const User = mongoose.model('User');
+            const user = await User.findById(userId);
+            if (user && user.userStatus === 'Delinquent') {
+                await User.findByIdAndUpdate(userId, {
+                    userStatus: 'Outstanding'
+                });
+            }
+        }
+
+        return updatedBill;
+    } catch (error) {
+        throw error;
+    }
+}
 
 
 module.exports = mongoose.model("Bill", billSchema)

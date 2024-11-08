@@ -923,6 +923,7 @@ const rejectReservation = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 }
+
 // Archive a single reservation
 const archiveReservation = async (req, res) => {
     const { id } = req.params;
@@ -958,6 +959,45 @@ const archiveReservation = async (req, res) => {
 
     } catch (error) {
         console.log("Error archiving reservation: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Archive a single reservation
+const unarchiveReservation = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            });
+        }
+
+        // Check if reservation is already unarchived
+        if (reservation.reservationVisibility === "Unarchived") {
+            return res.status(400).json({
+                error: 'Reservation is already unarchived',
+                description: 'This reservation has already been unarchived.'
+            });
+        }
+
+        // Update reservation visibility to unarchived
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { reservationVisibility: "Unarchived" },
+            { new: true }
+        );
+
+        console.log("Reservation unarchived successfully.");
+        res.status(200).json(updatedReservation);
+
+    } catch (error) {
+        console.log("Error unarchiving reservation: ", error.message);
         res.status(400).json({ error: error.message });
     }
 }
@@ -1874,6 +1914,8 @@ module.exports = {
     deleteReservation,
 
     // PATCH controllers
+    archiveReservation,
+    unarchiveReservation,
     batchArchiveReservations,
     batchUnarchiveReservations,
     addReservationComment,
