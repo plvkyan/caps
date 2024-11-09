@@ -9,7 +9,7 @@ const cancelled = () => {
 
     setTimeout(function() {
         window.location.replace('/bills');
-      }, 50000);
+      }, 5000);
 
     return (
         <>

@@ -275,7 +275,7 @@ export default function Userdetails() {
                             send_email_receipt: true,
                             show_description: false,
                             show_line_items: true,
-                            cancel_url: 'https://www.google.com',
+                            cancel_url: import.meta.env.VITE_API_URL + '/bills/cancelled',
                             description: JSON.stringify({
                                 billId: bill._id,
                                 payorId: user._id,
@@ -303,7 +303,7 @@ export default function Userdetails() {
                                 'grab_pay',
                                 'paymaya'
                             ],
-                            success_url: 'https://google.com',
+                            success_url: import.meta.env.VITE_API_URL + '/bills/success',
                             statement_descriptor: 'Kyan Lumanog'
                         }
                     }
