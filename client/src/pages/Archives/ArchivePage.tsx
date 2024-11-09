@@ -111,6 +111,10 @@ import { getArchivedReservations } from "@/data/reservation-api.ts";
 // All user unarchived reservation data Import
 import { getArchivedUsers } from "@/data/user-api"
 import AnnouncementDetails from "../Announcements/AnnouncementDetails"
+import ArchiveBillTable from "./ArchiveBillTable"
+import { getArchivedBills } from "@/data/bills-api"
+import { BillTableColumns } from "../Bills/BillColumns"
+import { BillType } from "@/types/bill-type"
 
 
 
@@ -129,6 +133,8 @@ export default function ArchivePage() {
     // States
     // Amenities state
     const [amenities, setAmenities] = useState<AmenityType[]>([]);
+    // Bills state
+    const [bills, setBills] = useState<BillType[]>([]);
     // Reservations state
     const [reservations, setReservations] = useState<ReservationType[]>([]);
     // Reservations state
@@ -194,6 +200,26 @@ export default function ArchivePage() {
 
         fetchArchivedAmenities();
     }, [amenities]);
+
+    // Fetching unarchived amenities effect
+    useEffect(() => {
+        const fetchArchivedBills = async () => {
+            try {
+                const response = await getArchivedBills();
+                if (!response.ok) throw new Error('Failed to fetch archived bills');
+
+                const data = await response.json();
+                setBills(data);
+            } catch (error) {
+                toast.error('Error fetching archived bills', {
+                    closeButton: true,
+                    duration: 5000,
+                });
+            }
+        };
+
+        fetchArchivedBills();
+    }, [bills]);
 
     useEffect(() => {
 
@@ -310,6 +336,7 @@ export default function ArchivePage() {
                         <TabsList className="p-0 mb-6 justify-start h-fit w-full rounded-none border-b bg-transparent overflow-x-hidden overflow-y-auto">
                             <TabsTrigger value="amenities" className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"> Amenities </TabsTrigger>
                             <TabsTrigger value="announcements" className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"> Announcements </TabsTrigger>
+                            <TabsTrigger value="bills" className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"> Bills </TabsTrigger>
                             <TabsTrigger value="reservations" className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"> Reservations </TabsTrigger>
                             <TabsTrigger value="users" className="rounded-none px-4 !bg-transparent border-b-transparent border-b-2 data-[state=active]:text-primary data-[state=active]:border-primary"> Users </TabsTrigger>
                         </TabsList>
@@ -325,6 +352,10 @@ export default function ArchivePage() {
                             {announcements != null && announcements.length < 1 && (
                                 <div className="text-center my-20"> No archived announcements found. </div>
                             )}
+                        </TabsContent>
+
+                        <TabsContent value="bills" className="flex flex-col gap-4 m-0">
+                            <ArchiveBillTable data={bills} columns={BillTableColumns} />
                         </TabsContent>
 
                         <TabsContent value="reservations" className="flex flex-col gap-4 m-0">

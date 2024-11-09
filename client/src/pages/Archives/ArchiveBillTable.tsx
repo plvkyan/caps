@@ -15,8 +15,12 @@ import {
 // shadcn Components Imports
 // shadcn Button Component Import
 import { Button } from "@/components/ui/button";
+
 // shadcn Input Component Import
 import { Input } from "@/components/ui/input";
+
+import { toast } from "sonner";
+
 // shadcn Table Imports
 import {
     Table,
@@ -32,8 +36,10 @@ import {
 // Custom Component Imports
 // Custom Data Table Pagination Import
 import { BottomDataTablePagination } from "@/components/custom/BottomDataTablePagination";
+
 // Custom Data Table Faceted Filter
-import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
+// import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
+
 // Custom Data Table View Options
 import { DataTableViewOptions } from "@/components/custom/DataTableViewOptions";
 
@@ -57,46 +63,68 @@ import {
 
 // Utility Imports
 // React Import
-import { useState } from "react";
-// React Router Imports
+import {
+    useEffect,
+    useState
+} from "react";
+
 // React Router Navigate Hook Import
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+// import { unarchiveManyAmenities } from "@/data/amenity-api";
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
+// import { BILL_STATUSES } from "@/types/bill-type";
+import { unarchiveMultipleBills } from "@/data/bills-api";
 
 
 
 // Types
-import { toast } from "sonner";
-import { bulkUnarchivedUsers } from "@/data/user-api";
-import { STATUS_FILTER_OPTIONS } from "@/types/user-type";
-import { useAuthContext } from "@/hooks/useAuthContext";
-import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 
 
 
 
 
 
-interface UserTableProps<TData, TValue> {
+interface BillData {
+    _id: string;
+}
+
+interface ArchiveBillTableProps<TData extends BillData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
 }
 
 
 
+// const EQUIPMENT = {
+//     id: 1,
+//     value: "Equipment",
+//     label: "Equipment",
+// }
+
+// const FACILITY = {
+//     id: 2,
+//     value: "Facility",
+//     label: "Facility",
+// }
+// const AMENITY_DATA = [
+//     EQUIPMENT,
+//     FACILITY
+// ];
 
 
-export default function UserTable<TData, TValue>({
+
+
+
+export default function ArchiveBillTable<TData extends BillData, TValue>({
     columns,
     data,
-}: UserTableProps<TData, TValue>) {
+}: ArchiveBillTableProps<TData, TValue>) {
 
 
 
     // Hooks
     // useNavigate Hook
-    // const navigate = useNavigate();
-    // useAuthContext hook for user account
-    const { user } = useAuthContext();
+    const navigate = useNavigate();
 
 
 
@@ -105,12 +133,12 @@ export default function UserTable<TData, TValue>({
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     // Global Filter State
     const [globalFilter, setGlobalFilter] = useState<any>("");
-    // Loading state
-    const [loading, setLoading] = useState<boolean>(false);
     // Sorting State
     const [sorting, setSorting] = useState<SortingState>([]);
     // Selected Rows State
     const [rowSelection, setRowSelection] = useState({});
+
+    const [loading, setLoading] = useState<boolean>(false);
 
 
 
@@ -138,40 +166,37 @@ export default function UserTable<TData, TValue>({
     // Check filtered State
     const isFiltered = table.getState().columnFilters.length > 0;
 
+    useEffect(() => {
+
+        if (sessionStorage.getItem("billUnarchiveSuccessful")) {
+            toast.success("Bill/s unarchived successfully", {
+                closeButton: true,
+                duration: 10000,
+            })
+        }
+
+    }, [])
+
 
 
     // Functions
-    // Archive selected users function
+    // Handle Archive Button Function
     const handleUnarchiveButton = async () => {
-        if (!user?._id) {
-            toast.error("You must be logged in to archive users", { closeButton: true });
-            return;
-        }
-
-        setLoading(true);
-
         try {
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as any)._id);
-            const response = await bulkUnarchivedUsers(user._id, selectedRowIds);
+            setLoading(true)
+            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as BillData)._id);
+            const response = await unarchiveMultipleBills(selectedRowIds);
+
             const data = await response.json();
 
-            if (!response.ok) {
-                const errorMessages: Record<number, string> = {
-                    400: data.error === 'Some users are already unarchived'
-                        ? "Some selected users are already unarchived"
-                        : data.error === 'Invalid or empty user IDs array'
-                            ? "Invalid selection of users"
-                            : data.error,
-                    404: "No users were unarchived",
-                    500: "Server error occurred while unarchiving users"
-                };
+            console.log(data);
 
-                throw new Error(errorMessages[response.status] || "Error unarchiving users");
+            if (response.ok) {
+                sessionStorage.setItem("billUnarchiveSuccessful", "true");
+                window.location.reload();
+            } else {
+                throw new Error("Error unarchiving bills");
             }
-
-            sessionStorage.setItem("unarchiveSuccessful", data.message);
-            window.location.reload();
-
         } catch (error) {
             toast.error((error as Error).message, { closeButton: true });
         } finally {
@@ -179,11 +204,11 @@ export default function UserTable<TData, TValue>({
         }
     };
 
-    // Navigate functions
-    // Navigate to a user's details page
-    // const navToUserDetails = (id: String) => {
-        // navigate("/users/" + id);
-    // }
+    // Redirect to Amenity Details Function
+    const navToAmenityDetails = (id: String) => {
+        const amenityDetailsPath = "/amenities/" + id;
+        navigate(amenityDetailsPath);
+    }
 
 
 
@@ -194,22 +219,18 @@ export default function UserTable<TData, TValue>({
             <div className="flex items-center justify-between">
 
                 <div className="flex flex-col">
-                    <h1 className="font-medium"> Archived users </h1>
-                    <p className="text-sm text-muted-foreground"> Archived users aren't given access to the system. </p>
+                    <h1 className="font-medium"> Archived bills </h1>
+                    <p className="text-sm text-muted-foreground"> Bills inaccessible from unit owners. </p>
                 </div>
 
-                <div className="flex items-end gap-2">
-
-                    <Button
-                        disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                        onClick={() => handleUnarchiveButton()}
-                        variant="outline"
-                    >
-                        {loading ? <LoadingSpinner className="h-4 w-4" /> : <ArchiveX className="h-4 w-4" />}
-                        Unarchive
-                    </Button>
-
-                </div>
+                <Button
+                    disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+                    onClick={() => handleUnarchiveButton()}
+                    variant="outline"
+                >
+                    {loading ? <LoadingSpinner className="h-4 w-4" /> : <ArchiveX className="h-4 w-4" />}
+                    Unarchive
+                </Button>
 
             </div>
 
@@ -221,9 +242,9 @@ export default function UserTable<TData, TValue>({
                     placeholder="Search..."
                 />
 
-                <DataTableViewOptions table={table} label="Toggle Columns" />
+                <DataTableViewOptions table={table} label="Toggle" />
 
-                <DataTableFacetedFilter column={table.getColumn("userStatus")} title="Filter" options={STATUS_FILTER_OPTIONS} />
+                {/* <DataTableFacetedFilter column={table.getColumn("billStatus")} title="Type" options={BILL_STATUSES} /> */}
 
                 {isFiltered && (
                     <Button
@@ -232,7 +253,7 @@ export default function UserTable<TData, TValue>({
                         className="items-center"
                     >
                         <X className="h-4 w-4" />
-                        Reset
+                        Reset Filters
                     </Button>
                 )}
 
@@ -251,7 +272,7 @@ export default function UserTable<TData, TValue>({
                                 {headerGroup.headers.map((header) => {
 
                                     if (header.id === "_id") {
-                                        return null;
+                                        return;
                                     }
 
                                     return (
@@ -272,43 +293,42 @@ export default function UserTable<TData, TValue>({
 
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => {
-                                return (
-                                    <TableRow
-                                        key={row.id}
-                                        data-state={row.getIsSelected() && "selected"}
-                                    >
-                                        {row.getVisibleCells().map((cell) => {
+                            table.getRowModel().rows.map((row) => (
+                                <TableRow
+                                    key={row.id}
+                                    data-state={row.getIsSelected() && "selected"}
+                                >
+                                    {row.getVisibleCells().map((cell) => {
 
-                                            if (cell.column.id === "_id") {
-                                                return null;
-                                            }
+                                        if (cell.column.id === "_id") {
+                                            return;
+                                        }
 
-                                            if (cell.column.id === "select") {
-                                                return (
-                                                    <TableCell
-                                                        key={cell.id}
-                                                    >
-                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                    </TableCell>
-                                                )
-                                            } else return (
+                                        if (cell.column.id === "select") {
+                                            return (
                                                 <TableCell
-                                                    className=""
                                                     key={cell.id}
-                                                    // onClick={() => navToUserDetails((row.original as any)._id)}
                                                 >
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                 </TableCell>
                                             )
-                                        })}
-                                    </TableRow>
-                                )
-                            })
+                                        } else return (
+                                            <TableCell
+                                                className="cursor-pointer"
+                                                key={cell.id}
+                                                onClick={() => navToAmenityDetails(row.original._id)}
+                                            >
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        )
+
+                                    })}
+                                </TableRow>
+                            ))
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No users found.
+                                    No amenities found.
                                 </TableCell>
                             </TableRow>
                         )}

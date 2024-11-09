@@ -30,6 +30,7 @@ const {
     updateBillPayorStatus,
     archiveBill,
     unarchiveBill,
+    unarchiveMultipleBills,
 
 } = require('../controllers/billController')
 
@@ -91,6 +92,7 @@ router.patch('/visibility/archive/:id', archiveBill);
 
 router.patch('/visibility/unarchive/:id', unarchiveBill);
 
+router.patch('/visibility/unarchive/bulk/_', unarchiveMultipleBills)
 
 
 module.exports = router

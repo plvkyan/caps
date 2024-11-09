@@ -36,7 +36,10 @@ import { BillType } from "@/types/bill-type";
 // date-fns format function Import
 import { format } from "date-fns";
 
-
+const PHPesos = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'PHP',
+});
 
 
 
@@ -105,11 +108,10 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         },
         cell: ({ row }) => {
 
-            const currency = row.original.billCurrency;
             const amount = row.original.billAmount;
 
             return (
-                <span> {currency + " " + amount} </span>
+                <span> {PHPesos.format(amount)} </span>
             )
         },
     },

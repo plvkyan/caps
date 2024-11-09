@@ -3,11 +3,11 @@
 
 // Imports
 // Lucide Icons Import
-import { 
-    ChevronLeft, 
-    CirclePlus, 
-    Info, 
-    TriangleAlert 
+import {
+    ChevronLeft,
+    CirclePlus,
+    Info,
+    TriangleAlert
 } from "lucide-react";
 
 // shadcn Components Imports
@@ -44,8 +44,8 @@ import { Input } from "@/components/ui/input";
 import { NavUser } from "@/components/nav-user"
 
 // shadcn RadioGroup Component Import
-import { 
-    RadioGroup, 
+import {
+    RadioGroup,
     RadioGroupItem
 } from "@/components/ui/radio-group";
 
@@ -116,7 +116,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 // Data Imports
 // User API Imports
-import { createUser } from "@/data/user-api";
+import { createUser, getAllUsers } from "@/data/user-api";
 
 
 
@@ -243,8 +243,36 @@ export default function UserForm() {
     };
 
 
+    // State to track existing positions
+    const [existingPositions, setExistingPositions] = useState<string[]>([]);
 
+    // Use Effect to fetch existing positions
+    useEffect(() => {
+        const fetchExistingPositions = async () => {
+            try {
+                const response = await getAllUsers();
 
+                const data = await response.json();
+
+                // Filter for unarchived users and get their positions
+                const positions = data
+                    .filter((user: any) => user.userVisibility !== "Archived")
+                    .map((user: any) => user.userPosition);
+
+                setExistingPositions(positions);
+            } catch (error) {
+                console.error('Error fetching existing positions:', error);
+            }
+        };
+
+        fetchExistingPositions();
+    }, []);
+
+    // Helper function to check if position is taken
+    const isPositionTaken = (position: string) => {
+        console.log(existingPositions)
+        return existingPositions.includes(position) && position !== "Unit Owner";
+    };
 
     return (
 
@@ -591,7 +619,7 @@ export default function UserForm() {
                                                             >
                                                                 <FormItem className="flex items-center gap-3">
                                                                     <FormControl>
-                                                                        <RadioGroupItem checked={field.value === "Unit Owner"} value="Unit Owner"/>
+                                                                        <RadioGroupItem checked={field.value === "Unit Owner"} value="Unit Owner" />
                                                                     </FormControl>
                                                                     <FormLabel className="font-normal">
                                                                         Unit Owner
@@ -651,13 +679,39 @@ export default function UserForm() {
                                                             </FormControl>
                                                             <SelectContent>
                                                                 <SelectItem disabled={userForm.watch("userRole") === "Admin"} value="Unit Owner"> Unit Owner </SelectItem>
-                                                                <SelectItem value="Admin"> Admin </SelectItem>
-                                                                <SelectItem value="Auditor"> Auditor </SelectItem>
-                                                                <SelectItem value="Treasurer"> Treasurer </SelectItem>
-                                                                <SelectItem value="Secretary"> Secretary </SelectItem>
-                                                                <SelectItem value="Vice President"> Vice President </SelectItem>
-                                                                <SelectItem value="President"> President </SelectItem>
-                                                            </SelectContent>
+                                                                <SelectItem
+                                                                    value="Admin">
+                                                                    Admin
+                                                                </SelectItem>
+                                                                <SelectItem
+                                                                    disabled={isPositionTaken("Auditor")}
+                                                                    value="Auditor"
+                                                                >
+                                                                    Auditor
+                                                                </SelectItem>
+                                                                <SelectItem
+                                                                    disabled={isPositionTaken("Treasurer")}
+                                                                    value="Treasurer">
+                                                                    Treasurer
+                                                                </SelectItem>
+                                                                <SelectItem
+                                                                    disabled={isPositionTaken("Secretary")}
+                                                                    value="Secretary"
+                                                                >
+                                                                    Secretary
+                                                                </SelectItem>
+                                                                <SelectItem
+                                                                    disabled={isPositionTaken("Vice President")}
+                                                                    value="Vice President"
+                                                                >
+                                                                    Vice President
+                                                                </SelectItem>
+                                                                <SelectItem
+                                                                    disabled={isPositionTaken("President")}
+                                                                    value="President"
+                                                                >
+                                                                    President
+                                                                </SelectItem>   </SelectContent>
                                                         </Select>
                                                         <FormMessage />
                                                     </FormItem>

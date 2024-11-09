@@ -24,6 +24,18 @@ export const archiveBill = async (billId) => {
     })
 }
 
+export const unarchiveMultipleBills = async (billIds) => {
+    return await fetch(apiBillsUrl + '/visibility/unarchive/bulk/_' , {
+        method: 'PATCH',
+        body: JSON.stringify({
+            billIds: billIds,
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+}
+
 export const updateBillPayorStatus = async (billId, payorId) => {
     return await fetch(apiBillsUrl + '/status/paid', {
         method: 'PATCH',
@@ -46,6 +58,10 @@ export const getBills = async () => {
 
 export const getUnarchivedBills = async () => {
     return await fetch(apiBillsUrl + '/unarchived');
+}
+
+export const getArchivedBills = async () => {
+    return await fetch(apiBillsUrl + '/archived');
 }
 
 // Fetch a single bill

@@ -182,9 +182,9 @@ export default function UserTable<TData, TValue>({
 
     // Navigate functions
     // Navigate to a user's details page
-    const navToUserDetails = (id: String) => {
-        navigate("/users/" + id);
-    }
+    // const navToUserDetails = (id: String) => {
+        // navigate("/users/" + id);
+    // }
 
     // Navigate to new user form page
     const navToUserForm = () => {
@@ -328,9 +328,9 @@ export default function UserTable<TData, TValue>({
                                                 )
                                             } else return (
                                                 <TableCell
-                                                    className="cursor-pointer"
+                                                    className=""
                                                     key={cell.id}
-                                                    onClick={() => navToUserDetails((row.original as any)._id)}
+                                                    // onClick={() => navToUserDetails((row.original as any)._id)}
                                                 >
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                 </TableCell>
