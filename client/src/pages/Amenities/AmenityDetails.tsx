@@ -17,7 +17,7 @@ import {
     Info,
     Pencil,
     Share,
-    Trash2,
+    // Trash2,
 } from "lucide-react";
 
 // shadcn Components Imports
@@ -89,7 +89,7 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuSeparator,
+    // DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -206,7 +206,12 @@ import { ReservationType } from "@/types/reservation-type";
 
 // Data Imports
 // Amenity API calls Import
-import { archiveAmenity, deleteAmenity, getSingleAmenity, unarchiveAmenity } from "@/data/amenity-api";
+import { 
+    archiveAmenity, 
+    // deleteAmenity, 
+    getSingleAmenity, 
+    unarchiveAmenity 
+} from "@/data/amenity-api";
 
 // Reservation API calls Import
 import { getAmenityReservations } from "@/data/reservation-api";
@@ -699,21 +704,21 @@ export default function AmenityDetails() {
     };
 
     // Archive amenity function
-    const handleDeleteAmenity = async () => {
-        try {
-            if (!amenity) throw new Error('Amenity data not available');
+    // const handleDeleteAmenity = async () => {
+    //     try {
+    //         if (!amenity) throw new Error('Amenity data not available');
 
-            const res = await deleteAmenity(amenity._id);
+    //         const res = await deleteAmenity(amenity._id);
 
-            if (!res.ok) throw new Error('Failed to delete amenity.');
+    //         if (!res.ok) throw new Error('Failed to delete amenity.');
 
-            sessionStorage.setItem('deleteSuccess', 'Amenity deleted successfully.');
-            navigate('/amenities');
-        } catch (error) {
-            console.error(error);
-            toast.error(error instanceof Error ? error.message : 'Failed to delete amenity.');
-        }
-    };
+    //         sessionStorage.setItem('deleteSuccess', 'Amenity deleted successfully.');
+    //         navigate('/amenities');
+    //     } catch (error) {
+    //         console.error(error);
+    //         toast.error(error instanceof Error ? error.message : 'Failed to delete amenity.');
+    //     }
+    // };
 
     // Navigate to amenity edit form page
     // Redirect to Amenity Details Function
@@ -876,9 +881,9 @@ export default function AmenityDetails() {
 
                                     </DropdownMenuGroup>
 
-                                    <DropdownMenuSeparator />
+                                    {/* <DropdownMenuSeparator /> */}
 
-                                    {user && user.userPosition === "President" && (
+                                    {/* {user && user.userPosition === "President" && (
                                         <DropdownMenuItem
                                         className="text-destructive focus:text-red-500"
                                         onClick={handleDeleteAmenity}
@@ -886,7 +891,7 @@ export default function AmenityDetails() {
                                         <Trash2 className="h-4 w-4" />
                                         Delete
                                     </DropdownMenuItem>
-                                    )}
+                                    )} */}
                                     
                                 </DropdownMenuContent>
                             </DropdownMenu>

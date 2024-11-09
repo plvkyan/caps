@@ -15,7 +15,7 @@ import {
     ImageOff,
     Info,
     SendHorizontal,
-    Trash2,
+    // Trash2,
     Upload,
     X
 } from "lucide-react";
@@ -67,7 +67,7 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuSeparator,
+    // DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -160,7 +160,7 @@ import { ReservationType } from "@/types/reservation-type"
 import {
     addCommentToReservation,
     archiveReservation,
-    deleteReservation,
+    // deleteReservation,
     getEquipmentsAvailableStocks,
     getSingleReservation,
     setReservationApproved,
@@ -714,31 +714,31 @@ export default function ReservationDetails() {
         }
     }
 
-    const handleDelete = async () => {
-        if (!reservation?._id) {
-            toast.error("Reservation ID not found");
-            return;
-        }
+    // const handleDelete = async () => {
+    //     if (!reservation?._id) {
+    //         toast.error("Reservation ID not found");
+    //         return;
+    //     }
 
-        try {
-            const response = await deleteReservation(reservation._id,);
+    //     try {
+    //         const response = await deleteReservation(reservation._id,);
 
-            const data = await response.json();
+    //         const data = await response.json();
 
-            if (!response.ok) {
-                throw data;
-            }
+    //         if (!response.ok) {
+    //             throw data;
+    //         }
 
-            sessionStorage.setItem("deleteSuccessful", "true");
-            navigate("/reservations");
-        } catch (error) {
-            console.log(error);
-            toast.error((error as { error?: string }).error || "Failed to delete reservation.", {
-                closeButton: true,
-                description: (error as { description?: string }).description || null,
-            });
-        }
-    }
+    //         sessionStorage.setItem("deleteSuccessful", "true");
+    //         navigate("/reservations");
+    //     } catch (error) {
+    //         console.log(error);
+    //         toast.error((error as { error?: string }).error || "Failed to delete reservation.", {
+    //             closeButton: true,
+    //             description: (error as { description?: string }).description || null,
+    //         });
+    //     }
+    // }
 
 
     return (
@@ -949,11 +949,11 @@ export default function ReservationDetails() {
                                             )}
                                         </DropdownMenuGroup>
 
-                                        <DropdownMenuSeparator />
+                                        {/* <DropdownMenuSeparator />
                                         <DropdownMenuItem className="text-destructive focus:text-red-500" onClick={handleDelete}>
                                             <Trash2 className="h-4 w-4" />
                                             Delete
-                                        </DropdownMenuItem>
+                                        </DropdownMenuItem> */}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             )}

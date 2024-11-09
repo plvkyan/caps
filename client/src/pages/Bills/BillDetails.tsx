@@ -10,7 +10,7 @@ import {
     EllipsisVertical,
     Star,
     StarOff,
-    Trash2
+    // Trash2
 } from "lucide-react"
 
 
@@ -47,7 +47,7 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuSeparator,
+    // DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -533,13 +533,13 @@ export default function Userdetails() {
                                             )}
                                         </DropdownMenuGroup>
 
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
+                                        {/* <DropdownMenuSeparator /> */}
+                                        {/* <DropdownMenuItem
                                             className="text-destructive focus:text-red-500"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                             Delete
-                                        </DropdownMenuItem>
+                                        </DropdownMenuItem> */}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             )}

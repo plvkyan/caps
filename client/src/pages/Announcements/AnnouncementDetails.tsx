@@ -3,15 +3,15 @@ import { MoreHorizontal } from "lucide-react";
 
 // shadcn Components Imports
 // shadcn Alert Dialog Component Import
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+// import {
+//   AlertDialog,
+//   // AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   // AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from "@/components/ui/alert-dialog";
 
 // shadcn Badge Component Import
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +35,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
+  // DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 // Hooks Imports
@@ -50,7 +50,7 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 import { formatDistanceToNow } from "date-fns";
 
 // React Import
-import React from "react";
+// import React from "react";
 
 // Custom Components Imports
 // Announcement Edit Form Component Import
@@ -66,7 +66,7 @@ const AnnouncementDetails = ({ announcement }) => {
 
   // Use States
   // Delete Dialog States
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+  // const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
 
   // Edit Dialog States
 
@@ -95,22 +95,22 @@ const AnnouncementDetails = ({ announcement }) => {
   };
 
   // Delete Announcement Function
-  const deleteAnnouncement = async () => {
-    const response = await fetch(
-      import.meta.env.VITE_API_URL + "/announcements/" + announcement._id,
-      {
-        method: "DELETE",
-      }
-    );
+  // const deleteAnnouncement = async () => {
+  //   const response = await fetch(
+  //     import.meta.env.VITE_API_URL + "/announcements/" + announcement._id,
+  //     {
+  //       method: "DELETE",
+  //     }
+  //   );
 
-    const json = await response.json();
+  //   const json = await response.json();
 
-    console.log(json);
+  //   console.log(json);
 
-    if (response.ok) {
-      dispatch({ type: "DELETE_ANNOUNCEMENT", payload: json });
-    }
-  };
+  //   if (response.ok) {
+  //     dispatch({ type: "DELETE_ANNOUNCEMENT", payload: json });
+  //   }
+  // };
 
   // Unarchive Announcement Function
   const setUnarchive = async () => {
@@ -197,7 +197,7 @@ const AnnouncementDetails = ({ announcement }) => {
                 </DropdownMenuItem>
               )}
 
-              {user.userPosition == "President" && (
+              {/* {user.userPosition == "President" && (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -207,7 +207,7 @@ const AnnouncementDetails = ({ announcement }) => {
                     Delete Announcement
                   </DropdownMenuItem>
                 </>
-              )}
+              )} */}
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -219,7 +219,7 @@ const AnnouncementDetails = ({ announcement }) => {
                         )
                     } */}
 
-          <AlertDialog
+          {/* <AlertDialog
             open={showDeleteDialog}
             onOpenChange={setShowDeleteDialog}
           >
@@ -243,7 +243,7 @@ const AnnouncementDetails = ({ announcement }) => {
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
-          </AlertDialog>
+          </AlertDialog> */}
         </div>
       </CardHeader>
 
