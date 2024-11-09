@@ -160,7 +160,6 @@ import { ReservationType } from "@/types/reservation-type"
 import {
     addCommentToReservation,
     archiveReservation,
-    // deleteReservation,
     getEquipmentsAvailableStocks,
     getSingleReservation,
     setReservationApproved,

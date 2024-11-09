@@ -818,8 +818,26 @@ const approveReservation = async (req, res) => {
             });
         }
 
+        // For Facility reservations, check if facility is already reserved for that date
+        if (reservation.reservationType === "Facility") {
+            for (const amenity of reservation.reservationAmenities) {
+                const existingReservation = await Reservation.findOne({
+                    'reservationAmenities._id': amenity._id,
+                    'reservationDate': reservation.reservationDate,
+                    'reservationStatus.status': 'Approved',
+                    '_id': { $ne: id } // exclude current reservation
+                });
+
+                if (existingReservation) {
+                    return res.status(400).json({
+                        error: 'Facility already reserved',
+                        description: `${amenity.amenityName} is already reserved for this date.`
+                    });
+                }
+            }
+        }
         // For Equipment or Equipment and Facility reservations, check stock availability
-        if (['Equipment', 'Equipment and Facility'].includes(reservation.reservationType)) {
+        else if (['Equipment', 'Equipment and Facility'].includes(reservation.reservationType)) {
             for (const amenity of reservation.reservationAmenities) {
                 // Get all approved reservations for this equipment on the same date
                 const approvedReservations = await Reservation.find({
@@ -1699,6 +1717,29 @@ const batchApproveReservations = async (req, res) => {
             });
         }
 
+        // Check facility availability first
+        for (const reservation of reservations) {
+            if (reservation.reservationType === "Facility") {
+                for (const amenity of reservation.reservationAmenities) {
+                    // Check if facility is already reserved for that date
+                    const existingReservation = await Reservation.findOne({
+                        'reservationAmenities._id': amenity._id,
+                        'reservationDate': reservation.reservationDate,
+                        'reservationStatus.status': 'Approved',
+                        '_id': { $ne: reservation._id } // exclude current reservation
+                    });
+
+                    if (existingReservation) {
+                        return res.status(400).json({
+                            success: false,
+                            error: 'Facility already reserved',
+                            description: `${amenity.amenityName} is already reserved for ${reservation.reservationDate}`
+                        });
+                    }
+                }
+            }
+        }
+
         // Create a map to track total requested quantities per amenity and date
         const stockRequests = new Map();
 
@@ -1753,7 +1794,7 @@ const batchApproveReservations = async (req, res) => {
             }
         }
 
-        // If stock validation passes, perform the update
+        // If all validations pass, perform the update
         const result = await Reservation.updateMany(
             { _id: { $in: reservationIds } },
             updateData,
