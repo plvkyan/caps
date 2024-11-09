@@ -368,9 +368,6 @@ export const BillForm = () => {
     };
 
 
-    console.log(options);
-
-
 
     return (
 

@@ -490,7 +490,7 @@ export default function Userdetails() {
 
                             </div>
 
-                            {user && user.userPosition === "Unit Owner" && (
+                            {user && user.userPosition === "Unit Owner" && billStatus.billStatus !== "Paid" && (
                                 <Button
                                     className="ml-auto"
                                     onClick={handlePayment}
