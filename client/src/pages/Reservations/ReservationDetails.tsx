@@ -840,45 +840,7 @@ export default function ReservationDetails() {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            {user.userRole === "Admin" && (
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
 
-                                        <Button
-                                            className="ml-auto h-7 w-7"
-                                            size="icon"
-                                            variant="outline"
-                                        >
-                                            <EllipsisVertical className="h-4 w-4" />
-                                        </Button>
-
-                                    </DropdownMenuTrigger>
-
-                                    <DropdownMenuContent align="end" className="mt-1">
-                                        <DropdownMenuGroup>
-                                            {user.userRole === "Admin" && reservation && reservation.reservationVisibility === "Unarchived" && (
-                                                <DropdownMenuItem onClick={handleArchive}>
-                                                    <Archive className="h-4 w-4" />
-                                                    Archive
-                                                </DropdownMenuItem>
-                                            )}
-
-                                            {user.userRole === "Admin" && reservation && reservation.reservationVisibility === "Archived" && (
-                                                <DropdownMenuItem onClick={handleUnarchive}>
-                                                    <ArchiveX className="h-4 w-4" />
-                                                    Unarchive
-                                                </DropdownMenuItem>
-                                            )}
-                                        </DropdownMenuGroup>
-
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem className="text-destructive focus:text-red-500" onClick={handleDelete}>
-                                            <Trash2 className="h-4 w-4" />
-                                            Delete
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            )}
                             {user.userRole === "Admin" && reservation && reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Pending" && (
                                 <>
                                     <Button
@@ -955,6 +917,46 @@ export default function ReservationDetails() {
                                         Completed
                                     </Button>
                                 )}
+
+                            {user.userRole === "Admin" && (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+
+                                        <Button
+                                            className="ml-auto h-7 w-7"
+                                            size="icon"
+                                            variant="outline"
+                                        >
+                                            <EllipsisVertical className="h-4 w-4" />
+                                        </Button>
+
+                                    </DropdownMenuTrigger>
+
+                                    <DropdownMenuContent align="end" className="mt-1">
+                                        <DropdownMenuGroup>
+                                            {user.userRole === "Admin" && reservation && reservation.reservationVisibility === "Unarchived" && (
+                                                <DropdownMenuItem onClick={handleArchive}>
+                                                    <Archive className="h-4 w-4" />
+                                                    Archive
+                                                </DropdownMenuItem>
+                                            )}
+
+                                            {user.userRole === "Admin" && reservation && reservation.reservationVisibility === "Archived" && (
+                                                <DropdownMenuItem onClick={handleUnarchive}>
+                                                    <ArchiveX className="h-4 w-4" />
+                                                    Unarchive
+                                                </DropdownMenuItem>
+                                            )}
+                                        </DropdownMenuGroup>
+
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="text-destructive focus:text-red-500" onClick={handleDelete}>
+                                            <Trash2 className="h-4 w-4" />
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            )}
 
                         </div>
 
