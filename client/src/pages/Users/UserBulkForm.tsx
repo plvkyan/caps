@@ -219,8 +219,6 @@ export default function UserBulkForm() {
                 throw new Error("Starting lot cannot be higher than ending lot.");
             }
 
-            console.log(values.defaultStatus);
-
             // Post the data to the server
             const response = await bulkCreateUsers(
                 values.startBlock,
@@ -234,7 +232,6 @@ export default function UserBulkForm() {
 
             if (!response.ok) {
                 const data = await response.json();
-                console.log(data)
                 throw new Error(data.error || 'Error creating new user.');
             }
 

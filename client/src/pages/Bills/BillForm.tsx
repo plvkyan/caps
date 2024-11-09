@@ -368,7 +368,7 @@ export const BillForm = () => {
     };
 
 
-
+    console.log(options);
 
 
 
@@ -522,7 +522,7 @@ export const BillForm = () => {
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </Label>
-                                                <Select onValueChange={console.log(billForm.watch())}>
+                                                <Select>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select bill preset" />
                                                     </SelectTrigger>
