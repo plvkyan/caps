@@ -40,8 +40,8 @@ export const bulkCreateUsers = async (startBlock: number, endBlock: number, star
             startLot: startLot,
             endLot: endLot,
             defaultPassword: defaultPassword, 
-            userStatus: defaultStatus, 
-            userVisibility: defaultVisibility,
+            defaultStatus: defaultStatus, 
+            defaultVisibility: defaultVisibility,
         }),
         headers: {
             'Content-Type': 'application/json'

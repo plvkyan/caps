@@ -161,6 +161,8 @@ userSchema.statics.bulkSignup = async function(
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(defaultPassword, salt);
 
+        console.log(defaultStatus)
+
         // Generate users for each block and lot combination
         for (let block = startBlock; block <= endBlock; block++) {
             for (let lot = startLot; lot <= endLot; lot++) {
