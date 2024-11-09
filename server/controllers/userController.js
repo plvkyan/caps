@@ -98,6 +98,8 @@ const bulkCreateUsers = async (req, res) => {
 
     try {
 
+        console.log(defaultStatus);
+
         const createUsers = await User.bulkSignup(startBlock, endBlock, startLot, endLot, defaultPassword, defaultStatus, defaultVisibility);
         
         res.status(200).json(createUsers);

@@ -144,13 +144,14 @@ userSchema.statics.bulkSignup = async function(
     startLot,
     endLot,
     defaultPassword,
-    defaultRole = "Unit Owner",
-    defaultPosition = "Unit Owner",
     defaultStatus,
     defaultVisibility
 ) {
     try {
         const users = [];
+
+        const defaultRole = "Unit Owner";
+        const defaultPosition = "Unit Owner";
 
         // Validate inputs
         if (!startBlock || !endBlock || !startLot || !endLot || !defaultPassword) {
