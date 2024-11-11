@@ -123,6 +123,7 @@ import UserDetails from './pages/Users/UserDetails';
 import BillDetails from './pages/Bills/BillDetails';
 import { useEffect } from 'react';
 import { getSingleUser } from './data/user-api';
+import PrivateRouteAdmin from './pages/PrivateRouteAdmin';
 
 
 
@@ -205,11 +206,11 @@ function App() {
                         {/* Amenities list page */}
                         <Route path="/amenities" element={<PrivateRoute component={AmenityPage} />} />
                         {/* Create new amenity page */}
-                        <Route path="/amenities/create" element={<PrivateRoute component={AmenityForm} />} />
+                        <Route path="/amenities/create" element={<PrivateRouteAdmin component={AmenityForm} />} />
                         {/* Amenity details page */}
-                        <Route path="/amenities/:id" element={<PrivateRoute component={AmenityDetails} />} />
+                        <Route path="/amenities/:id" element={<PrivateRouteAdmin component={AmenityDetails} />} />
                         {/* Edit amenity page */}
-                        <Route path="/amenities/edit/:id" element={<PrivateRoute component={AmenityEditForm} />} />
+                        <Route path="/amenities/edit/:id" element={<PrivateRouteAdmin component={AmenityEditForm} />} />
 
 
 
@@ -221,7 +222,7 @@ function App() {
 
 
                         {/* Archive Routes */}
-                        <Route path="/archives" element={<PrivateRoute component={ArchivePage} />} />
+                        <Route path="/archives" element={<PrivateRouteAdmin component={ArchivePage} />} />
 
 
 
@@ -229,9 +230,9 @@ function App() {
                         {/* Bill list page */}
                         <Route path="/bills" element={<PrivateRoute component={BillPage} />} />
                         {/* Create new bill page */}
-                        <Route path="/bills/create/" element={<PrivateRoute component={BillForm} />} />
+                        <Route path="/bills/create/" element={<PrivateRouteAdmin component={BillForm} />} />
                         {/* Create new bill preset page */}
-                        <Route path="/bills/preset-create/" element={<PrivateRoute component={BillPresetForm} />} />
+                        <Route path="/bills/preset-create/" element={<PrivateRouteAdmin component={BillPresetForm} />} />
                         <Route path="/bills/:id" element={<PrivateRoute component={BillDetails} />} />
                         {/* Bill payment successful page */}
                         <Route path="/bills/success" element={<PrivateRoute component={Success} />} />
@@ -252,13 +253,13 @@ function App() {
 
                         {/* User routes */}
                         {/* User list page */}
-                        <Route path="/users" element={<PrivateRoute component={UserPage} />} />
+                        <Route path="/users" element={<PrivateRouteAdmin component={UserPage} />} />
                         {/* Create new user page */}
-                        <Route path="/users/create" element={<PrivateRoute component={UserForm} />} />
+                        <Route path="/users/create" element={<PrivateRouteAdmin component={UserForm} />} />
                         {/* Bulk create new users page */}
-                        <Route path="/users/bulk-create" element={<PrivateRoute component={UserBulkForm} />} />
+                        <Route path="/users/bulk-create" element={<PrivateRouteAdmin component={UserBulkForm} />} />
                         {/* User details */}
-                        <Route path="/users/:id" element={<PrivateRoute component={UserDetails} />} />
+                        <Route path="/users/:id" element={<PrivateRouteAdmin component={UserDetails} />} />
 
 
                     </Routes>
