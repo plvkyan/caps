@@ -14,6 +14,8 @@ import {
     Warehouse,
 } from "lucide-react";
 
+
+
 export const DASHBOARD = {
     title: "Dashboard",
     url: "/dashboard",
@@ -21,7 +23,7 @@ export const DASHBOARD = {
     isActive: false,
 }
 
-export const BILLS = {
+export const ADMIN_BILLS = {
     title: "Bills",
     url: "/bills",
     icon: ReceiptText,
@@ -36,6 +38,13 @@ export const BILLS = {
             url: "/bills/preset-create",
         },
     ]
+}
+
+export const UNIT_OWNER_BILLS = {
+    title: "Bills",
+    url: "/bills",
+    icon: ReceiptText,
+    isActive: false,
 }
 
 export const RESERVATIONS = {
@@ -109,11 +118,26 @@ export const GENERAL_NAV_DATA = {
     ],
 }
 
-export const TRANSACTION_NAV_DATA = {
+export const ADMIN_TRANSACTION_NAV_DATA = {
     label: "Transactions",
     items: [
-        BILLS,
+        ADMIN_BILLS,
         RESERVATIONS,
+    ]
+}
+
+export const UNIT_OWNER_TRANSACTION_NAV_DATA = {
+    label: "Transactions",
+    items: [
+        UNIT_OWNER_BILLS,
+        RESERVATIONS,
+    ]
+}
+
+export const UNIT_OWNER_ASSOCIATION_NAV_DATA = {
+    label: "Association",
+    items: [
+        ANNOUNCEMENTS,
     ]
 }
 
@@ -126,16 +150,29 @@ export const ASSOCIATION_NAV_DATA = {
     ]
 }
 
-export const SUPPORT_NAV_DATA = {
+export const ADMIN_SUPPORT_NAV_DATA = {
     items: [
         ARCHIVES,
         SETTINGS,
     ]
 }
 
+export const UNIT_OWNER_SUPPORT_NAV_DATA = {
+    items: [
+        SETTINGS,
+    ]
+}
+
 export const ADMIN_SIDEBAR_NAV_DATA = {
     GENERAL_NAV_DATA,
-    TRANSACTION_NAV_DATA,
+    ADMIN_TRANSACTION_NAV_DATA,
     ASSOCIATION_NAV_DATA,
-    SUPPORT_NAV_DATA,
+    ADMIN_SUPPORT_NAV_DATA,
+}
+
+export const UNIT_OWNER_SIDEBAR_NAV_DATA = {
+    GENERAL_NAV_DATA,
+    UNIT_OWNER_TRANSACTION_NAV_DATA,
+    UNIT_OWNER_ASSOCIATION_NAV_DATA,
+    UNIT_OWNER_SUPPORT_NAV_DATA,
 }

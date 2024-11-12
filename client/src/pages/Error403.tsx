@@ -26,7 +26,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-const Error404: React.FC = () => {
+const Error403: React.FC = () => {
 
 
 
@@ -42,6 +42,7 @@ const Error404: React.FC = () => {
     // Functions
     // Navigate back to a page function
     const navigateBack = () => {
+        
         if (user) {
             navigate('/dashboard');
         } else {
@@ -76,4 +77,4 @@ const Error404: React.FC = () => {
 
 
 
-export default Error404;
+export default Error403;

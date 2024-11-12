@@ -9,6 +9,7 @@ import { Navigate } from "react-router-dom";
 // Hooks Imports
 // Authentication Hook Import
 import { useAuthContext } from "@/hooks/useAuthContext";
+import Error403 from "./Error403";
 
 
 
@@ -42,7 +43,7 @@ export default function PrivateRoute({ component: Component, ...rest }: PrivateR
     // If the user is not an admin, redirect to the 403 page
     // This is to prevent non-admin users from accessing admin pages
     if (user.userRole !== "Admin" && user.userPosition === "Unit Owner") {
-        return <Navigate to="/403" replace={true} />
+        return <Error403 />
     }
 
     // Return the protected component

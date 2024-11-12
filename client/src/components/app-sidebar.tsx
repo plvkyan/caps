@@ -20,7 +20,8 @@ import {
 
 
 //
-import { ADMIN_SIDEBAR_NAV_DATA } from "@/data/sidebar-nav-data"
+import { ADMIN_SIDEBAR_NAV_DATA, UNIT_OWNER_SIDEBAR_NAV_DATA } from "@/data/sidebar-nav-data"
+import { useAuthContext } from "@/hooks/useAuthContext"
 
 // import { Separator } from "@/components/ui/separator"
 
@@ -29,6 +30,11 @@ import { ADMIN_SIDEBAR_NAV_DATA } from "@/data/sidebar-nav-data"
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+  const { user } = useAuthContext();
+
+
+
   return (
 
     <Sidebar variant="inset" {...props}>
@@ -57,19 +63,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       </SidebarHeader>
 
-      <SidebarContent className="flex items-center">
+      {user && user.userRole === "Admin" && user.userPosition !== "Unit Owner" && (
+        <SidebarContent className="flex items-center">
 
-        <NavMain items={ADMIN_SIDEBAR_NAV_DATA.GENERAL_NAV_DATA.items} label={ADMIN_SIDEBAR_NAV_DATA.GENERAL_NAV_DATA.label} />
-        <NavMain items={ADMIN_SIDEBAR_NAV_DATA.TRANSACTION_NAV_DATA.items} label={ADMIN_SIDEBAR_NAV_DATA.TRANSACTION_NAV_DATA.label} />
-        <NavMain items={ADMIN_SIDEBAR_NAV_DATA.ASSOCIATION_NAV_DATA.items} label={ADMIN_SIDEBAR_NAV_DATA.ASSOCIATION_NAV_DATA.label} />
-        <NavSecondary items={ADMIN_SIDEBAR_NAV_DATA.SUPPORT_NAV_DATA.items} className="mt-auto"/>
+          <NavMain items={ADMIN_SIDEBAR_NAV_DATA.GENERAL_NAV_DATA.items} label={ADMIN_SIDEBAR_NAV_DATA.GENERAL_NAV_DATA.label} />
+          <NavMain items={ADMIN_SIDEBAR_NAV_DATA.ADMIN_TRANSACTION_NAV_DATA.items} label={ADMIN_SIDEBAR_NAV_DATA.ADMIN_TRANSACTION_NAV_DATA.label} />
+          <NavMain items={ADMIN_SIDEBAR_NAV_DATA.ASSOCIATION_NAV_DATA.items} label={ADMIN_SIDEBAR_NAV_DATA.ASSOCIATION_NAV_DATA.label} />
+          <NavSecondary items={ADMIN_SIDEBAR_NAV_DATA.ADMIN_SUPPORT_NAV_DATA.items} className="mt-auto" />
 
-      </SidebarContent>
+        </SidebarContent>
+      )}
+
+{user && user.userRole === "Unit Owner" && user.userPosition === "Unit Owner" && (
+        <SidebarContent className="flex items-center">
+
+          <NavMain items={UNIT_OWNER_SIDEBAR_NAV_DATA.GENERAL_NAV_DATA.items} label={UNIT_OWNER_SIDEBAR_NAV_DATA.GENERAL_NAV_DATA.label} />
+          <NavMain items={UNIT_OWNER_SIDEBAR_NAV_DATA.UNIT_OWNER_TRANSACTION_NAV_DATA.items} label={UNIT_OWNER_SIDEBAR_NAV_DATA.UNIT_OWNER_TRANSACTION_NAV_DATA.label} />
+          <NavMain items={UNIT_OWNER_SIDEBAR_NAV_DATA.UNIT_OWNER_ASSOCIATION_NAV_DATA.items} label={UNIT_OWNER_SIDEBAR_NAV_DATA.UNIT_OWNER_ASSOCIATION_NAV_DATA.label} />
+          <NavSecondary items={UNIT_OWNER_SIDEBAR_NAV_DATA.UNIT_OWNER_SUPPORT_NAV_DATA.items} className="mt-auto" />
+
+        </SidebarContent>
+      )}
+
 
       <SidebarFooter className="block md:hidden">
-        <NavUser/>
+        <NavUser />
       </SidebarFooter>
-      
+
     </Sidebar>
 
   )
