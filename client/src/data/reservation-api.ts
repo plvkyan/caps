@@ -298,6 +298,36 @@ export const setReservationCompleted = async (reservationId, statusAuthorId, sta
     }));
 }
 
+// PATCH request to update a reservation status to completed
+export const setReservationVoid = async (reservationId, statusAuthorId, statusAuthor, statusAuthorPosition) => {
+    return (await fetch(apiReservationsUrl + '/update/status/void/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            statusAuthorId: statusAuthorId,
+            statusAuthor: statusAuthor,
+            statusAuthorPosition: statusAuthorPosition
+        })
+    }));
+}
+
+// PATCH request to update a reservation status to completed
+export const setReservationCancelled = async (reservationId, statusAuthorId, statusAuthor, statusAuthorPosition) => {
+    return (await fetch(apiReservationsUrl + '/update/status/cancelled/' + reservationId, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            statusAuthorId: statusAuthorId,
+            statusAuthor: statusAuthor,
+            statusAuthorPosition: statusAuthorPosition
+        })
+    }));
+}
+
 export const updateReservationImages = async (reservationId, reservationImages) => {
     return (await fetch(apiReservationsUrl + '/update/images/' + reservationId, {
         method: 'PATCH',

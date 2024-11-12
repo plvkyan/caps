@@ -168,6 +168,7 @@ import {
     // setReservationOngoing,
     setReservationRejected,
     setReservationReturned,
+    setReservationVoid,
     unarchiveReservation,
     updateReservationImages,
 } from "@/data/reservation-api.ts";
@@ -286,6 +287,16 @@ export default function ReservationDetails() {
         if (sessionStorage.getItem("reservationCompleted")) {
             toast.success("Reservation completed successfully.");
             sessionStorage.removeItem("reservationCompleted");
+        }
+
+        if (sessionStorage.getItem("reservationCancelled")) {
+            toast.success("Reservation cancelled successfully.");
+            sessionStorage.removeItem("reservationCancelled");
+        }
+
+        if (sessionStorage.getItem("reservationVoided")) {
+            toast.success("Reservation voided successfully.");
+            sessionStorage.removeItem("reservationVoided");
         }
 
         if (sessionStorage.getItem("reservationImagesUploaded")) {
@@ -531,6 +542,68 @@ export default function ReservationDetails() {
         } catch (error) {
             console.log(error);
             toast.error((error as { error?: string }).error || "Failed to reject reservation.", {
+                closeButton: true,
+                description: (error as { description?: string }).description || null,
+            });
+        }
+    };
+
+    const handleCancelReservation = async () => {
+        if (!reservation?._id) {
+            toast.error("Reservation ID not found");
+            return;
+        }
+
+        try {
+            const response = await setReservationRejected(
+                reservation._id,
+                user.id,
+                user.userBlkLt,
+                user.userPosition
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw data;
+            }
+
+            sessionStorage.setItem("reservationCancelled", "true");
+            window.location.reload();
+        } catch (error) {
+            console.log(error);
+            toast.error((error as { error?: string }).error || "Failed to cancel reservation.", {
+                closeButton: true,
+                description: (error as { description?: string }).description || null,
+            });
+        }
+    };
+
+    const handleVoidReservation = async () => {
+        if (!reservation?._id) {
+            toast.error("Reservation ID not found");
+            return;
+        }
+
+        try {
+            const response = await setReservationVoid(
+                reservation._id,
+                user.id,
+                user.userBlkLt,
+                user.userPosition
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw data;
+            }
+
+            sessionStorage.setItem("reservationVoided", "true");
+            window.location.reload();
+        } catch (error) {
+            console.log(error);
+            toast.error((error as { error?: string }).error || "Failed to void reservation.", {
                 closeButton: true,
                 description: (error as { description?: string }).description || null,
             });
@@ -787,7 +860,7 @@ export default function ReservationDetails() {
 
                                     <BreadcrumbItem className="hidden md:block">
                                         <BreadcrumbPage>
-Reservation Details
+                                            Reservation Details
                                         </BreadcrumbPage>
                                     </BreadcrumbItem>
 
@@ -861,6 +934,32 @@ Reservation Details
                                         </Button>
                                     </>
                                 )}
+
+                                {user.userRole === "Unit Owner" && user.userPosition === "Unit Owner" && reservation && reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Pending" && (
+                                    <Button
+                                        onClick={handleCancelReservation}
+                                        size="sm"
+                                        variant="outline"
+                                    >
+                                        <CircleX className="h-4 w-4 text-destructive" />
+                                        Cancel
+                                    </Button>
+                                )}
+
+                                {user.userRole === "Admin" && user.userPosition !== "Unit Owner" && reservation &&
+                                    ["Approved", "Ongoing", "For Return", "Returned", "Completed"].includes(
+                                        reservation.reservationStatus[reservation.reservationStatus.length - 1].status
+                                    ) && (
+                                        <Button
+                                            onClick={handleVoidReservation}
+                                            size="sm"
+                                            variant="outline"
+                                        >
+                                            <CircleX className="h-4 w-4 text-destructive" />
+                                            Void
+                                        </Button>
+                                    )}
+
                                 {/* <Button
                                 onClick={handleSetReservationOngoing}
                                 size="sm"
@@ -1006,36 +1105,59 @@ Reservation Details
                                     "Completed"
                                 ].indexOf(item.step);
 
+                                // Only replace the text of the step that matches the current status
+                                const displayStep = currentStatus === "Void" &&
+                                    item.step === reservation?.reservationStatus?.[reservation.reservationStatus.length - 2]?.status ?
+                                    "Void" : item.step;
+
                                 const color = getStatusColor(stepIndex - 1);
 
                                 return (
                                     <React.Fragment key={idx}>
                                         <div className="flex flex-col items-center flex-1">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium
-                                                                    ${color}`}>
+                                                ${color}`}>
                                                 {item.index + 1}
                                             </div>
                                             <div className="mt-2 text-sm text-center flex flex-col items-center">
-                                                <span className="">{item.step}</span>
-                                                {reservation?.reservationStatus?.find(s => s.status === item.step) && (
-                                                    <>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {format(
-                                                                new Date(reservation.reservationStatus.find(s =>
-                                                                    s.status === item.step)?.statusDate || ""),
-                                                                "Pp"
-                                                            )}
-                                                        </span>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {reservation.reservationStatus.find(s =>
-                                                                s.status === item.step)?.statusAuthor},
-                                                        </span>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {reservation.reservationStatus.find(s =>
-                                                                s.status === item.step)?.statusAuthorPosition}
-                                                        </span>
-                                                    </>
-                                                )}
+                                                <span className="">{displayStep}</span>
+                                                {reservation?.reservationStatus?.find(s => {
+                                                    // For void status, get the void status details
+                                                    if (currentStatus === "Void" && item.step === reservation?.reservationStatus?.[reservation.reservationStatus.length - 2]?.status) {
+                                                        return s.status === "Void";
+                                                    }
+                                                    return s.status === item.step;
+                                                }) && (
+                                                        <>
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {format(
+                                                                    new Date(reservation.reservationStatus.find(s => {
+                                                                        if (currentStatus === "Void" && item.step === reservation?.reservationStatus?.[reservation.reservationStatus.length - 2]?.status) {
+                                                                            return s.status === "Void";
+                                                                        }
+                                                                        return s.status === item.step;
+                                                                    })?.statusDate || ""),
+                                                                    "Pp"
+                                                                )}
+                                                            </span>
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {reservation.reservationStatus.find(s => {
+                                                                    if (currentStatus === "Void" && item.step === reservation?.reservationStatus?.[reservation.reservationStatus.length - 2]?.status) {
+                                                                        return s.status === "Void";
+                                                                    }
+                                                                    return s.status === item.step;
+                                                                })?.statusAuthor},
+                                                            </span>
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {reservation.reservationStatus.find(s => {
+                                                                    if (currentStatus === "Void" && item.step === reservation?.reservationStatus?.[reservation.reservationStatus.length - 2]?.status) {
+                                                                        return s.status === "Void";
+                                                                    }
+                                                                    return s.status === item.step;
+                                                                })?.statusAuthorPosition}
+                                                            </span>
+                                                        </>
+                                                    )}
                                             </div>
                                         </div>
                                         {idx < (reservation?.reservationType === "Equipment" || reservation?.reservationType === "Equipment and Facility" ? 5 : 3) && (
@@ -1045,6 +1167,10 @@ Reservation Details
                                 );
                             })}
                         </div>
+
+
+
+
 
                         <div className="flex text-sm bg-gray-700/20 border border-gray-700 text-gray-400 items-center gap-3 rounded-md px-4 py-3.5">
                             <Info className="w-5 h-5" />
@@ -1087,7 +1213,7 @@ Reservation Details
                                                                 </div>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
-                                                                <p> This user is {reservee?.memberStatus}. The color of the badge to the right also represents their status. </p>
+                                                                <p> This user is {reservee?.userStatus}. The color of the badge to the right also represents their status. </p>
                                                             </TooltipContent>
                                                         </Tooltip>
                                                     </TooltipProvider>
@@ -1259,14 +1385,18 @@ Reservation Details
                                                         )}
                                                     </div>
 
-                                                    <Button
-                                                        size="sm"
-                                                        type="submit"
-                                                        variant="outline"
-                                                    >
-                                                        {loading ? <LoadingSpinner className="h-4 w-4" /> : <CloudUpload className="h-4 w-4" />}
+                                                    {user && user._id === reservee?._id && reservation?.reservationStatus[reservation.reservationStatus.length - 1].status === "Ongoing" && (
+                                                        <Button
+                                                            disabled={loading}
+                                                            size="sm"
+                                                            type="submit"
+                                                            variant="outline"
+                                                        >
+                                                            {loading ? <LoadingSpinner className="h-4 w-4" /> : <CloudUpload className="h-4 w-4" />}
+                                                        </Button>
+                                                    )}
 
-                                                    </Button>
+
 
                                                 </div>
 

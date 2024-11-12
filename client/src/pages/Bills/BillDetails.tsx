@@ -119,6 +119,7 @@ import { BillType } from "@/types/bill-type"
 // Get a single bill API call import
 import { archiveBill, getBill, unarchiveBill, updateBillPayorStatus } from "@/data/bills-api"
 import { useNavigate } from "react-router-dom"
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner"
 
 
 
@@ -450,7 +451,7 @@ export default function Userdetails() {
 
                 </header>
 
-                {bill && (
+                {bill ? (
 
                     <main className="flex flex-col gap-4 p-8 pt-4">
 
@@ -836,6 +837,11 @@ export default function Userdetails() {
 
                     </main>
 
+                ): (
+                    <div className="flex w-full h-full gap-2 items-center justify-center opacity-90">
+                        <LoadingSpinner className="h-6 w-6" />
+                        <span className="text-sm"> Loading </span>
+                    </div>
                 )}
 
 

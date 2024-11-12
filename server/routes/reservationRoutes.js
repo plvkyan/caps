@@ -54,6 +54,8 @@ const {
    batchArchiveReservations,
    batchUnarchiveReservations,
    unarchiveReservation,
+   setReservationCancelled,
+   setReservationVoid,
 } = require('../controllers/reservationController');
 const { set } = require('mongoose');
 
@@ -164,6 +166,8 @@ router.patch('/update/status/ongoing/:id', setReservationOngoing);
 router.patch('/update/status/forreturn/:id', setReservationForReturn);
 router.patch('/update/status/returned/:id', setReservationReturned);
 router.patch('/update/status/completed/:id', setReservationCompleted);
+router.patch('/update/status/cancelled/:id', setReservationCancelled);
+router.patch('/update/status/void/:id', setReservationVoid);
 router.patch('/update/images/:id', uploadReservationImages);
 router.patch('/update/visibility/batch/archive', batchArchiveReservations)
 router.patch('/update/visibility/batch/unarchives', batchUnarchiveReservations)

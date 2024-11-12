@@ -1251,6 +1251,110 @@ const setReservationCompleted = async (req, res) => {
     }
 }
 
+// Reject a single reservation
+const setReservationCancelled = async (req, res) => {
+    const { id } = req.params;
+    const { statusAuthorId, statusAuthor, statusAuthorPosition } = req.body;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            })
+        }
+
+        // Get the latest status
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+
+        // Check if the reservation is pending
+        if (!latestStatus || latestStatus.status !== "Pending") {
+            return res.status(400).json({
+                error: 'Only pending reservations can be cancelled',
+                description: 'Reservation status of type \'' + latestStatus.status + '\' cannot be cancelled.'
+            })
+        }
+
+        // Create new status object
+        const newStatus = {
+            status: "Cancelled",
+            statusDate: new Date(),
+            statusAuthorId,
+            statusAuthor,
+            statusAuthorPosition
+        };
+
+        // Add status to reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { $push: { reservationStatus: newStatus } },
+            { new: true }
+        );
+
+        console.log("Reservation cancelled successfully.");
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        console.log("Error cancelling reservation: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+const setReservationVoid = async (req, res) => {
+    const { id } = req.params;
+    const { statusAuthorId, statusAuthor, statusAuthorPosition } = req.body;
+
+    try {
+        // Find the reservation first
+        const reservation = await Reservation.findById(id);
+
+        if (!reservation) {
+            return res.status(400).json({
+                error: 'Reservation not found',
+                description: 'There might be internal errors. Please try again later.'
+            })
+        }
+
+        // Get the latest status
+        const latestStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
+
+        // Define allowed statuses
+        const allowedStatuses = ["Approved", "Ongoing", "For Return", "Returned", "Completed"];
+
+        // Check if the latest status is allowed to be voided
+        if (!latestStatus || !allowedStatuses.includes(latestStatus.status)) {
+            return res.status(400).json({
+                error: 'Invalid status for voiding',
+                description: `Only reservations with status ${allowedStatuses.join(", ")} can be voided. Current status: ${latestStatus.status}`
+            })
+        }
+
+        // Create new status object
+        const newStatus = {
+            status: "Void",
+            statusDate: new Date(),
+            statusAuthorId,
+            statusAuthor,
+            statusAuthorPosition
+        };
+
+        // Add status to reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            { $push: { reservationStatus: newStatus } },
+            { new: true }
+        );
+
+        console.log("Reservation voided successfully.");
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        console.log("Error voiding reservation: ", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
 const uploadReservationImages = async (req, res) => {
 
     const { id } = req.params;
@@ -1966,6 +2070,8 @@ module.exports = {
     setReservationForReturn,
     setReservationReturned,
     setReservationCompleted,
+    setReservationCancelled,
+    setReservationVoid,
     batchApproveReservations,
     batchRejectReservations,
     updateReservation,

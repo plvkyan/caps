@@ -37,12 +37,26 @@ export const CANCELLED = {
     label: "Cancelled",
 };
 
+export const FOR_RETURN = {
+    id: 7,
+    value: "For Return",
+    label: "For Return",
+};
+
+export const RETURNED = {
+    id: 8,
+    value: "Returned",
+    label: "Returned",
+};
+
 
 export const RESERVATION_DATA = [
     APPROVED,
-    REJECTED,
-    PENDING,
-    VOID,
-    COMPLETED,
     CANCELLED,
+    COMPLETED,
+    FOR_RETURN,
+    PENDING,
+    REJECTED,
+    RETURNED,
+    VOID,
 ];
