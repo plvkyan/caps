@@ -329,6 +329,10 @@ export default function BillTable<TData extends BillData, TValue>({
                                         return null;
                                     }
 
+                                    if (header.id === "billStatus" && user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
+                                        return null;
+                                    }
+
                                     return (
                                         <TableHead key={header.id}>
                                             {header.isPlaceholder
@@ -367,6 +371,10 @@ export default function BillTable<TData extends BillData, TValue>({
                                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </TableCell>
                                                 )
+                                            }
+
+                                            if (cell.column.id === "billStatus" && user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
+                                                return null;
                                             }
 
                                             return (

@@ -35,11 +35,21 @@ import { BillType } from "@/types/bill-type";
 // Utility imports
 // date-fns format function Import
 import { format } from "date-fns";
+import { useAuthContext } from "@/hooks/useAuthContext";
+import { Badge } from "@/components/ui/badge";
 
 const PHPesos = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'PHP',
 });
+
+const userFunction = () => {
+
+    const { user } = useAuthContext();
+
+    return user;
+}
+
 
 
 
@@ -116,6 +126,37 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         },
     },
     {
+        accessorKey: "billStatus",
+        accessorFn: (row) => {
+
+            const status = row.billPayors.find(payor => payor.payorId === userFunction()._id);
+
+            return status?.billStatus;
+        },
+        header: ({ column }) => {
+            return (
+                <DataTableColumnHeader column={column} title="Status" />
+            )
+        },
+        cell: ({ row }) => {
+
+            const status = row.original.billPayors.find(payor => payor.payorId === userFunction()._id);
+
+            return (
+                <div>
+                    <Badge variant={
+                        status?.billStatus === "Pending" ? "warning" :
+                            status?.billStatus === "Paid" ? "default" :
+                                status?.billStatus === "Overdue" ? "destructive" :
+                                    "outline"
+                    }>
+                        {status?.billStatus}
+                    </Badge>
+                </div>
+            )
+        },
+    },
+    {
         accessorKey: "billDueDate",
         accessorFn: (row) => {
             return format(row.billDueDate, "PPP");
@@ -135,7 +176,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         filterFn:
             (row, id, value) => {
 
-                console.log(id); 
+                console.log(id);
                 const date = new Date(row.original.billDueDate);
 
                 const { from: start, to: end } = value as { from: Date, to: Date };
