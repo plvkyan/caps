@@ -16,7 +16,9 @@ const {
     updateUser, 
     bulkCreateUsers,
     bulkArchiveUsers,
-    bulkUnarchiveUsers
+    bulkUnarchiveUsers,
+    archiveUser,
+    unarchiveUser
 } = require('../controllers/userController')
 
 
@@ -73,6 +75,14 @@ router.get('/single/:id', getUser)
 // PATCH functions
 // UPDATE a user
 router.patch('/:id', updateUser)
+// ARCHIVE single user
+
+router.patch('/archive/single/:id', archiveUser);
+
+// UNARCHIVE single user
+router.patch('/unarchive/single/:id', unarchiveUser);
+
+
 // ARCHIVE multiple users
 router.patch('/archive/bulk', bulkArchiveUsers)
 // UNARCHIVE multiple users

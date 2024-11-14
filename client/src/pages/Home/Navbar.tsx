@@ -156,7 +156,7 @@ export const Navbar = () => {
 
 
 
-                    <div className="flex gap-5">
+                    <div className="flex hidden gap-5 md:flex">
 
                         <ModeToggle />
 

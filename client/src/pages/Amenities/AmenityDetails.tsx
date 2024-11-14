@@ -1313,10 +1313,10 @@ export default function AmenityDetails() {
                                                             <TableCell className="font-medium"> Max Stock </TableCell>
                                                             <TableCell className="text-muted-foreground"> {amenity.amenityStockMax} </TableCell>
                                                         </TableRow>
-                                                        <TableRow key="missing-stock">
+                                                        {/* <TableRow key="missing-stock">
                                                             <TableCell className="font-medium"> Unavailable </TableCell>
                                                             <TableCell className="text-muted-foreground"> Idk how stocks should work </TableCell>
-                                                        </TableRow>
+                                                        </TableRow> */}
                                                         <TableRow key="min-qty">
                                                             <TableCell className="font-medium"> Min per reservation </TableCell>
                                                             <TableCell className="text-muted-foreground"> {amenity.amenityQuantityMin} </TableCell>

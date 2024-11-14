@@ -558,7 +558,7 @@ export default function Userdetails() {
                             <div className="grid gap-6 auto-rows-max lg:col-span-2 items-start">
 
                                 {/* Basic information card */}
-                                <Card>
+                                <Card className="sticky top-5">
 
                                     <CardContent className="flex flex-col gap-4 pt-5">
 
@@ -766,13 +766,16 @@ export default function Userdetails() {
                                     </Card>
                                 )}
 
-                                {user && user.userPosition !== "Unit Owner" && (
+                                {user && user.userRole === "Admin" && user.userPosition !== "Unit Owner" && (
                                     <Card>
 
                                         <CardContent className="flex flex-col gap-4 pt-5">
 
                                             <div className="flex flex-col">
                                                 <Label className="text-lg font-semibold"> Bill payors </Label>
+                                                <p className="text-sm text-muted-foreground font-light">
+                                                    {bill.billPayors.filter(payor => payor.billStatus === "Paid").length} out of {bill.billPayors.length} payors are paid.
+                                                </p>
                                             </div>
 
                                             <div className="">
@@ -784,11 +787,13 @@ export default function Userdetails() {
                                                             <div
                                                                 className="flex flex-row justify-between p-3 cursor-pointer hover:bg-muted/30"
                                                             >
-                                                                <div className="flex flex-col">
+                                                                <div className="flex flex-row items-center gap-2">
                                                                     <Label className="text-sm">
-                                                                        {payor.payorBlkLt} <span className="text-muted-foreground"> {payor.billStatus} </span>
+                                                                        {payor.payorBlkLt}
                                                                     </Label>
-                                                                    <p className="text-sm text-muted-foreground"> {payor.billStatus} </p>
+                                                                    {payor.billStatus === "Paid" && <Badge variant="default" className="w-fit h-fit"> {payor.billStatus} </Badge>}
+                                                                    {payor.billStatus === "Pending" && <Badge variant="warning" className="w-fit h-fit"> {payor.billStatus} </Badge>}
+                                                                    {payor.billStatus === "Overdue" && <Badge variant="destructive" className="w-fit h-fit"> {payor.billStatus} </Badge>}
                                                                 </div>
 
                                                                 {payor.billStatus === "Paid" && (
@@ -806,12 +811,14 @@ export default function Userdetails() {
                                                         <div
                                                             className="flex flex-row justify-between p-3 cursor-pointer hover:bg-muted/30 border-b"
                                                         >
-                                                            <div className="flex flex-col">
-                                                                <Label className="text-sm">
-                                                                    {payor.payorBlkLt} <span className="text-muted-foreground"> {payor.billStatus} </span>
-                                                                </Label>
-                                                                <p className="text-sm text-muted-foreground"> {payor.billStatus} </p>
-                                                            </div>
+                                                            <div className="flex flex-row items-center gap-2">
+                                                                    <Label className="text-sm">
+                                                                        {payor.payorBlkLt}
+                                                                    </Label>
+                                                                    {payor.billStatus === "Paid" && <Badge variant="default" className="w-fit h-fit"> {payor.billStatus} </Badge>}
+                                                                    {payor.billStatus === "Pending" && <Badge variant="warning" className="w-fit h-fit"> {payor.billStatus} </Badge>}
+                                                                    {payor.billStatus === "Overdue" && <Badge variant="destructive" className="w-fit h-fit"> {payor.billStatus} </Badge>}
+                                                                </div>
 
                                                             {payor.billStatus === "Paid" && (
                                                                 <Button disabled size="sm"> Already paid </Button>

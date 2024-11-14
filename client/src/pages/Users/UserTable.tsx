@@ -182,9 +182,9 @@ export default function UserTable<TData, TValue>({
 
     // Navigate functions
     // Navigate to a user's details page
-    // const navToUserDetails = (id: String) => {
-        // navigate("/users/" + id);
-    // }
+    const navToUserDetails = (id: String) => {
+        navigate("/users/" + id);
+    }
 
     // Navigate to new user form page
     const navToUserForm = () => {
@@ -258,6 +258,7 @@ export default function UserTable<TData, TValue>({
                 <DataTableViewOptions table={table} label="Toggle Columns" />
 
                 <DataTableFacetedFilter column={table.getColumn("userStatus")} title="Filter" options={STATUS_FILTER_OPTIONS} />
+                <DataTableFacetedFilter column={table.getColumn("userStatus")} title="Filter" options={STATUS_FILTER_OPTIONS} />
 
                 {isFiltered && (
                     <Button
@@ -328,9 +329,9 @@ export default function UserTable<TData, TValue>({
                                                 )
                                             } else return (
                                                 <TableCell
-                                                    className=""
+                                                    className="cursor-pointer"
                                                     key={cell.id}
-                                                    // onClick={() => navToUserDetails((row.original as any)._id)}
+                                                    onClick={() => navToUserDetails((row.original as any)._id)}
                                                 >
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                 </TableCell>

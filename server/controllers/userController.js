@@ -270,13 +270,29 @@ const bulkUnarchiveUsers = async (req, res) => {
             return res.status(400).json({ error: 'Invalid user ID format.' });
         }
 
+        // Get users to be unarchived
+        const usersToUnarchive = await User.find({ _id: { $in: userIds } });
+
         // Check if any users are already unarchived
-        const existingUsers = await User.find({ _id: { $in: userIds } });
-        const alreadyUnarchived = existingUsers.filter(user => user.userVisibility === "Unarchived");
-        
+        const alreadyUnarchived = usersToUnarchive.filter(user => user.userVisibility === "Unarchived");
         if (alreadyUnarchived.length > 0) {
             return res.status(400).json({ 
                 error: 'Some users are already unarchived.',
+            });
+        }
+
+        // Get block/lot numbers of users to be unarchived
+        const blkLtNumbers = usersToUnarchive.map(user => user.userBlkLt);
+
+        // Check for existing unarchived users with same block/lot numbers
+        const existingUnarchived = await User.find({
+            userBlkLt: { $in: blkLtNumbers },
+            userVisibility: "Unarchived"
+        });
+
+        if (existingUnarchived.length > 0) {
+            return res.status(400).json({
+                error: 'Cannot unarchive users. Some block/lot numbers are already in use by unarchived accounts.'
             });
         }
 
@@ -298,7 +314,91 @@ const bulkUnarchiveUsers = async (req, res) => {
     }
 }
 
+// Unarchive single user
+const unarchiveUser = async (req, res) => {
+    const { id } = req.params;
 
+    try {
+        // Validate ID format
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'Invalid user ID format.' });
+        }
+
+        // Get user to be unarchived
+        const userToUnarchive = await User.findById(id);
+        if (!userToUnarchive) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        // Check if user is already unarchived
+        if (userToUnarchive.userVisibility === "Unarchived") {
+            return res.status(400).json({ error: 'User is already unarchived.' });
+        }
+
+        // Check for existing unarchived user with same block/lot number
+        const existingUnarchived = await User.findOne({
+            userBlkLt: userToUnarchive.userBlkLt,
+            userVisibility: "Unarchived"
+        });
+
+        if (existingUnarchived) {
+            return res.status(400).json({
+                error: 'Cannot unarchive user. Block/lot number is already in use by an unarchived account.'
+            });
+        }
+
+        // Update user visibility
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { userVisibility: "Unarchived" },
+            { new: true }
+        );
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+// Archive single user
+const archiveUser = async (req, res) => {
+    const { id } = req.params;
+    const { archiverId } = req.body;
+
+    try {
+        // Validate ID format
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'Invalid user ID format.' });
+        }
+
+        // Check if user is trying to archive themselves
+        if (id === archiverId) {
+            return res.status(400).json({ error: 'You cannot archive your own account.' });
+        }
+
+        // Get user to be archived
+        const userToArchive = await User.findById(id);
+        if (!userToArchive) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        // Check if user is already archived
+        if (userToArchive.userVisibility === "Archived") {
+            return res.status(400).json({ error: 'User is already archived.' });
+        }
+
+        // Update user visibility
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { userVisibility: "Archived" },
+            { new: true }
+        );
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 
 
 
@@ -416,6 +516,8 @@ module.exports = {
 
     // PATCH controllers
     updateUser, 
+    archiveUser,
+    unarchiveUser,
     bulkArchiveUsers,
     bulkUnarchiveUsers,
     

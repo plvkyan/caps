@@ -1,8 +1,6 @@
-import { LogoIcon } from "./Icons";
-
 export const Footer = () => {
 
-
+    const theme = localStorage.getItem("vite-ui-theme");
 
     return (
 
@@ -12,15 +10,33 @@ export const Footer = () => {
 
             <section className="container py-20 grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-x-12 gap-y-8">
 
-                <div className="col-span-full xl:col-span-2">
-                    <a
+                <div className="flex items-center justify-center col-span-full xl:col-span-2">
+
+                    { theme && theme === "dark" && (
+                        <a
                         rel="noreferrer noopener"
                         href="/"
-                        className="font-bold text-xl flex"
                     >
-                        <LogoIcon />
-                        Grand Cedar Homes
+                        <img 
+                        alt="Grand Cedar Homes"
+                        className="max-w-64"
+                        src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798270/grand-cedar-homes-new-logo-dark-mode_sucwgk.png" 
+                        />
                     </a>
+                    )}
+
+{ theme && theme === "light" && (
+                        <a
+                        rel="noreferrer noopener"
+                        href="/"
+                    >
+                        <img 
+                        alt="Grand Cedar Homes"
+                        className="max-w-64"
+                        src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798254/grand-cedar-homes-new-logo-light-mode_fgdxbd.png" 
+                        />
+                    </a>
+                    )}
                 </div>
 
                 <div className="flex flex-col gap-2">

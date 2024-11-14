@@ -90,6 +90,24 @@ export const updateUser = async (_id: String, user: any) => {
     }))
 }
 
+export const archiveUser = async (archiverId: String, id: String) => {
+    return (await fetch(apiUsersUrl + '/archive/single/' + id, {
+        body: JSON.stringify({
+            archiverId: archiverId,
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'PATCH',
+    }));
+}
+
+export const unarchiveUser = async (id: String) => {
+    return (await fetch(apiUsersUrl + '/unarchive/single/' + id, {
+        method: 'PATCH',
+    }));
+}
+
 export const bulkArchiveUsers = async (archiverId: String, userIds: Array<String>) => {
     return (await fetch(apiUsersUrl + '/archive/bulk', {
         body: JSON.stringify({

@@ -18,20 +18,20 @@ interface FAQProps {
 const FAQList: FAQProps[] = [
     {
       question: "Is it free to create an account?",
-      answer: "As long as you own a unit within Grand Cedar Homes and is an actively paying member of its homeowners association (HOA), you have the rights to an account.",
+      answer: "As long as you own a unit within Grand Cedar Homes and is an actively paying member of its homeowners association (HOA), you have the rights to have a free account.",
       value: "item-1",
     },
     {
       question: "How do I create an account?",
       answer:
-        "Accounts are created by the officers of the HOA, the admins of the website. Contact them and tell them your block and lot number and what password you want to have.",
+        "Accounts are created by the officers of the HOA, the admins of the website. Contact them and tell them your block and lot number and they'll give you temporary account credentials. You can use these credentials to access your account and change your password.",
       value: "item-2",
     },
     {
       question:
         "I forgot my account credentials. How can I access my account?",
       answer:
-        "Contact the officers of the HOA, the admins of the website. They shall reset your account and ask you for a new set of account credentials. You can use your new credentials to access your account.",
+        "Contact the officers of the HOA, the admins of the website. They will reset your account credentials and give it to you. You can use your new credentials to access your account.",
       value: "item-3",
     },
 ];
