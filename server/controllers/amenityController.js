@@ -3,9 +3,6 @@
 
 const Amenity = require("../models/amenityModel")
 const mongoose = require('mongoose')
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
-const cloudinary = require('../utils/cloudinary');
 
 
 

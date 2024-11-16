@@ -14,8 +14,13 @@ import {
 } from "@/components/ui/breadcrumb"
 // shadcn NavUser Imports
 import { NavUser } from "@/components/nav-user"
+
+// shadcn ScrollArea Component Import
+// import { ScrollArea } from "@/components/ui/scroll-area"
+
 // shadcn Separator Imports
 import { Separator } from "@/components/ui/separator"
+
 // shadcn Sidebar Imports
 import {
     SidebarInset,

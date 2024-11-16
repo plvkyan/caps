@@ -89,7 +89,6 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    // DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -184,6 +183,9 @@ import { format } from "date-fns";
 // exceljs Workbook Import
 import { Workbook } from "exceljs";
 
+// useNavigate React Router Import
+import { useNavigate } from "react-router-dom";
+
 // React Imports
 import {
     useEffect,
@@ -206,16 +208,15 @@ import { ReservationType } from "@/types/reservation-type";
 
 // Data Imports
 // Amenity API calls Import
-import { 
-    archiveAmenity, 
-    // deleteAmenity, 
-    getSingleAmenity, 
-    unarchiveAmenity 
+import {
+    archiveAmenity,
+    getSingleAmenity,
+    unarchiveAmenity
 } from "@/data/amenity-api";
 
 // Reservation API calls Import
 import { getAmenityReservations } from "@/data/reservation-api";
-import { useNavigate } from "react-router-dom";
+
 
 
 
@@ -269,19 +270,26 @@ export default function AmenityDetails() {
 
     // States
     // Loading state
-    // const [setLoading] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
 
 
     // Image preview states
     // Current image index for image preview
     const [currentIndex, setCurrentIndex] = useState(0);
+
     // Images state
     const [images, setImages] = useState<any>([]);
+
     // Rotating index for image preview state
     const [rotatingIndex, setRotatingIndex] = useState(0);
+
     // Image preview dialog state
     const [showImagePreview, setShowImagePreview] = useState(false);
+
+
+
+
 
     // Export amenity dialog state
     const [showExportDialog, setShowExportDialog] = useState(false);
@@ -295,6 +303,7 @@ export default function AmenityDetails() {
     const [includeReservationOptions, setIncludeReservationOptions] = useState(true);
     // Export amenity reservations options state
     const [showReservationOptions, setShowReservationOptions] = useState(true);
+
     // 
     const [exportReservationDateRange, setExportReservationDateRange] = useState<DateRange | undefined>({
         from: undefined,
@@ -314,12 +323,18 @@ export default function AmenityDetails() {
 
     const [exportAuthorRole, setExportAuthorRole] = useState<string>("All");
 
+
+
+
+
     // Amenity-related states
     // Amenity information state
     const [amenity, setAmenity] = useState<AmenityType>();
 
     // Amenity reservations state
     const [reservations, setReservations] = useState<ReservationType[]>([]);
+
+
 
 
 
@@ -508,7 +523,9 @@ export default function AmenityDetails() {
 
     // Functions
     // Export excel file function
-    const handleExport = async () => {
+    const handleExport = async (type: String) => {
+
+        setLoading(true);
 
         try {
 
@@ -524,7 +541,6 @@ export default function AmenityDetails() {
             wb.lastModifiedBy = user.userBlkLt;
             wb.created = new Date();
             wb.modified = new Date();
-
 
             if (includeBasicInfo) {
                 const ws = wb.addWorksheet(amenity?.amenityName + ' Details');
@@ -647,13 +663,20 @@ export default function AmenityDetails() {
                 wsReservations.getRow(1).font = { bold: true };
             }
 
+            if (type === "excel") {
+                const buffer = await wb.xlsx.writeBuffer();
+                saveAs(new Blob([buffer], { type: "application/octet-stream" }), "amenity-details.xlsx");
+            }
 
-
-            const buffer = await wb.xlsx.writeBuffer();
-            saveAs(new Blob([buffer], { type: "application/octet-stream" }), "amenity-details.xlsx");
+            if (type === "csv") {
+                const buffer = await wb.csv.writeBuffer();
+                saveAs(new Blob([buffer], { type: "application/octet-stream" }), "amenity-details.csv");
+            }
 
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'Failed to export data');
+        } finally {
+            setLoading(false);
         }
 
     }
@@ -854,21 +877,21 @@ export default function AmenityDetails() {
                                     <DropdownMenuGroup>
                                         {amenity && amenity.amenityVisibility === "Archived" && (
                                             <DropdownMenuItem
-                                            onClick={handleUnarchiveAmenity}
-                                        >
-                                            <ArchiveX className="h-4 w-4" />
-                                            Unarchive
-                                        </DropdownMenuItem>
+                                                onClick={handleUnarchiveAmenity}
+                                            >
+                                                <ArchiveX className="h-4 w-4" />
+                                                Unarchive
+                                            </DropdownMenuItem>
                                         )}
                                         {amenity && amenity.amenityVisibility === "Unarchived" && (
                                             <DropdownMenuItem
-                                            onClick={handleArchiveAmenity}
-                                        >
-                                            <Archive className="h-4 w-4" />
-                                            Archive
-                                        </DropdownMenuItem>
+                                                onClick={handleArchiveAmenity}
+                                            >
+                                                <Archive className="h-4 w-4" />
+                                                Archive
+                                            </DropdownMenuItem>
                                         )}
-                                        
+
                                         <DropdownMenuItem onClick={() => navToEditForm(amenity._id)}>
                                             <Pencil className="h-4 w-4" />
                                             Edit
@@ -876,7 +899,7 @@ export default function AmenityDetails() {
 
                                         <DropdownMenuItem onClick={() => setShowExportDialog(true)}>
                                             <Share className="h-4 w-4" />
-                                            Export .xslx
+                                            Export
                                         </DropdownMenuItem>
 
                                     </DropdownMenuGroup>
@@ -892,7 +915,7 @@ export default function AmenityDetails() {
                                         Delete
                                     </DropdownMenuItem>
                                     )} */}
-                                    
+
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
@@ -1458,7 +1481,7 @@ export default function AmenityDetails() {
 
                                         <Label className="text-sm cursor-pointer"> Amenity Reservations </Label>
                                         <div className="flex items-center justify-center h-6 w-6 rounded-md hover:bg-accent">
-                                            {!showReservationOptions ? <ChevronDown className="h-4 w-4" />
+                                            {!showReservationOptions || !includeReservationOptions ? <ChevronDown className="h-4 w-4" />
                                                 : < ChevronUp className="h-4 w-4" />}
                                         </div>
 
@@ -1554,7 +1577,7 @@ export default function AmenityDetails() {
                                                             <CalendarRange className="mr-2 h-4 w-4 opacity-50" />
                                                             {exportCreatedAtDateRange?.from && exportCreatedAtDateRange?.to
                                                                 ? `${format(exportCreatedAtDateRange.from, "MMM d, yyyy")} - ${format(exportCreatedAtDateRange.to, "MMM d, yyyy")}`
-                                                                : "All reservation dates"}
+                                                                : "All creation dates"}
                                                         </Button>
                                                     </PopoverTrigger>
                                                     <PopoverContent className="w-fit">
@@ -1571,7 +1594,7 @@ export default function AmenityDetails() {
                                             </div>
 
                                             {/* Export reservation status */}
-                                            <div className="flex flex-col gap-4 pb-3 w-full">
+                                            <div className="flex flex-col gap-4 pt-1 pb-4 w-full">
 
                                                 <Label className="text-sm text-muted-foreground"> Reservation Status </Label>
 
@@ -1785,15 +1808,40 @@ export default function AmenityDetails() {
                                 </Collapsible>
 
                                 <DialogFooter>
-                                    <Button
-                                        className=""
-                                        disabled={!includeBasicInfo && !includeReservationOptions}
-                                        onClick={handleExport}
-                                        size="sm"
-                                    >
-                                        <Download className="h-7 w-7" />
-                                        Download .xslx
-                                    </Button>
+
+                                    <DropdownMenu>
+
+                                        <DropdownMenuTrigger asChild>
+
+                                            <Button
+                                                className=""
+                                                disabled={(!includeBasicInfo && !includeReservationOptions) || loading}
+                                                size="sm"
+                                            >
+                                                { loading ? <LoadingSpinner className="h-7 w-7" /> : <Download className="h-7 w-7" />}
+                                                Download
+                                                <ChevronDown className="h-7 w-7" />
+                                            </Button>
+
+                                        </DropdownMenuTrigger>
+
+                                        <DropdownMenuContent align="center" className="mt-1">
+                                            <DropdownMenuItem
+                                            onClick={() => handleExport("excel")}
+                                            >
+                                                .xslx 
+                                            </DropdownMenuItem>
+
+                                            <DropdownMenuItem
+                                            onClick={() => handleExport("csv")}
+                                            >
+                                                .csv 
+                                            </DropdownMenuItem>
+
+                                        </DropdownMenuContent>
+
+                                    </DropdownMenu>
+
                                 </DialogFooter>
 
                             </DialogContent>
