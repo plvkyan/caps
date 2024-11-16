@@ -566,7 +566,6 @@ export default function AmenityDetails() {
                         amenityReminder: amenity?.amenityReminder,
                         amenityVisibility: amenity?.amenityVisibility
                     });
-                    ws.addRow({});
                 } else if (amenity && amenity.amenityType === "Facility") {
                     ws.columns = [
                         { header: "Amenity Name", key: "amenityName", width: 20 },

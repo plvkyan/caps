@@ -70,6 +70,8 @@ import { getUnarchivedAmenities } from "@/data/amenity-api.ts";
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Bell } from "lucide-react"
+import { ReservationType } from "@/types/reservation-type"
+import { getAllReservations } from "@/data/reservation-api"
 
 
 
@@ -86,6 +88,8 @@ export default function AmenityPage() {
     // States
     // Reservations state
     const [amenities, setAmenities] = useState<AmenityType[]>([]);
+
+    const [reservations, setReservations] = useState<ReservationType[]>([]);
 
 
 
@@ -130,7 +134,28 @@ export default function AmenityPage() {
             }
         };
 
+        const fetchReservations = async () => {
+            try {
+                const response = await getAllReservations();
+                if (!ignore) {
+                    if (response.ok) {
+                        const data = await response.json();
+                        setReservations(data);
+                    } else {
+                        toast.error("Failed to fetch all reservations.", {
+                            closeButton: true,
+                        });
+                    }
+                }
+            } catch (error) {
+                if (!ignore) {
+                    console.error("Error fetching all reservations: ", error);
+                }
+            }
+        };
+
         let ignore = false;
+        fetchReservations();
         fetchUnarchivedAmenities();
         return () => {
             ignore = true;
@@ -205,7 +230,7 @@ export default function AmenityPage() {
 
                 <main className="flex flex-col gap-4 p-8 pt-4">
 
-                    <AmenityTable columns={AmenityTableColumns} data={amenities} />
+                    <AmenityTable columns={AmenityTableColumns} data={amenities} reservations={reservations} />
 
                 </main>
 
