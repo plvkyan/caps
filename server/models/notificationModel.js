@@ -13,28 +13,33 @@ const Schema = mongoose.Schema;
 
 // Schema
 const notificationSchema = new Schema({
-    
+
     _id: {
         type: Schema.Types.ObjectId,
         auto: true
     },
-    recipient: {
+    recipientIds: [{
         type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+    }],
+    recipientRole: {
+        type: String,
+        required: false,
+        enum: ['Admin', 'Unit Owner', '']
     },
-    message: {
+    notificationMessage: {
         type: String,
         required: true
     },
-    type: {
+    notificationLink: {
         type: String,
-        required: true,
-        enum: ['alert', 'message', 'reminder']
+        required: false,
     },
-    read: {
-        type: Boolean,
-        default: false
+    notificationReadStatus: [{
+        type: Schema.Types.ObjectId,
+    }],
+    notificationData: {
+        type: Object,
+        required: false
     },
     createdAt: {
         type: Date,

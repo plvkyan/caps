@@ -158,11 +158,7 @@ export default function ArchivePage() {
             });
             sessionStorage.removeItem("unarchiveSuccessful");
         }
-        
-    }, []);
 
-    // Fetching unarchived reservations effect
-    useEffect(() => {
         const fetchArchivedReservations = async () => {
             try {
                 const response = await getArchivedReservations();
@@ -179,10 +175,7 @@ export default function ArchivePage() {
         };
 
         fetchArchivedReservations();
-    }, [reservations]);
 
-    // Fetching unarchived amenities effect
-    useEffect(() => {
         const fetchArchivedAmenities = async () => {
             try {
                 const response = await getArchivedAmenities();
@@ -199,10 +192,7 @@ export default function ArchivePage() {
         };
 
         fetchArchivedAmenities();
-    }, [amenities]);
 
-    // Fetching unarchived amenities effect
-    useEffect(() => {
         const fetchArchivedBills = async () => {
             try {
                 const response = await getArchivedBills();
@@ -219,9 +209,6 @@ export default function ArchivePage() {
         };
 
         fetchArchivedBills();
-    }, [bills]);
-
-    useEffect(() => {
 
         const fetchArchivedAnnouncements = async () => {
 
@@ -237,10 +224,6 @@ export default function ArchivePage() {
 
         fetchArchivedAnnouncements();
 
-    }, [announcements])
-
-    // Fetching unarchived amenities effect
-    useEffect(() => {
         const fetchArchivedUsers = async () => {
             try {
                 const response = await getArchivedUsers();
@@ -257,7 +240,8 @@ export default function ArchivePage() {
         };
 
         fetchArchivedUsers();
-    }, [users]);
+        
+    }, []);
 
 
 

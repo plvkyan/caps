@@ -9,6 +9,7 @@ import {
     LayoutDashboard,
     Megaphone,
     ReceiptText,
+    Scroll,
     Settings,
     Users,
     Warehouse,
@@ -102,6 +103,12 @@ export const SETTINGS = {
     icon: Settings,
 }
 
+export const LOGS = {
+    title: "Logs",
+    url: "/logs",
+    icon: Scroll,
+}
+
 export const ARCHIVES = {
     title: "Archives",
     url: "/archives",
@@ -153,6 +160,7 @@ export const ASSOCIATION_NAV_DATA = {
 export const ADMIN_SUPPORT_NAV_DATA = {
     items: [
         ARCHIVES,
+        LOGS,
         SETTINGS,
     ]
 }

@@ -155,7 +155,6 @@ export function NavUser() {
                 Home
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuGroup>
               {/* <DropdownMenuItem>
                 <Bell />

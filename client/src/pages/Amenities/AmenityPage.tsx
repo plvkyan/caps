@@ -63,6 +63,8 @@ import { AmenityType } from "@/types/amenity-type"
 // All unarchived amenities API Import
 import { getUnarchivedAmenities } from "@/data/amenity-api.ts";
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Bell } from "lucide-react"
 
 
 
@@ -89,7 +91,7 @@ export default function AmenityPage() {
     }, []);
 
     useEffect(() => {
-        
+
         sessionStorage.getItem("archiveSuccess") && toast.success("Amenity archived successfully.", { closeButton: true, duration: 10000 });
         sessionStorage.removeItem("archiveSuccess");
 
@@ -98,7 +100,7 @@ export default function AmenityPage() {
 
         sessionStorage.getItem("deleteSuccess") && toast.success("Amenity deleted successfully.", { closeButton: true, duration: 10000 });
         sessionStorage.removeItem("deleteSuccess");
-        
+
     })
 
     // Fetching unarchived amenities effect
@@ -177,6 +179,17 @@ export default function AmenityPage() {
 
                         {/* Account navigation */}
                         <div className="hidden md:flex items-center gap-2">
+
+                            <Button
+                                className="group relative h-10 w-10"
+                                variant="outline"
+                                size="sm"
+                            >
+                                <div className="absolute -top-1 -right-1 bg-destructive w-[0.8rem] h-[0.8rem] transition-all rounded-full text-center z-50 group-hover:bg-destructive/90" />
+                                <Bell className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
+                                <span className="sr-only">Toggle theme</span>
+                            </Button>
+
                             <ThemeToggle />
                             <NavUser />
                         </div>

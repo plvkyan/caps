@@ -20,12 +20,22 @@ const logSchema = new Schema({
     },
     logUser: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
     },
-    logAction: {
+    logMessage: {
         type: String,
         required: true
+    },
+    logSource: {
+        type: String,
+        required: true,
+    },
+    logLink: {
+        type: String,
+        required: false,
+    },
+    logData: {
+        type: Object,
+        required: true,
     },
     createdAt: {
         type: Date,
