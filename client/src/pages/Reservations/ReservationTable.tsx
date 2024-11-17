@@ -8,9 +8,14 @@
 import {
     Archive,
     CalendarRange,
+    ChevronDown,
+    ChevronUp,
     CircleCheck,
     CirclePlus,
     CircleX,
+    Download,
+    Info,
+    Share,
     X
 } from "lucide-react";
 
@@ -23,8 +28,39 @@ import { Button } from "@/components/ui/button";
 // shadcn Calendar Component Import
 import { Calendar } from "@/components/ui/calendar"
 
+// shadcn Checkbox Component Import
+import { Checkbox } from "@/components/ui/checkbox";
+
+// shadcn Collapsible Component Imports
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+// shadcn Dialog Imports
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+
+// shadcn Dropdown Menu Component Imports
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 // shadcn Input Component Import
 import { Input } from "@/components/ui/input";
+
+// shadcn Label Component Import
+import { Label } from "@/components/ui/label";
 
 // shadcn Popover Component Imports
 import {
@@ -32,6 +68,16 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+
+// shadcn Select Component Imports
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
 // shadcn Table Imports
 import {
@@ -43,16 +89,29 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
+// shadcn Tooltip Component Import
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 
 
 
 // Custom Component Imports
 // Custom Data Table Pagination Import
 import { BottomDataTablePagination } from "@/components/custom/BottomDataTablePagination";
+
 // Custom Data Table Faceted Filter
 import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
+
 // Custom Data Table View Options
 import { DataTableViewOptions } from "@/components/custom/DataTableViewOptions";
+
+// Loading Spinner Component Import
+import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 
 
 
@@ -73,6 +132,9 @@ import {
 
 
 // Utility Imports
+// exceljs Workbook Import
+import { Workbook } from "exceljs";
+
 // date-fns format Function Import
 import { format } from "date-fns";
 
@@ -82,6 +144,9 @@ import { useEffect, useState } from "react";
 // React Router Navigate Hook Import
 import { useNavigate } from "react-router-dom";
 
+// file-saver Import
+import { saveAs } from "file-saver";
+
 
 
 // Types
@@ -90,6 +155,7 @@ import { toast } from "sonner";
 import { approveManyReservations, archiveManyReservations, getAllReservations, rejectManyReservations } from "@/data/reservation-api";
 import { useAuthContext } from "@/hooks/useAuthContext";
 import { DateRange } from "react-day-picker";
+import { ReservationType } from "@/types/reservation-type";
 
 
 
@@ -127,6 +193,8 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
 
     // States
+    // 
+    const [loading, setLoading] = useState<boolean>(false);
     // Column Visibility State
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     // Global Filter State
@@ -135,10 +203,6 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     const [sorting, setSorting] = useState<SortingState>([]);
     // Selected Rows State
     const [rowSelection, setRowSelection] = useState({});
-    // Reservations State
-    const [reservations, setReservations] = useState<[]>([]);
-
-    console.log(reservations);
 
     // Custom States
     // Date Range State
@@ -146,6 +210,27 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
         from: undefined,
         to: undefined,
     })
+
+
+
+    // Export states
+    // Show export states
+    const [showExportDialog, setShowExportDialog] = useState(false);
+    const [showReservationOptions, setShowReservationOptions] = useState(true);
+
+    // All reservations
+    const [reservations, setReservations] = useState<ReservationType[]>([]);
+
+    // Export criteria states
+    const [exportReservationDateRange, setExportReservationDateRange] = useState<DateRange | undefined>({ from: undefined, to: undefined })
+    const [exportCreatedAtDateRange, setExportCreatedAtDateRange] = useState<DateRange | undefined>({ from: undefined, to: undefined })
+    const [exportStatus, setExportStatus] = useState<String[]>(["Pending", "Cancelled", "Void", "Approved", "Rejected", "Ongoing", "For Return", "Returned", "Completed"])
+    const [exportReservationVisibility, setExportReservationVisibility] = useState<String>("Unarchived");
+    const [exportReservationType, setExportReservationType] = useState<String>("All");
+    const [exportAuthorRole, setExportAuthorRole] = useState<String>("All");
+
+
+
 
 
     // React Table
@@ -179,7 +264,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
         if (sessionStorage.getItem("approveSuccessful")) {
             console.log(sessionStorage.getItem("approveSuccessful"));
-            toast.success(sessionStorage.getItem("approveSuccesful"), { 
+            toast.success(sessionStorage.getItem("approveSuccesful"), {
                 closeButton: true,
                 duration: 10000,
             });
@@ -187,7 +272,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
         }
 
         if (sessionStorage.getItem("rejectedSuccessful")) {
-            toast.success("Reservation/s rejected successfully", { 
+            toast.success("Reservation/s rejected successfully", {
                 closeButton: true,
                 duration: 10000,
             });
@@ -203,53 +288,42 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
         }
 
         if (sessionStorage.getItem("archiveSuccessful")) {
-            toast.success("Reservation/s archived successfully", { 
+            toast.success("Reservation/s archived successfully", {
                 closeButton: true,
                 duration: 10000,
-             });
+            });
             sessionStorage.removeItem("archiveSuccessful");
         }
 
         if (sessionStorage.getItem("unarchiveSuccessful")) {
-            toast.success("Reservation/s unarchived successfully", { 
+            toast.success("Reservation/s unarchived successfully", {
                 closeButton: true,
                 duration: 10000,
-             });
+            });
             sessionStorage.removeItem("unarchiveSuccessful");
         }
 
-    }, []);
-
-    useEffect(() => {
-
-
-        async function fetchUnarchivedReservations() {
+        const fetchReservations = async () => {
             try {
-                const fetchFunction = getAllReservations;
-                const result = await fetchFunction();
-                const data = await result.json();
-
-                if (!ignore) {
-                    if (result.ok) {
-                        console.log("All reservations fetched successfully.");
-                        setReservations(data);
-                    } else {
-                        console.log("All reservations fetch failed.");
-                    }
+                const response = await getAllReservations();
+                if (response.ok) {
+                    const data = await response.json();
+                    setReservations(data);
+                } else {
+                    toast.error("Failed to fetch all reservations.", {
+                        closeButton: true,
+                    });
                 }
             } catch (error) {
-                if (!ignore) {
-                    console.error("Error fetching reservations: ", error);
-                }
+                console.error("Error fetching all reservations: ", error);
             }
-        }
-
-        let ignore = false;
-        fetchUnarchivedReservations();
-        return () => {
-            ignore = true;
         };
-    }, [])
+
+        fetchReservations();
+
+    }, []);
+
+
 
     // Update the table filter when date range changes
     useEffect(() => {
@@ -327,6 +401,117 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
         }
     };
 
+    const handleExport = async (type: String) => {
+        setLoading(true);
+
+        try {
+
+            if (!reservations) throw new Error('Reservation data not available');
+
+            const wb = new Workbook();
+
+            wb.creator = user.userBlkLt;
+            wb.lastModifiedBy = user.userBlkLt;
+            wb.created = new Date();
+            wb.modified = new Date();
+
+            const ws = wb.addWorksheet("Reservations - " + format(new Date(), "MMM d, yyyy"));
+
+            // Filter reservations based on export options
+            const filteredReservations = reservations.filter(reservation => {
+                const reservationDate = new Date(reservation.reservationDate);
+                const createdAt = new Date(reservation.createdAt);
+                const currentStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1].status;
+
+                // Date range filters
+                const matchesReservationDate = !exportReservationDateRange?.from || !exportReservationDateRange?.to ||
+                    (reservationDate >= exportReservationDateRange.from && reservationDate <= exportReservationDateRange.to);
+
+                const matchesCreatedDate = !exportCreatedAtDateRange?.from || !exportCreatedAtDateRange?.to ||
+                    (createdAt >= exportCreatedAtDateRange.from && createdAt <= exportCreatedAtDateRange.to);
+
+                // Status filter
+                const matchesStatus = exportStatus.includes(currentStatus);
+
+                // Visibility filter
+                const matchesVisibility = exportReservationVisibility === "All" ? true :
+                    exportReservationVisibility === "Unarchived" ? reservation.reservationVisibility === "Unarchived" :
+                        exportReservationVisibility === "Archived" ? reservation.reservationVisibility === "Archived" : false;
+
+                // Type filter
+                const matchesType = exportReservationType === "All" ? true :
+                    exportReservationType === "Equipment" ? reservation.reservationType === "Equipment" :
+                        exportReservationType === "Facility" ? reservation.reservationType === "Facility" :
+                            exportReservationType === "Equipment and Facility" ? reservation.reservationType === "Equipment and Facility" : false;
+
+                const matchesAuthorRole = exportAuthorRole === "All" ? true :
+                    exportAuthorRole === "Unit Owners" ? reservation.reserveePosition === "Unit Owner" :
+                        exportAuthorRole === "Admins" ? reservation.reserveePosition != "Unit Owner" : false;
+
+                return matchesReservationDate && matchesCreatedDate && matchesStatus &&
+                    matchesVisibility && matchesType &&
+                    matchesAuthorRole;
+            });
+
+            ws.columns = [
+                { header: "Reservation ID", key: "_id", width: 25 },
+                { header: "Reservee ID", key: "reserveeId", width: 25 },
+                { header: "Reservee Block and Lot", key: "reserveeBlkLt", width: 15 },
+                { header: "Reservation Type", key: "reservationType", width: 15 },
+                { header: "Reservation Amenities", key: "reservationAmenities", width: 70 },
+                { header: "Reservation Status", key: "reservationStatus", width: 15 },
+                { header: "Reservation Date", key: "reservationDate", width: 20 },
+                { header: "Reservation Visibility", key: "reservationVisibility", width: 15 },
+                { header: "Created At", key: "createdAt", width: 20 },
+            ];
+
+            ws.getRow(1).eachCell(cell => {
+                cell.font = { bold: true };
+            });
+
+            // Add the filtered data
+            filteredReservations.forEach(reservation => {
+
+                ws.addRow({
+                    _id: reservation._id,
+                    reserveeId: reservation.reserveeId,
+                    reserveeBlkLt: reservation.reserveeBlkLt,
+                    reservationType: reservation.reservationType,
+                    reservationAmenities: reservation.reservationAmenities.map(a => {
+                        if (a.amenityType === "Equipment") {
+                            return `${a.amenityName} (${a.amenityQuantity})`
+                        } else {
+                            return `${a.amenityName}`
+                        }
+                    }).join(', '),
+                    reservationStatus: reservation.reservationStatus[reservation.reservationStatus.length - 1].status,
+                    reservationDate: format(new Date(reservation.reservationDate), "MMM d, yyyy"),
+                    reservationVisibility: reservation.reservationVisibility,
+                    createdAt: format(new Date(reservation.createdAt), "MMM d, yyyy"),
+                })
+
+            });
+
+            if (type === "excel") {
+                const buffer = await wb.xlsx.writeBuffer();
+                saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Reservations - " + format(new Date(), "MMM d, yyyy") + ".xlsx");
+            }
+
+            if (type === "csv") {
+                const buffer = await wb.csv.writeBuffer();
+                saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Reservations - " + format(new Date(), "MMM d, yyyy") + ".csv");
+            }
+
+
+
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Failed to export data');
+        } finally {
+            setLoading(false);
+        }
+
+    }
+
 
     // Redirect to Reservation Form Function
     const navToReservationForm = () => {
@@ -359,6 +544,14 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
                     {user.userRole === "Admin" && (
                         <>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setShowExportDialog(true)}
+                            >
+                                <Share className="h-7 w-7" />
+                                Export
+                            </Button>
 
                             <Button
                                 disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
@@ -540,6 +733,452 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
             </div>
 
             <BottomDataTablePagination table={table} />
+
+            <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+
+                <DialogContent className="md:min-w-[70%] max-h-[80%] overflow-scroll">
+
+                    {/* Export options header */}
+                    <DialogHeader>
+
+                        <DialogTitle>
+                            Export Options
+                        </DialogTitle>
+
+                        <DialogDescription>
+                            Please select the information to include in the export. All are selected by default.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Amenity Reservations Options */}
+                    <Collapsible
+                        className={"relative w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:transition-all data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"}
+                        onOpenChange={setShowReservationOptions}
+                    >
+
+                        <CollapsibleTrigger className="flex gap-2 items-center w-full text-white/90">
+
+                            <Label className="text-sm cursor-pointer"> Reservation options </Label>
+                            <div className="flex items-center justify-center h-6 w-6 rounded-md hover:bg-accent">
+                                {!showReservationOptions ? <ChevronDown className="h-4 w-4" />
+                                    : < ChevronUp className="h-4 w-4" />}
+                            </div>
+
+                        </CollapsibleTrigger>
+
+                        <CollapsibleContent className="">
+
+                            {/* Export options content */}
+                            <div className="flex flex-wrap gap-y-3 gap-x-16 my-4">
+
+                                {/* Export reservation date range amenities */}
+                                <div className="flex-intial min-w-[250px] flex flex-col">
+
+                                    {/* Export reservation date range header */}
+                                    <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        Included reservation dates
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div className="rounded-full w-fit h-fit cursor-pointer text-gray-200/30">
+                                                        <Info className="w-4 h-4" />
+                                                    </div>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p> Include all dates by default. </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </Label>
+
+                                    <p className="font-light text-sm text-muted-foreground pb-1.5">
+                                        Export reservations placed on these dates:
+                                    </p>
+
+                                    {/* Date Range Filter Button */}
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                className="justify-start font-normal"
+                                                id="date"
+                                                variant="outline"
+                                            >
+                                                <CalendarRange className="mr-2 h-4 w-4 opacity-50" />
+                                                {exportReservationDateRange?.from && exportReservationDateRange?.to
+                                                    ? `${format(exportReservationDateRange.from, "MMM d, yyyy")} - ${format(exportReservationDateRange.to, "MMM d, yyyy")}`
+                                                    : "All reservation dates"}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-fit">
+                                            <Calendar
+                                                initialFocus
+                                                mode="range"
+                                                defaultMonth={exportReservationDateRange?.from}
+                                                selected={exportReservationDateRange}
+                                                onSelect={setExportReservationDateRange}
+                                                numberOfMonths={2}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+
+                                {/* Export created date range amenities */}
+                                <div className="flex-intial min-w-[250px] flex flex-col">
+
+                                    {/* Export including other amenities header */}
+                                    <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        Included creation dates
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div className="rounded-full w-fit h-fit cursor-pointer text-gray-200/30">
+                                                        <Info className="w-4 h-4" />
+                                                    </div>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p> Include all dates by default. </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </Label>
+                                    <p className="font-light text-sm text-muted-foreground pb-1.5">
+                                        Export reservations created within these dates:
+                                    </p>
+
+                                    {/* Date Range Filter Button */}
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                className="justify-start font-normal"
+                                                id="date"
+                                                variant="outline"
+                                            >
+                                                <CalendarRange className="mr-2 h-4 w-4 opacity-50" />
+                                                {exportCreatedAtDateRange?.from && exportCreatedAtDateRange?.to
+                                                    ? `${format(exportCreatedAtDateRange.from, "MMM d, yyyy")} - ${format(exportCreatedAtDateRange.to, "MMM d, yyyy")}`
+                                                    : "All creation dates"}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-fit">
+                                            <Calendar
+                                                initialFocus
+                                                mode="range"
+                                                defaultMonth={exportCreatedAtDateRange?.from}
+                                                selected={exportCreatedAtDateRange}
+                                                onSelect={setExportCreatedAtDateRange}
+                                                numberOfMonths={2}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+
+                                {/* Export reservation status */}
+                                <div className="flex flex-col gap-4 pt-1 pb-4 w-full">
+
+                                    <Label className="text-sm text-muted-foreground"> Reservation Status </Label>
+
+                                    <div className="flex flex-row flex-wrap gap-12">
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.length === 9}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([
+                                                            'Pending',
+                                                            'Cancelled',
+                                                            'Void',
+                                                            'Approved',
+                                                            'Rejected',
+                                                            'Ongoing',
+                                                            'For Return',
+                                                            'Returned',
+                                                            'Completed'
+                                                        ]);
+                                                    } else {
+                                                        setExportStatus([]);
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> All </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Pending')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Pending']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Pending'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Pending </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Approved')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Approved']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Approved'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Approved </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Rejected')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Rejected']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Rejected'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Rejected </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Ongoing')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Ongoing']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Ongoing'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Ongoing </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Void')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Void']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Void'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Void </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Cancelled')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Cancelled']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Cancelled'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Cancelled </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('For Return')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'For Return']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'For Return'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> For Return </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Returned')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Returned']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Returned'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Returned </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Completed')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Completed']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Completed'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Completed </Label>
+                                        </div>
+
+                                    </div>
+
+
+
+                                </div>
+
+                                {/* Export reservation visibility */}
+                                <div className="flex-intial w-[200px] flex flex-col gap-1">
+
+                                    {/* Export visibility header */}
+                                    <Label className="text-sm text-muted-foreground"> Reservation visibility </Label>
+
+                                    {/* Export visibility input */}
+                                    <Select
+                                        defaultValue="Unarchived"
+                                        onValueChange={(value) => setExportReservationVisibility(value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select visibility of exported reservations" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectItem value="All"> All </SelectItem>
+                                                <SelectItem value="Unarchived"> Unarchived </SelectItem>
+                                                <SelectItem value="Archived"> Archived </SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+
+                                </div>
+
+                                {/* Export reservation type */}
+                                <div className="flex-intial w-[200px] flex flex-col gap-1">
+
+                                    {/* Export reservation type header */}
+                                    <Label className="text-sm text-muted-foreground"> Reservation types </Label>
+
+                                    {/* Export reservation type input */}
+                                    <Select
+                                        defaultValue="Equipment and Facility"
+                                        onValueChange={(value) => setExportReservationType(value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select types of reservations" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectItem value="Equipment"> Equipment </SelectItem>
+                                                <SelectItem value="Facility"> Facility </SelectItem>
+                                                <SelectItem value="Equipment and Facility"> Equipment and Facility </SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Export creator visibility */}
+                                {/* <div className="flex-intial w-[200px] flex flex-col gap-1"> */}
+
+                                {/* Export creator visibility header */}
+                                {/* <Label className="text-sm text-muted-foreground"> Author visibility </Label> */}
+
+                                {/* Export creator visibility input */}
+                                {/* <Select */}
+                                {/* defaultValue="Unarchived" */}
+                                {/* onValueChange={(value) => setExportAuthorVisibility(value)} */}
+                                {/* > */}
+                                {/* <SelectTrigger> */}
+                                {/* <SelectValue placeholder="Select visibility of reservees" /> */}
+                                {/* </SelectTrigger> */}
+                                {/* <SelectContent> */}
+                                {/* <SelectGroup> */}
+                                {/* <SelectItem value="All"> All </SelectItem> */}
+                                {/* <SelectItem value="Unarchived"> Unarchived </SelectItem> */}
+                                {/* <SelectItem value="Archived"> Archived </SelectItem> */}
+                                {/* </SelectGroup> */}
+                                {/* </SelectContent> */}
+                                {/* </Select> */}
+                                {/* </div> */}
+
+                                {/* Export creator type */}
+                                <div className="flex-intial w-[200px] flex flex-col gap-1">
+
+                                    {/* Export creator type header */}
+                                    <Label className="text-sm text-muted-foreground"> Author role </Label>
+
+                                    {/* Export creator type input */}
+                                    <Select
+                                        defaultValue="All"
+                                        onValueChange={(value) => setExportAuthorRole(value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select user roles" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectItem value="All"> All </SelectItem>
+                                                <SelectItem value="Unit Owners"> Unit Owners </SelectItem>
+                                                <SelectItem value="Admins"> Admins </SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                            </div>
+
+                        </CollapsibleContent>
+
+                    </Collapsible>
+
+                    <DialogFooter>
+
+                        <DropdownMenu>
+
+                            <DropdownMenuTrigger asChild>
+
+                                <Button
+                                    className=""
+                                    disabled={loading}
+                                    size="sm"
+                                >
+                                    {loading ? <LoadingSpinner className="h-7 w-7" /> : <Download className="h-7 w-7" />}
+                                    Download
+                                    <ChevronDown className="h-7 w-7" />
+                                </Button>
+
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent align="center" className="mt-1">
+                                <DropdownMenuItem
+                                    onClick={() => handleExport("excel")}
+                                >
+                                    .xslx
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem
+                                    onClick={() => handleExport("csv")}
+                                >
+                                    .csv
+                                </DropdownMenuItem>
+
+                            </DropdownMenuContent>
+
+                        </DropdownMenu>
+
+                    </DialogFooter>
+
+                </DialogContent>
+
+            </Dialog>
+
 
         </>
 

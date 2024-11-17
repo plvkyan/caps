@@ -230,7 +230,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
     // Export criteria states
     const [exportReservationDateRange, setExportReservationDateRange] = useState<DateRange | undefined>({ from: undefined, to: undefined })
     const [exportCreatedAtDateRange, setExportCreatedAtDateRange] = useState<DateRange | undefined>({ from: undefined, to: undefined })
-    const [exportStatus, setExportStatus] = useState<String[]>(["Pending", "Approved", "Rejected", "Ongoing", "For Return", "Returned", "Completed"])
+    const [exportStatus, setExportStatus] = useState<String[]>(["Pending", "Cancelled", "Void", "Approved", "Rejected", "Ongoing", "For Return", "Returned", "Completed"])
     const [exportReservationVisibility, setExportReservationVisibility] = useState<String>("Unarchived");
     const [exportReservationType, setExportReservationType] = useState<String>("All");
     const [exportAuthorRole, setExportAuthorRole] = useState<String>("All");
@@ -708,7 +708,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                         onClick={() => setShowExportDialog(true)}
                     >
                         <Share className="h-7 w-7" />
-                        Export amenities
+                        Export
                     </Button>
 
                     <Button className="" onClick={navToAmenityForm} size="sm" variant="default" >
@@ -1020,6 +1020,30 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
                                         <div className="flex items-center gap-2">
                                             <Checkbox
+                                                checked={exportStatus.length === 9}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([
+                                                            'Pending', 
+                                                            'Cancelled', 
+                                                            'Void', 
+                                                            'Approved', 
+                                                            'Rejected', 
+                                                            'Ongoing', 
+                                                            'For Return', 
+                                                            'Returned', 
+                                                            'Completed'
+                                                        ]);
+                                                    } else {
+                                                        setExportStatus([]);
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> All </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
                                                 checked={exportStatus.includes('Pending')}
                                                 onCheckedChange={(checked) => {
                                                     if (checked) {
@@ -1072,6 +1096,34 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                                                 }}
                                             />
                                             <Label className="text-sm"> Ongoing </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Void')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Void']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Void'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Void </Label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={exportStatus.includes('Cancelled')}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setExportStatus([...exportStatus, 'Cancelled']);
+                                                    } else {
+                                                        setExportStatus(exportStatus.filter(status => status !== 'Cancelled'));
+                                                    }
+                                                }}
+                                            />
+                                            <Label className="text-sm"> Cancelled </Label>
                                         </div>
 
                                         <div className="flex items-center gap-2">

@@ -71,7 +71,9 @@ const receiveBillWebhook = async (req, res) => {
   const billDetails = JSON.parse(webhookEvent.data.attributes.data.attributes.description);
 
   console.log(billDetails);
-
+  console.log('Received webhook: ', webhookEvent);
+  console.log('Data: ', webhookEvent.data)
+  console.log('Attributes: ', webhookEvent.data.attributes.data.attributes)
 
 
   if (webhookEvent.data.attributes.type === "checkout_session.payment.paid") {
@@ -86,9 +88,9 @@ const receiveBillWebhook = async (req, res) => {
     res.status(200).send('Webhook received')
   }
 
-  // console.log('Received webhook: ', webhookEvent);
-  // console.log('Data: ', webhookEvent.data)
-  // console.log('Attributes: ', webhookEvent.data.attributes.data.attributes)
+  console.log('Received webhook: ', webhookEvent);
+  console.log('Data: ', webhookEvent.data)
+  console.log('Attributes: ', webhookEvent.data.attributes.data.attributes)
 
 
   // res.status(200).send('Webhook received');
