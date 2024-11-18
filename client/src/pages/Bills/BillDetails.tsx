@@ -787,14 +787,21 @@ export default function Userdetails() {
                                                             <div
                                                                 className="flex flex-row justify-between p-3 cursor-pointer hover:bg-muted/30"
                                                             >
-                                                                <div className="flex flex-row items-center gap-2">
-                                                                    <Label className="text-sm">
-                                                                        {payor.payorBlkLt}
-                                                                    </Label>
-                                                                    {payor.billStatus === "Paid" && <Badge variant="default" className="w-fit h-fit"> {payor.billStatus} </Badge>}
-                                                                    {payor.billStatus === "Pending" && <Badge variant="warning" className="w-fit h-fit"> {payor.billStatus} </Badge>}
-                                                                    {payor.billStatus === "Overdue" && <Badge variant="destructive" className="w-fit h-fit"> {payor.billStatus} </Badge>}
+                                                                <div className="flex flex-col justify-center gap-1">
+                                                                    <div className="flex flex-row items-center gap-2">
+                                                                        <Label className="text-sm">
+                                                                            {payor.payorBlkLt}
+                                                                        </Label>
+                                                                        {payor.billStatus === "Paid" && <Badge variant="default" className="w-fit h-fit"> {payor.billStatus} </Badge>}
+                                                                        {payor.billStatus === "Pending" && <Badge variant="warning" className="w-fit h-fit"> {payor.billStatus} </Badge>}
+                                                                        {payor.billStatus === "Overdue" && <Badge variant="destructive" className="w-fit h-fit"> {payor.billStatus} </Badge>}
+                                                                    </div>
+                                                                    {
+                                                                        payor.billStatus === "Paid" &&
+                                                                        <p className="text-muted-foreground text-sm font-light"> Date paid: {format(payor.billPaidDate, "P")} </p>
+                                                                    }
                                                                 </div>
+
 
                                                                 {payor.billStatus === "Paid" && (
                                                                     <Button disabled size="sm"> Already paid </Button>
@@ -811,7 +818,8 @@ export default function Userdetails() {
                                                         <div
                                                             className="flex flex-row justify-between p-3 cursor-pointer hover:bg-muted/30 border-b"
                                                         >
-                                                            <div className="flex flex-row items-center gap-2">
+                                                            <div className="flex flex-col justify-center gap-1">
+                                                                <div className="flex flex-row items-center gap-2">
                                                                     <Label className="text-sm">
                                                                         {payor.payorBlkLt}
                                                                     </Label>
@@ -819,6 +827,11 @@ export default function Userdetails() {
                                                                     {payor.billStatus === "Pending" && <Badge variant="warning" className="w-fit h-fit"> {payor.billStatus} </Badge>}
                                                                     {payor.billStatus === "Overdue" && <Badge variant="destructive" className="w-fit h-fit"> {payor.billStatus} </Badge>}
                                                                 </div>
+                                                                {
+                                                                    payor.billStatus === "Paid" && 
+                                                                    <p className="text-muted-foreground text-sm font-light"> Date paid: {format(payor.billPaidDate, "P")} </p>
+                                                                }
+                                                            </div>
 
                                                             {payor.billStatus === "Paid" && (
                                                                 <Button disabled size="sm"> Already paid </Button>
@@ -844,7 +857,7 @@ export default function Userdetails() {
 
                     </main>
 
-                ): (
+                ) : (
                     <div className="flex w-full h-full gap-2 items-center justify-center opacity-90">
                         <LoadingSpinner className="h-6 w-6" />
                         <span className="text-sm"> Loading </span>

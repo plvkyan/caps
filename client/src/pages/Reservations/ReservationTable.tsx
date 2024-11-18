@@ -28,6 +28,14 @@ import { Button } from "@/components/ui/button";
 // shadcn Calendar Component Import
 import { Calendar } from "@/components/ui/calendar"
 
+// shadcn Card Component Imports
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card"
+
 // shadcn Checkbox Component Import
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -163,6 +171,10 @@ import { ReservationType } from "@/types/reservation-type";
 
 interface ReservationData {
     _id: string;
+    reservationStatus: {
+        status: string;
+    }[];
+    reservationDate: string | Date;
 }
 
 interface ReservationTableProps<TData extends ReservationData, TValue> {
@@ -219,7 +231,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     const [showReservationOptions, setShowReservationOptions] = useState(true);
 
     // All reservations
-    const [reservations, setReservations] = useState<ReservationType[]>([]);
+    const [reservations, setReservations] = useState<ReservationType[]>(data as any);
 
     // Export criteria states
     const [exportReservationDateRange, setExportReservationDateRange] = useState<DateRange | undefined>({ from: undefined, to: undefined })
@@ -229,7 +241,9 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     const [exportReservationType, setExportReservationType] = useState<String>("All");
     const [exportAuthorRole, setExportAuthorRole] = useState<String>("All");
 
-
+    // 
+    const [reservationTypeCount, setReservationTypeCount] = useState<String>("All");
+    const [upcomingReservationsRange, setUpcomingReservationsRange] = useState<String>("Tomorrow");
 
 
 
@@ -418,7 +432,11 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
             const ws = wb.addWorksheet("Reservations - " + format(new Date(), "MMM d, yyyy"));
 
             // Filter reservations based on export options
-            const filteredReservations = reservations.filter(reservation => {
+            // First filter for user-specific reservations if applicable
+            let userFilteredReservations = data as any;
+
+            // Then apply all other filters
+            const filteredReservations = userFilteredReservations.filter(reservation => {
                 const reservationDate = new Date(reservation.reservationDate);
                 const createdAt = new Date(reservation.createdAt);
                 const currentStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1].status;
@@ -513,13 +531,12 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     }
 
 
+
     // Redirect to Reservation Form Function
     const navToReservationForm = () => {
         const reservationFormPath = "/reservations/create";
         navigate(reservationFormPath);
     }
-
-
 
     const navigateToReservationDetails = (id: String) => {
         navigate("/reservations/" + id);
@@ -533,25 +550,238 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
         <>
 
+            <div className="flex flex-col">
+                <h1 className="font-semibold text-2xl"> Reservations </h1>
+                <h3 className="font-light text-muted-foreground"> All reservations with their dates and statuses. </h3>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+
+                <Card>
+                    <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+
+                        {reservationTypeCount === "All" ?
+                            <CardTitle className="text-sm font-medium">
+                                All reservations
+                            </CardTitle>
+                            : reservationTypeCount === "Pending" ?
+                                <CardTitle className="text-sm font-medium">
+                                    Pending reservations
+                                </CardTitle>
+                                : reservationTypeCount === "Approved" ?
+                                    <CardTitle className="text-sm font-medium">
+                                        Approved reservations
+                                    </CardTitle>
+                                    : reservationTypeCount === "Rejected" ?
+                                        <CardTitle className="text-sm font-medium">
+                                            Rejected reservations
+                                        </CardTitle>
+                                        : reservationTypeCount === "Cancelled" ?
+                                            <CardTitle className="text-sm font-medium">
+                                                Cancelled reservations
+                                            </CardTitle>
+                                            : reservationTypeCount === "Void" ?
+                                                <CardTitle className="text-sm font-medium">
+                                                    Void reservations
+                                                </CardTitle>
+                                                : reservationTypeCount === "Ongoing" ?
+                                                    <CardTitle className="text-sm font-medium">
+                                                        Ongoing reservations
+                                                    </CardTitle>
+                                                    : reservationTypeCount === "For Return" ?
+                                                        <CardTitle className="text-sm font-medium">
+                                                            For return reservations
+                                                        </CardTitle>
+                                                        : reservationTypeCount === "Returned" ?
+                                                            <CardTitle className="text-sm font-medium">
+                                                                Returned reservations
+                                                            </CardTitle>
+                                                            : reservationTypeCount === "Completed" ?
+                                                                <CardTitle className="text-sm font-medium">
+                                                                    Completed reservations
+                                                                </CardTitle> : null
+                        }
+
+
+                        <Select
+                            defaultValue="All"
+                            onValueChange={(value) => setReservationTypeCount(value)}
+                        >
+                            <SelectTrigger className="max-w-32 h-fit">
+                                <SelectValue></SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="All">All</SelectItem>
+                                    <SelectItem value="Pending">Pending</SelectItem>
+                                    <SelectItem value="Approved">Approved</SelectItem>
+                                    <SelectItem value="Rejected">Rejected</SelectItem>
+                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                    <SelectItem value="Void">Void</SelectItem>
+                                    <SelectItem value="Ongoing">Ongoing</SelectItem>
+                                    <SelectItem value="For Return">For Return</SelectItem>
+                                    <SelectItem value="Returned">Returned</SelectItem>
+                                    <SelectItem value="Completed">Completed</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </CardHeader>
+
+                    <CardContent className="flex flex-col gap-1">
+
+                        {reservationTypeCount === "All" ?
+                            <div className="text-2xl font-bold">
+                                {table.getFilteredRowModel().rows.length}
+                            </div>
+                            : reservationTypeCount === "Pending" ?
+                                <div className="text-2xl font-bold text-warning">
+                                    {table.getFilteredRowModel().rows
+                                        .filter(row => row.original.reservationStatus[row.original.reservationStatus.length - 1].status === "Pending")
+                                        .length}
+                                </div>
+                                : reservationTypeCount === "Approved" ?
+                                    <div className="text-2xl font-bold text-primary">
+                                        {table.getFilteredRowModel().rows
+                                            .filter(row => row.original.reservationStatus[row.original.reservationStatus.length - 1].status === "Approved")
+                                            .length}
+                                    </div>
+                                    : reservationTypeCount === "Rejected" ?
+                                        <div className="text-2xl font-bold text-destructive">
+                                            {table.getFilteredRowModel().rows
+                                                .filter(row => row.original.reservationStatus[row.original.reservationStatus.length - 1].status === "Rejected")
+                                                .length}
+                                        </div>
+                                        : reservationTypeCount === "Cancelled" ?
+                                            <div className="text-2xl font-bold text-destructive">
+                                                {table.getFilteredRowModel().rows
+                                                    .filter(row => row.original.reservationStatus[row.original.reservationStatus.length - 1].status === "Cancelled")
+                                                    .length}
+                                            </div>
+                                            : reservationTypeCount === "Void" ?
+                                                <div className="text-2xl font-bold text-destructive">
+                                                    {table.getFilteredRowModel().rows
+                                                        .filter(row => row.original.reservationStatus[row.original.reservationStatus.length - 1].status === "Void")
+                                                        .length}
+                                                </div>
+                                                : reservationTypeCount === "Ongoing" ?
+                                                    <div className="text-2xl font-bold text-warning">
+                                                        {table.getFilteredRowModel().rows
+                                                            .filter(row => row.original.reservationStatus[row.original.reservationStatus.length - 1].status === "Ongoing")
+                                                            .length}
+                                                    </div>
+                                                    : reservationTypeCount === "For Return" ?
+                                                        <div className="text-2xl font-bold text-warning">
+                                                            {table.getFilteredRowModel().rows
+                                                                .filter(row => row.original.reservationStatus[row.original.reservationStatus.length - 1].status === "For Return")
+                                                                .length}
+                                                        </div>
+                                                        : reservationTypeCount === "Returned" ?
+                                                            <div className="text-2xl font-bold text-primary">
+                                                                {table.getFilteredRowModel().rows
+                                                                    .filter(row => row.original.reservationStatus[row.original.reservationStatus.length - 1].status === "Returned")
+                                                                    .length}
+                                                            </div>
+                                                            : reservationTypeCount === "Completed" ?
+                                                                <div className="text-2xl font-bold text-primary">
+                                                                    {table.getFilteredRowModel().rows
+                                                                        .filter(row => row.original.reservationStatus[row.original.reservationStatus.length - 1].status === "Completed")
+                                                                        .length}
+                                                                </div> : null
+                        }
+
+                        <p className="text-sm text-muted-foreground">
+                            out of {table.getFilteredRowModel().rows.length} total {isFiltered ? "filtered" : null} reservations
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium"> Upcoming approved reservations </CardTitle>
+                        <Select
+                            defaultValue="Tomorrow"
+                            onValueChange={(value) => setUpcomingReservationsRange(value)}
+                        >
+                            <SelectTrigger className="max-w-36 h-fit">
+                                <SelectValue></SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="Tomorrow">Tomorrow</SelectItem>
+                                    <SelectItem value="Next 3 days">Next 3 days</SelectItem>
+                                    <SelectItem value="Next 7 days">Next 7 days</SelectItem>
+                                    <SelectItem value="Next 2 weeks">Next 2 weeks</SelectItem>
+                                    <SelectItem value="Next 3 weeks">Next 3 weeks</SelectItem>
+                                    <SelectItem value="Next month">Next month</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-1">
+
+                        <div className="text-2xl font-bold">
+
+                            {table.getFilteredRowModel().rows.filter(row => {
+                                const today = new Date();
+                                const reservationDate = new Date(row.original.reservationDate);
+                                const status = row.original.reservationStatus[row.original.reservationStatus.length - 1].status;
+
+                                if (status !== "Approved") return false;
+
+                                const diffDays = Math.ceil((reservationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+                                switch (upcomingReservationsRange) {
+                                    case "Tomorrow":
+                                        return diffDays === 1;
+                                    case "Next 3 days":
+                                        return diffDays > 0 && diffDays <= 3;
+                                    case "Next 7 days":
+                                        return diffDays > 0 && diffDays <= 7;
+                                    case "Next 2 weeks":
+                                        return diffDays > 0 && diffDays <= 14;
+                                    case "Next 3 weeks":
+                                        return diffDays > 0 && diffDays <= 21;
+                                    case "Next month":
+                                        return diffDays > 0 && diffDays <= 30;
+                                    default:
+                                        return false;
+                                }
+                            }).length}
+
+                        </div>
+
+                        <p className="text-sm text-muted-foreground">
+                            out of {table.getFilteredRowModel().rows.length} total {isFiltered ? "filtered" : null} reservations
+                        </p>
+                    </CardContent>
+                </Card>
+
+            </div >
+
+
+
             <div className="flex justify-between">
 
-                <div className="flex flex-col">
-                    <h1 className="font-semibold text-2xl"> Reservations </h1>
-                    <h3 className="font-light text-muted-foreground"> All reservations with their dates and statuses. </h3>
+
+
+                <div>
+
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowExportDialog(true)}
+                    >
+                        <Share className="h-7 w-7" />
+                        Export
+                    </Button>
+
                 </div>
 
                 <div className="flex items-end gap-2">
 
                     {user.userRole === "Admin" && (
                         <>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setShowExportDialog(true)}
-                            >
-                                <Share className="h-7 w-7" />
-                                Export
-                            </Button>
+
 
                             <Button
                                 disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
@@ -753,6 +983,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                     {/* Amenity Reservations Options */}
                     <Collapsible
                         className={"relative w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:transition-all data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"}
+                        open={showReservationOptions}
                         onOpenChange={setShowReservationOptions}
                     >
 
@@ -1036,29 +1267,34 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                                 </div>
 
                                 {/* Export reservation visibility */}
-                                <div className="flex-intial w-[200px] flex flex-col gap-1">
+                                {user && user.userRole === "Admin" && user.userPosition !== "Unit Owner" && (
 
-                                    {/* Export visibility header */}
-                                    <Label className="text-sm text-muted-foreground"> Reservation visibility </Label>
+                                    <div className="flex-intial w-[200px] flex flex-col gap-1">
 
-                                    {/* Export visibility input */}
-                                    <Select
-                                        defaultValue="Unarchived"
-                                        onValueChange={(value) => setExportReservationVisibility(value)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select visibility of exported reservations" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectItem value="All"> All </SelectItem>
-                                                <SelectItem value="Unarchived"> Unarchived </SelectItem>
-                                                <SelectItem value="Archived"> Archived </SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
+                                        {/* Export visibility header */}
+                                        <Label className="text-sm text-muted-foreground"> Reservation visibility </Label>
 
-                                </div>
+                                        {/* Export visibility input */}
+                                        <Select
+                                            defaultValue="Unarchived"
+                                            onValueChange={(value) => setExportReservationVisibility(value)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select visibility of exported reservations" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectItem value="All"> All </SelectItem>
+                                                    <SelectItem value="Unarchived"> Unarchived </SelectItem>
+                                                    <SelectItem value="Archived"> Archived </SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+
+                                    </div>
+
+                                )}
+
 
                                 {/* Export reservation type */}
                                 <div className="flex-intial w-[200px] flex flex-col gap-1">
@@ -1108,29 +1344,33 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                                 {/* </Select> */}
                                 {/* </div> */}
 
-                                {/* Export creator type */}
-                                <div className="flex-intial w-[200px] flex flex-col gap-1">
+                                {user && user.userRole === "Admin" && user.userPosition !== "Unit Owner" && (
 
-                                    {/* Export creator type header */}
-                                    <Label className="text-sm text-muted-foreground"> Author role </Label>
+                                    <div className="flex-intial w-[200px] flex flex-col gap-1">
 
-                                    {/* Export creator type input */}
-                                    <Select
-                                        defaultValue="All"
-                                        onValueChange={(value) => setExportAuthorRole(value)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select user roles" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectItem value="All"> All </SelectItem>
-                                                <SelectItem value="Unit Owners"> Unit Owners </SelectItem>
-                                                <SelectItem value="Admins"> Admins </SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                        {/* Export creator type header */}
+                                        <Label className="text-sm text-muted-foreground"> Author role </Label>
+
+                                        {/* Export creator type input */}
+                                        <Select
+                                            defaultValue="All"
+                                            onValueChange={(value) => setExportAuthorRole(value)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select user roles" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectItem value="All"> All </SelectItem>
+                                                    <SelectItem value="Unit Owners"> Unit Owners </SelectItem>
+                                                    <SelectItem value="Admins"> Admins </SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                )}
+
 
                             </div>
 
@@ -1177,7 +1417,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
                 </DialogContent>
 
-            </Dialog>
+            </Dialog >
 
 
         </>

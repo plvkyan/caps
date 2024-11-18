@@ -16,6 +16,15 @@ import {
     BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 
+// shadcn Card Component Imports
+import { 
+    Card, 
+    CardContent, 
+    CardHeader, 
+    CardTitle 
+} from "@/components/ui/card"
+
+// shadcn Chart Component Imports
 import {
     ChartConfig,
     ChartContainer,
@@ -96,7 +105,6 @@ import { ReservationType } from "@/types/reservation-type"
 import { getUnarchivedReservations, getUserUnarchivedReservations } from "@/data/reservation-api.ts";
 
 // All user unarchived reservation data Import
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getUnitOwners } from "@/data/user-api"
 import { UserType } from "@/types/user-type"
 import { Button } from "@/components/ui/button"

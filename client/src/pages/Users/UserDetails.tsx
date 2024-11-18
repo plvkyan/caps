@@ -739,7 +739,7 @@ export default function UserDetails() {
                                                 <Label className="text-sm text-muted-foreground font-light">
                                                     User role
                                                 </Label>
-                                                <p className="text-sm"> {users.userRole} payment </p>
+                                                <p className="text-sm"> {users.userRole} </p>
                                             </div>
 
                                             <div className="flex flex-col gap-1.5">
@@ -809,7 +809,7 @@ export default function UserDetails() {
                                                     User created at
                                                 </Label>
 
-                                                <p className="text-sm"> {format(users.createdAt, "PPPp")} </p>
+                                                <p className="text-sm"> {format(users.createdAt, "Pp")} </p>
                                             </div>
 
                                         </div>

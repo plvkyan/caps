@@ -18,6 +18,7 @@ export type BillType = {
             payorEmail: string,
             billStatus: string,
             billPaidDate: Date,
+            billPaymentMode: string,
         }
     ],
     billCreatorId: string,

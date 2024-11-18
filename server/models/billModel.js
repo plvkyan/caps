@@ -71,6 +71,10 @@ const billSchema = new Schema({
             billPaidDate: {
                 type: Date,
                 required: false,
+            },
+            billPaymentMode: {
+                type: String,
+                required: false,
             }
         }
     ],

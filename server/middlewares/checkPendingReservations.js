@@ -1,36 +1,28 @@
 // Imports
-
-// Reservation model import
 const Reservation = require('../models/reservationModel');
+const fns = require('date-fns');
 
-// Date-fns import
-const fns = require('date-fns')
-
-
-
-
-const checkOngoingReservation = async (req, res, next) => {
-
+const checkPendingReservations = async (req, res, next) => {
     try {
         // Get current date
         const currentDate = new Date();
 
-        // Find reservations where date matches current date (ignoring time)
+        // Find reservations where:
+        // 1. reservation date is less than current date
+        // 2. last status is "Pending"
         const reservations = await Reservation.find({
-            reservationDate: {
-                $gte: fns.startOfDay(currentDate),
-                $lte: fns.endOfDay(currentDate)
-            }
+            reservationDate: { $lt: currentDate }
         });
 
-        // For each matching reservation, add Ongoing status if not already present
+        // Check each reservation
         for (const reservation of reservations) {
+            // Get the latest status
             const lastStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1];
-            const hasOngoing = reservation.reservationStatus.some(status => status.status === "Ongoing");
-
-            if (!hasOngoing && lastStatus.status === "Approved") {
+            
+            // If the last status is "Pending", add "Void" status
+            if (lastStatus && lastStatus.status === "Pending") {
                 reservation.reservationStatus.push({
-                    status: "Ongoing",
+                    status: "Void",
                     statusDate: new Date(),
                     statusAuthorId: "SYSTEM",
                     statusAuthor: "Automatic",
@@ -42,10 +34,9 @@ const checkOngoingReservation = async (req, res, next) => {
 
         next();
     } catch (error) {
-
+        console.error('Error in checkPendingReservations:', error);
+        next(error);
     }
-
 }
 
-
-module.exports = checkOngoingReservation;
+module.exports = checkPendingReservations;

@@ -134,25 +134,25 @@ export default function AmenityPage() {
             }
         };
 
-        const fetchReservations = async () => {
-            try {
-                const response = await getAllReservations();
-                if (!ignore) {
-                    if (response.ok) {
-                        const data = await response.json();
-                        setReservations(data);
-                    } else {
-                        toast.error("Failed to fetch all reservations.", {
-                            closeButton: true,
-                        });
-                    }
-                }
-            } catch (error) {
-                if (!ignore) {
-                    console.error("Error fetching all reservations: ", error);
+    const fetchReservations = async () => {
+        try {
+            const response = await getAllReservations();
+            if (!ignore) {
+                if (response.ok) {
+                    const data = await response.json();
+                    setReservations(data);
+                } else {
+                    toast.error("Failed to fetch all reservations.", {
+                        closeButton: true,
+                    });
                 }
             }
-        };
+        } catch (error) {
+            if (!ignore) {
+                console.error("Error fetching all reservations: ", error);
+            }
+        }
+    };
 
         let ignore = false;
         fetchReservations();
