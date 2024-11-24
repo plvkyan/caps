@@ -74,6 +74,14 @@ export const getUserBills = async (id: string) => {
 }
 
 export const getBillPresets = async () => {
+    return await fetch(apiBillsUrl + '/presets/all');
+}
+
+export const getArchivedBillPresets = async () => {
+    return await fetch(apiBillsUrl + '/presets/archived');
+}
+
+export const getUnarchivedBillPresets = async () => {
     return await fetch(apiBillsUrl + '/presets/unarchived');
 }
 

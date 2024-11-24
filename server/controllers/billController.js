@@ -99,6 +99,28 @@ const getBill = async (req, res) => {
     }
 }
 
+const getAllBillPresets = async (req, res) => {
+    try {
+        const billPresets = await BillPreset.find().sort({ createdAt: -1 }).lean()
+            .sort({ createdAt: -1 })
+            .lean();
+        res.status(200).json(billPresets);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const getArchivedBillPresets = async (req, res) => {
+    try {
+        const billPresets = await BillPreset.find({ billPresetVisibility: "Archived" })
+            .sort({ createdAt: -1 })
+            .lean();
+        res.status(200).json(billPresets);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 const getUnarchivedBillPresets = async (req, res) => {
     try {
         const billPresets = await BillPreset.find({ billPresetVisibility: "Unarchived" })
@@ -406,6 +428,8 @@ module.exports = {
 
     // GET functions
     getUnarchivedBillPresets,
+    getArchivedBillPresets,
+    getAllBillPresets,
 
 
     updateBillPayorStatus,

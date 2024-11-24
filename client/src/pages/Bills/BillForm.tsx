@@ -110,7 +110,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // Data Imports
 // User API Imports
 import { getUnitOwners } from "@/data/user-api";
-import { createBill, getBillPresets } from "@/data/bills-api.ts";
+import { createBill, getUnarchivedBillPresets } from "@/data/bills-api.ts";
 import { ChevronLeft, CirclePlus, TriangleAlert } from "lucide-react";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import { Input } from "@/components/ui/input";
@@ -224,7 +224,7 @@ export const BillForm = () => {
 
         const fetchBillPresets = async () => {
             try {
-                const response = await getBillPresets();
+                const response = await getUnarchivedBillPresets();
                 if (!response.ok) {
                     throw new Error('Failed to fetch bill presets');
                 }

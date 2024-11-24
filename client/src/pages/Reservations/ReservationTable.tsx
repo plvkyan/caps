@@ -160,7 +160,7 @@ import { saveAs } from "file-saver";
 // Types
 import { RESERVATION_DATA } from "@/data/reservation-data";
 import { toast } from "sonner";
-import { approveManyReservations, archiveManyReservations, getAllReservations, rejectManyReservations } from "@/data/reservation-api";
+import { approveManyReservations, archiveManyReservations, rejectManyReservations } from "@/data/reservation-api";
 import { useAuthContext } from "@/hooks/useAuthContext";
 import { DateRange } from "react-day-picker";
 import { ReservationType } from "@/types/reservation-type";
@@ -229,9 +229,6 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
     // Show export states
     const [showExportDialog, setShowExportDialog] = useState(false);
     const [showReservationOptions, setShowReservationOptions] = useState(true);
-
-    // All reservations
-    const [reservations, setReservations] = useState<ReservationType[]>(data as any);
 
     // Export criteria states
     const [exportReservationDateRange, setExportReservationDateRange] = useState<DateRange | undefined>({ from: undefined, to: undefined })
@@ -317,23 +314,23 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
             sessionStorage.removeItem("unarchiveSuccessful");
         }
 
-        const fetchReservations = async () => {
-            try {
-                const response = await getAllReservations();
-                if (response.ok) {
-                    const data = await response.json();
-                    setReservations(data);
-                } else {
-                    toast.error("Failed to fetch all reservations.", {
-                        closeButton: true,
-                    });
-                }
-            } catch (error) {
-                console.error("Error fetching all reservations: ", error);
-            }
-        };
+        // const fetchReservations = async () => {
+        //     try {
+        //         const response = await getAllReservations();
+        //         if (response.ok) {
+        //             const data = await response.json();
+        //             setReservations(data);
+        //         } else {
+        //             toast.error("Failed to fetch all reservations.", {
+        //                 closeButton: true,
+        //             });
+        //         }
+        //     } catch (error) {
+        //         console.error("Error fetching all reservations: ", error);
+        //     }
+        // };
 
-        fetchReservations();
+        // fetchReservations();
 
     }, []);
 
@@ -420,7 +417,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
         try {
 
-            if (!reservations) throw new Error('Reservation data not available');
+            if (!data) throw new Error('Reservation data not available');
 
             const wb = new Workbook();
 
@@ -433,7 +430,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
             // Filter reservations based on export options
             // First filter for user-specific reservations if applicable
-            let userFilteredReservations = data as any;
+            let userFilteredReservations: ReservationType[] = data as any;
 
             // Then apply all other filters
             const filteredReservations = userFilteredReservations.filter(reservation => {
@@ -972,7 +969,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                     <DialogHeader>
 
                         <DialogTitle>
-                            Export Options
+                            Export options
                         </DialogTitle>
 
                         <DialogDescription>

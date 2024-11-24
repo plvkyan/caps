@@ -31,6 +31,8 @@ const {
     archiveBill,
     unarchiveBill,
     unarchiveMultipleBills,
+    getAllBillPresets,
+    getArchivedBillPresets,
 
 } = require('../controllers/billController')
 
@@ -61,15 +63,13 @@ router.get('/user/:id', getUserBills)
 // GET a single bill
 router.get('/single/:id', getBill)
 
-router.get('/presets/unarchived', getUnarchivedBillPresets)
 
 
 
 // POST routes
 // POST a new bill
 router.post('/', createBill)
-// POST a new bill preset
-router.post('/presets', createBillPreset) 
+
 
 
 
@@ -93,6 +93,31 @@ router.patch('/visibility/archive/:id', archiveBill);
 router.patch('/visibility/unarchive/:id', unarchiveBill);
 
 router.patch('/visibility/unarchive/bulk/_', unarchiveMultipleBills)
+
+
+
+
+
+
+
+
+// PRESETS
+// POST a new bill preset
+router.post('/presets', createBillPreset) 
+
+
+
+// GET all bill presets
+router.get('/presets/all', getAllBillPresets)
+
+// GET all unarchived bill presets
+router.get('/presets/unarchived', getUnarchivedBillPresets)
+
+// GET all archived bill presets
+router.get('/presets/archived', getArchivedBillPresets)
+
+
+
 
 
 module.exports = router

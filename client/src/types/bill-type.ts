@@ -11,7 +11,7 @@ export type BillType = {
     billAmount: number,
     billRecurringDate?: Date,
     billDueDate: Date,
-    billPayors: [
+    billPayors: 
         {
             payorId: string,
             payorBlkLt: string,
@@ -19,8 +19,8 @@ export type BillType = {
             billStatus: string,
             billPaidDate: Date,
             billPaymentMode: string,
-        }
-    ],
+        }[]
+    ,
     billCreatorId: string,
     billCreatorBlkLt: string,
     billCreatorPosition: string,

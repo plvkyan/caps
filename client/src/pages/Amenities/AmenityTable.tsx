@@ -151,6 +151,7 @@ import { useNavigate } from "react-router-dom";
 import { DateRange } from "react-day-picker";
 import { ReservationType } from "@/types/reservation-type";
 import { useAuthContext } from "@/hooks/useAuthContext";
+import { AmenityType } from "@/types/amenity-type";
 
 
 // Types
@@ -266,710 +267,90 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
 
     // Functions
-    const handleExport = async (type: String) => {
+    // Helper functions for export
+    const getWorkbookConfig = (user: any) => ({
+        creator: user.userBlkLt,
+        lastModifiedBy: user.userBlkLt,
+        created: new Date(),
+        modified: new Date()
+    });
+
+    const getEquipmentColumns = () => [
+        { header: "Amenity Name", key: "amenityName", width: 20 },
+        { header: "Amenity Type", key: "amenityType", width: 15 },
+        { header: "Amenity Stock", key: "amenityStockMax", width: 10 },
+        { header: "Amenity Min Qty", key: "amenityQuantityMin", width: 10 },
+        { header: "Amenity Max Qty", key: "amenityQuantityMax", width: 10 },
+        { header: "Amenity Description", key: "amenityDescription", width: 100 },
+        { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
+        { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
+        { header: "Created At", key: "amenityCreatedAt", width: 20 },
+        { header: "Created By", key: "amenityCreator", width: 15 }
+    ];
+
+    const getFacilityColumns = () => [
+        { header: "Amenity Name", key: "amenityName", width: 20 },
+        { header: "Amenity Type", key: "amenityType", width: 15 },
+        { header: "Amenity Address", key: "amenityAddress", width: 30 },
+        { header: "Amenity Description", key: "amenityDescription", width: 100 },
+        { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
+        { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
+        { header: "Created At", key: "amenityCreatedAt", width: 20 },
+        { header: "Created By", key: "amenityCreator", width: 15 }
+    ];
+
+    const filterReservations = (reservations: any[], exportOptions: any) => {
+        return reservations.filter(reservation => {
+            const reservationDate = new Date(reservation.reservationDate);
+            const createdAt = new Date(reservation.createdAt);
+            const currentStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1].status;
+
+            const matchesReservationDate = !exportOptions.dateRange?.from || !exportOptions.dateRange?.to ||
+                (reservationDate >= exportOptions.dateRange.from && reservationDate <= exportOptions.dateRange.to);
+
+            const matchesCreatedDate = !exportOptions.createdAtRange?.from || !exportOptions.createdAtRange?.to ||
+                (createdAt >= exportOptions.createdAtRange.from && createdAt <= exportOptions.createdAtRange.to);
+
+            const matchesStatus = exportOptions.status.includes(currentStatus);
+            const matchesVisibility = exportOptions.visibility === "All" ? true :
+                reservation.reservationVisibility === exportOptions.visibility;
+            const matchesType = exportOptions.type === "All" ? true :
+                reservation.reservationType === exportOptions.type;
+            const matchesAuthorRole = exportOptions.authorRole === "All" ? true :
+                exportOptions.authorRole === "Unit Owners" ? reservation.reserveePosition === "Unit Owner" :
+                    reservation.reserveePosition !== "Unit Owner";
+
+            return matchesReservationDate && matchesCreatedDate && matchesStatus &&
+                matchesVisibility && matchesType && matchesAuthorRole;
+        });
+    };
+
+    const handleExport = async (type: string) => {
         setLoading(true);
 
         try {
-
             if (!data) throw new Error('Amenity data not available');
-
-            const amenities = data as any[];
-
             if (!includeBasicInfo && !includeReservationOptions) {
                 throw new Error('Please select at least one export option');
             }
 
+            const amenities: AmenityType[] = data as any[];
             const wb = new Workbook();
-
-            wb.creator = user.userBlkLt;
-            wb.lastModifiedBy = user.userBlkLt;
-            wb.created = new Date();
-            wb.modified = new Date();
-
-            if (type === "excel" && includeBasicInfo && !includeReservationOptions) {
-
-                const ews = wb.addWorksheet('Equipment Amenity Details');
-
-                ews.columns = [
-                    { header: "Amenity Name", key: "amenityName", width: 20 },
-                    { header: "Amenity Type", key: "amenityType", width: 15 },
-                    { header: "Amenity Stock", key: "amenityStockMax", width: 10 },
-                    { header: "Amenity Min Qty", key: "amenityQuantityMin", width: 10 },
-                    { header: "Amenity Max Qty", key: "amenityQuantityMax", width: 10 },
-                    { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                    { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                    { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                    { header: "Created At", key: "amenityCreatedAt", width: 20 },
-                    { header: "Created By", key: "amenityCreator", width: 15 },
-                ];
-
-                amenities.forEach(amenity => {
-
-                    if (amenity.amenityType === "Equipment") {
-                        ews.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityStockMax: amenity?.amenityStockMax,
-                            amenityQuantityMin: amenity?.amenityQuantityMin,
-                            amenityQuantityMax: amenity?.amenityQuantityMax,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                            amenityCreator: amenity?.amenityCreator,
-                        });
-                    }
-
-                });
-
-                const fws = wb.addWorksheet('Facility Amenity Details');
-
-                fws.columns = [
-                    { header: "Amenity Name", key: "amenityName", width: 20 },
-                    { header: "Amenity Type", key: "amenityType", width: 15 },
-                    { header: "Amenity Address", key: "amenityAddress", width: 30 },
-                    { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                    { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                    { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                    { header: "Created At", key: "amenityCreatedAt", width: 20 },
-                    { header: "Created By", key: "amenityCreator", width: 15 },
-                ];
-
-                amenities.forEach(amenity => {
-                    if (amenity.amenityType === "Facility") {
-
-                        fws.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityAddress: amenity?.amenityAddress,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                            amenityCreator: amenity?.amenityCreator,
-                        });
-
-                    }
-                });
-
-                const buffer = await wb.xlsx.writeBuffer();
-                saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Amenities - " + format(new Date(), "MMM d, yyyy") + ".xlsx");
-            }
-
-            if (type === "csv" && includeBasicInfo && !includeReservationOptions) {
-                const zip = new JSZip();
-
-                const ewb = new Workbook();
-                ewb.creator = user.userBlkLt;
-                ewb.lastModifiedBy = user.userBlkLt;
-                ewb.created = new Date();
-                ewb.modified = new Date();
-
-                const ews = ewb.addWorksheet('Equipment Amenity Details');
-                ews.columns = [
-                    { header: "Amenity Name", key: "amenityName", width: 20 },
-                    { header: "Amenity Type", key: "amenityType", width: 15 },
-                    { header: "Amenity Stock", key: "amenityStockMax", width: 10 },
-                    { header: "Amenity Min Qty", key: "amenityQuantityMin", width: 10 },
-                    { header: "Amenity Max Qty", key: "amenityQuantityMax", width: 10 },
-                    { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                    { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                    { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                    { header: "Created At", key: "amenityCreatedAt", width: 20 },
-                    { header: "Created By", key: "amenityCreator", width: 15 },
-                ];
-
-                amenities.forEach(amenity => {
-                    if (amenity.amenityType === "Equipment") {
-                        ews.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityStockMax: amenity?.amenityStockMax,
-                            amenityQuantityMin: amenity?.amenityQuantityMin,
-                            amenityQuantityMax: amenity?.amenityQuantityMax,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                            amenityCreator: amenity?.amenityCreator,
-                        });
-                    }
-                });
-
-                const equipmentBuffer = await ewb.csv.writeBuffer();
-                zip.file("Equipment Amenities - " + format(new Date(), "MMM d, yyyy") + ".csv", equipmentBuffer);
-
-                const fwb = new Workbook();
-                fwb.creator = user.userBlkLt;
-                fwb.lastModifiedBy = user.userBlkLt;
-                fwb.created = new Date();
-                fwb.modified = new Date();
-
-                const fws = fwb.addWorksheet('Facility Amenity Details');
-                fws.columns = [
-                    { header: "Amenity Name", key: "amenityName", width: 20 },
-                    { header: "Amenity Type", key: "amenityType", width: 15 },
-                    { header: "Amenity Address", key: "amenityAddress", width: 30 },
-                    { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                    { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                    { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                    { header: "Created At", key: "amenityCreatedAt", width: 20 },
-                    { header: "Created By", key: "amenityCreator", width: 15 },
-                ];
-
-                amenities.forEach(amenity => {
-                    if (amenity.amenityType === "Facility") {
-                        fws.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityAddress: amenity?.amenityAddress,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                            amenityCreator: amenity?.amenityCreator,
-                        });
-                    }
-                });
-
-                const facilityBuffer = await fwb.csv.writeBuffer();
-                zip.file("Facility Amenities.csv", facilityBuffer);
-
-                const zipContent = await zip.generateAsync({ type: "blob" });
-                saveAs(zipContent, "Amenities - " + format(new Date(), "MMM d, yyyy") + ".zip");
-            }
-
-
-            if (type === "excel" && includeBasicInfo && includeReservationOptions) {
-
-                const ews = wb.addWorksheet('Equipment Amenity Details');
-
-                ews.columns = [
-                    { header: "Amenity Name", key: "amenityName", width: 20 },
-                    { header: "Amenity Type", key: "amenityType", width: 15 },
-                    { header: "Amenity Stock", key: "amenityStockMax", width: 10 },
-                    { header: "Amenity Min Qty", key: "amenityQuantityMin", width: 10 },
-                    { header: "Amenity Max Qty", key: "amenityQuantityMax", width: 10 },
-                    { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                    { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                    { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                    { header: "Created At", key: "amenityCreatedAt", width: 20 },
-                    { header: "Created By", key: "amenityCreator", width: 15 },
-                ];
-
-                amenities.forEach(amenity => {
-
-                    if (amenity.amenityType === "Equipment") {
-                        ews.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityStockMax: amenity?.amenityStockMax,
-                            amenityQuantityMin: amenity?.amenityQuantityMin,
-                            amenityQuantityMax: amenity?.amenityQuantityMax,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                            amenityCreator: amenity?.amenityCreator,
-                        });
-                    }
-
-                });
-
-                const fws = wb.addWorksheet('Facility Amenity Details');
-
-                fws.columns = [
-                    { header: "Amenity Name", key: "amenityName", width: 20 },
-                    { header: "Amenity Type", key: "amenityType", width: 15 },
-                    { header: "Amenity Address", key: "amenityAddress", width: 30 },
-                    { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                    { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                    { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                    { header: "Created At", key: "amenityCreatedAt", width: 20 },
-                    { header: "Created By", key: "amenityCreator", width: 15 },
-                ];
-
-                amenities.forEach(amenity => {
-                    if (amenity.amenityType === "Facility") {
-
-                        fws.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityAddress: amenity?.amenityAddress,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                            amenityCreator: amenity?.amenityCreator,
-                        });
-
-                    }
-                });
-
-                amenities.map((amenity) => {
-
-                    const ws = wb.addWorksheet(amenity?.amenityName + ' Details');
-
-                    const currReservations = reservations.filter(reservation => {
-                        return reservation.reservationAmenities.some(reservationAmenity =>
-                            reservationAmenity.amenityName === amenity?.amenityName
-                        )
-                    })
-
-                    if (amenity && amenity.amenityType === "Equipment") {
-                        ws.columns = [
-                            { header: "Amenity Name", key: "amenityName", width: 20 },
-                            { header: "Amenity Type", key: "amenityType", width: 15 },
-                            { header: "Amenity Stock", key: "amenityStockMax", width: 10 },
-                            { header: "Amenity Min Qty", key: "amenityQuantityMin", width: 10 },
-                            { header: "Amenity Max Qty", key: "amenityQuantityMax", width: 10 },
-                            { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                            { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                            { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                            { header: "Created At", key: "amenityCreatedAt", width: 15 },
-                        ];
-                        ws.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityStockMax: amenity?.amenityStockMax,
-                            amenityQuantityMin: amenity?.amenityQuantityMin,
-                            amenityQuantityMax: amenity?.amenityQuantityMax,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                        });
-                    } else if (amenity && amenity.amenityType === "Facility") {
-                        ws.columns = [
-                            { header: "Amenity Name", key: "amenityName", width: 20 },
-                            { header: "Amenity Type", key: "amenityType", width: 15 },
-                            { header: "Amenity Address", key: "amenityAddress", width: 50 },
-                            { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                            { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                            { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                            { header: "Created At", key: "amenityCreatedAt", width: 15 },
-                            { header: "", key: "reservationVisibility", width: 15 },
-                            { header: "", key: "reservationCreatedAt", width: 15 },
-                        ];
-                        ws.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityAddress: amenity?.amenityAddress,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                        });
-                    }
-
-                    ws.addRow({});
-                    ws.addRow({});
-                    ws.addRow({});
-
-                    ws.getRow(1).eachCell(cell => {
-                        cell.font = { bold: true };
-                    });
-
-                    // Add a second worksheet for reservations if includeReservationOptions is true
-                    if (amenity.amenityType === "Equipment") {
-                        ws.addRow({
-                            amenityName: "Reservation ID",
-                            amenityType: "Reservee ID",
-                            amenityStockMax: "Reservee Block and Lot",
-                            amenityQuantityMin: "Reservation Type",
-                            amenityQuantityMax: "Reservation Amenities",
-                            amenityDescription: "Reservation Status",
-                            amenityReminder: "Reservation Date",
-                            amenityVisibility: "Reservation Visibility",
-                            amenityCreatedAt: "Created At",
-                        })
-                    }
-
-                    if (amenity.amenityType === "Facility") {
-                        ws.addRow({
-                            amenityName: "Reservation ID",
-                            amenityType: "Reservee ID",
-                            amenityAddress: "Reservee Block and Lot",
-                            amenityDescription: "Reservation Type",
-                            amenityReminder: "Reservation Amenities",
-                            amenityVisibility: "Reservation Status",
-                            amenityCreatedAt: "Reservation Date",
-                            reservationVisibility: "Reservation Visibility",
-                            reservationCreatedAt: "Created At",
-                        })
-                    }
-
-
-
-                    // Filter reservations based on export options
-                    const filteredReservations = currReservations.filter(reservation => {
-                        const reservationDate = new Date(reservation.reservationDate);
-                        const createdAt = new Date(reservation.createdAt);
-                        const currentStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1].status;
-
-                        // Date range filters
-                        const matchesReservationDate = !exportReservationDateRange?.from || !exportReservationDateRange?.to ||
-                            (reservationDate >= exportReservationDateRange.from && reservationDate <= exportReservationDateRange.to);
-
-                        const matchesCreatedDate = !exportCreatedAtDateRange?.from || !exportCreatedAtDateRange?.to ||
-                            (createdAt >= exportCreatedAtDateRange.from && createdAt <= exportCreatedAtDateRange.to);
-
-                        // Status filter
-                        const matchesStatus = exportStatus.includes(currentStatus);
-
-                        // Visibility filter
-                        const matchesVisibility = exportReservationVisibility === "All" ? true :
-                            exportReservationVisibility === "Unarchived" ? reservation.reservationVisibility === "Unarchived" :
-                                exportReservationVisibility === "Archived" ? reservation.reservationVisibility === "Archived" : false;
-
-                        // Type filter
-                        const matchesType = exportReservationType === "All" ? true :
-                            exportReservationType === "Equipment" ? reservation.reservationType === "Equipment" :
-                                exportReservationType === "Facility" ? reservation.reservationType === "Facility" :
-                                    exportReservationType === "Equipment and Facility" ? reservation.reservationType === "Equipment and Facility" : false;
-
-                        const matchesAuthorRole = exportAuthorRole === "All" ? true :
-                            exportAuthorRole === "Unit Owners" ? reservation.reserveePosition === "Unit Owner" :
-                                exportAuthorRole === "Admins" ? reservation.reserveePosition != "Unit Owner" : false;
-
-                        return matchesReservationDate && matchesCreatedDate && matchesStatus &&
-                            matchesVisibility && matchesType &&
-                            matchesAuthorRole;
-                    });
-
-                    // Add the filtered data
-                    filteredReservations.forEach(reservation => {
-
-                        if (amenity.amenityType === "Equipment") {
-                            ws.addRow({
-                                amenityName: reservation._id,
-                                amenityType: reservation.reserveeId,
-                                amenityStockMax: reservation.reserveeBlkLt,
-                                amenityQuantityMin: reservation.reservationType,
-                                amenityQuantityMax: reservation.reservationAmenities.map(a => {
-                                    if (a.amenityType === "Equipment") {
-                                        return `${a.amenityName} (${a.amenityQuantity})`
-                                    } else {
-                                        return `${a.amenityName}`
-                                    }
-                                }).join(', '),
-                                amenityDescription: reservation.reservationStatus[reservation.reservationStatus.length - 1].status,
-                                amenityReminder: format(new Date(reservation.reservationDate), "MMM d, yyyy"),
-                                amenityVisibility: reservation.reservationVisibility,
-                                amenityCreatedAt: format(new Date(reservation.createdAt), "MMM d, yyyy"),
-                            })
-                        }
-
-                        if (amenity.amenityType === "Facility") {
-                            ws.addRow({
-                                amenityName: reservation._id,
-                                amenityType: reservation.reserveeId,
-                                amenityAddress: reservation.reserveeBlkLt,
-                                amenityDescription: reservation.reservationType,
-                                amenityReminder: reservation.reservationAmenities.map(a => {
-                                    if (a.amenityType === "Equipment") {
-                                        return `${a.amenityName} (${a.amenityQuantity})`
-                                    } else {
-                                        return `${a.amenityName}`
-                                    }
-                                }).join(', '),
-                                amenityVisibility: reservation.reservationStatus[reservation.reservationStatus.length - 1].status,
-                                amenityCreatedAt: format(new Date(reservation.reservationDate), "MMM d, yyyy"),
-                                reservationVisibility: reservation.reservationVisibility,
-                                reservationCreatedAt: format(new Date(reservation.createdAt), "MMM d, yyyy"),
-                            })
-                        }
-
-                    });
-
-                    // Style the header row
-                    ws.getRow(6).font = { bold: true };
-
-                })
-
-                const buffer = await wb.xlsx.writeBuffer();
-                saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Amenities - " + format(new Date(), "MMM d, yyyy") + ".xlsx");
-            }
-
-            if (type === "csv" && includeBasicInfo && includeReservationOptions) {
-
-                let zip = new JSZip();
-
-                const ewb = new Workbook();
-
-                ewb.creator = user.userBlkLt;
-                ewb.lastModifiedBy = user.userBlkLt;
-                ewb.created = new Date();
-                ewb.modified = new Date();
-
-                const ews = ewb.addWorksheet('Equipment Amenity Details');
-
-                ews.columns = [
-                    { header: "Amenity Name", key: "amenityName", width: 20 },
-                    { header: "Amenity Type", key: "amenityType", width: 15 },
-                    { header: "Amenity Stock", key: "amenityStockMax", width: 10 },
-                    { header: "Amenity Min Qty", key: "amenityQuantityMin", width: 10 },
-                    { header: "Amenity Max Qty", key: "amenityQuantityMax", width: 10 },
-                    { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                    { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                    { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                    { header: "Created At", key: "amenityCreatedAt", width: 20 },
-                    { header: "Created By", key: "amenityCreator", width: 15 },
-                ];
-
-                amenities.forEach(amenity => {
-
-                    if (amenity.amenityType === "Equipment") {
-                        ews.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityStockMax: amenity?.amenityStockMax,
-                            amenityQuantityMin: amenity?.amenityQuantityMin,
-                            amenityQuantityMax: amenity?.amenityQuantityMax,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                            amenityCreator: amenity?.amenityCreator,
-                        });
-                    }
-
-                });
-
-                const equipmentBuffer = await ewb.csv.writeBuffer();
-                zip.file("Equipment Amenities - " + format(new Date(), "MMM d, yyyy") + ".csv", equipmentBuffer);
-
-                const fwb = new Workbook();
-
-                fwb.creator = user.userBlkLt;
-                fwb.lastModifiedBy = user.userBlkLt;
-                fwb.created = new Date();
-                fwb.modified = new Date();
-
-                const fws = fwb.addWorksheet('Facility Amenity Details');
-
-                fws.columns = [
-                    { header: "Amenity Name", key: "amenityName", width: 20 },
-                    { header: "Amenity Type", key: "amenityType", width: 15 },
-                    { header: "Amenity Address", key: "amenityAddress", width: 30 },
-                    { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                    { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                    { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                    { header: "Created At", key: "amenityCreatedAt", width: 20 },
-                    { header: "Created By", key: "amenityCreator", width: 15 },
-                ];
-
-                amenities.forEach(amenity => {
-                    if (amenity.amenityType === "Facility") {
-
-                        fws.addRow({
-                            amenityName: amenity?.amenityName,
-                            amenityType: amenity?.amenityType,
-                            amenityAddress: amenity?.amenityAddress,
-                            amenityDescription: amenity?.amenityDescription,
-                            amenityReminder: amenity?.amenityReminder,
-                            amenityVisibility: amenity?.amenityVisibility,
-                            amenityCreatedAt: amenity?.createdAt,
-                            amenityCreator: amenity?.amenityCreator,
-                        });
-
-                    }
-                });
-
-                const facilityBuffer = await fwb.csv.writeBuffer();
-                zip.file("Facility Amenities - " + format(new Date(), "MMM d, yyyy") + ".csv", facilityBuffer);
-
-                await Promise.all(amenities.map(async (amenity) => {
-
-                    const ws = wb.addWorksheet(amenity?.amenityName + ' Details');
-
-                    const currReservations = reservations.filter(reservation => {
-                        return reservation.reservationAmenities.some(reservationAmenity =>
-                            reservationAmenity.amenityName === amenity?.amenityName
-                        )
-                    })
-
-                    if (includeBasicInfo) {
-
-                        if (amenity && amenity.amenityType === "Equipment") {
-                            ws.columns = [
-                                { header: "Amenity Name", key: "amenityName", width: 20 },
-                                { header: "Amenity Type", key: "amenityType", width: 15 },
-                                { header: "Amenity Stock", key: "amenityStockMax", width: 10 },
-                                { header: "Amenity Min Qty", key: "amenityQuantityMin", width: 10 },
-                                { header: "Amenity Max Qty", key: "amenityQuantityMax", width: 10 },
-                                { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                                { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                                { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                                { header: "Created At", key: "amenityCreatedAt", width: 15 },
-                            ];
-                            ws.addRow({
-                                amenityName: amenity?.amenityName,
-                                amenityType: amenity?.amenityType,
-                                amenityStockMax: amenity?.amenityStockMax,
-                                amenityQuantityMin: amenity?.amenityQuantityMin,
-                                amenityQuantityMax: amenity?.amenityQuantityMax,
-                                amenityDescription: amenity?.amenityDescription,
-                                amenityReminder: amenity?.amenityReminder,
-                                amenityVisibility: amenity?.amenityVisibility,
-                                amenityCreatedAt: amenity?.createdAt,
-                            });
-                        } else if (amenity && amenity.amenityType === "Facility") {
-                            ws.columns = [
-                                { header: "Amenity Name", key: "amenityName", width: 20 },
-                                { header: "Amenity Type", key: "amenityType", width: 15 },
-                                { header: "Amenity Address", key: "amenityAddress", width: 50 },
-                                { header: "Amenity Description", key: "amenityDescription", width: 100 },
-                                { header: "Amenity Reminder", key: "amenityReminder", width: 100 },
-                                { header: "Amenity Visibility", key: "amenityVisibility", width: 15 },
-                                { header: "Created At", key: "amenityCreatedAt", width: 15 },
-                                { header: "", key: "reservationVisibility", width: 15 },
-                                { header: "", key: "reservationCreatedAt", width: 15 },
-                            ];
-                            ws.addRow({
-                                amenityName: amenity?.amenityName,
-                                amenityType: amenity?.amenityType,
-                                amenityAddress: amenity?.amenityAddress,
-                                amenityDescription: amenity?.amenityDescription,
-                                amenityReminder: amenity?.amenityReminder,
-                                amenityVisibility: amenity?.amenityVisibility,
-                                amenityCreatedAt: amenity?.createdAt,
-                            });
-                        }
-
-                        ws.addRow({});
-                        ws.addRow({});
-                        ws.addRow({});
-
-                        ws.getRow(1).eachCell(cell => {
-                            cell.font = { bold: true };
-                        });
-                    }
-
-                    // Add a second worksheet for reservations if includeReservationOptions is true
-                    if (includeReservationOptions) {
-
-                        if (amenity.amenityType === "Equipment") {
-                            ws.addRow({
-                                amenityName: "Reservation ID",
-                                amenityType: "Reservee ID",
-                                amenityStockMax: "Reservee Block and Lot",
-                                amenityQuantityMin: "Reservation Type",
-                                amenityQuantityMax: "Reservation Amenities",
-                                amenityDescription: "Reservation Status",
-                                amenityReminder: "Reservation Date",
-                                amenityVisibility: "Reservation Visibility",
-                                amenityCreatedAt: "Created At",
-                            })
-                        }
-
-                        if (amenity.amenityType === "Facility") {
-                            ws.addRow({
-                                amenityName: "Reservation ID",
-                                amenityType: "Reservee ID",
-                                amenityAddress: "Reservee Block and Lot",
-                                amenityDescription: "Reservation Type",
-                                amenityReminder: "Reservation Amenities",
-                                amenityVisibility: "Reservation Status",
-                                amenityCreatedAt: "Reservation Date",
-                                reservationVisibility: "Reservation Visibility",
-                                reservationCreatedAt: "Created At",
-                            })
-                        }
-
-
-
-                        // Filter reservations based on export options
-                        const filteredReservations = currReservations.filter(reservation => {
-                            const reservationDate = new Date(reservation.reservationDate);
-                            const createdAt = new Date(reservation.createdAt);
-                            const currentStatus = reservation.reservationStatus[reservation.reservationStatus.length - 1].status;
-
-                            // Date range filters
-                            const matchesReservationDate = !exportReservationDateRange?.from || !exportReservationDateRange?.to ||
-                                (reservationDate >= exportReservationDateRange.from && reservationDate <= exportReservationDateRange.to);
-
-                            const matchesCreatedDate = !exportCreatedAtDateRange?.from || !exportCreatedAtDateRange?.to ||
-                                (createdAt >= exportCreatedAtDateRange.from && createdAt <= exportCreatedAtDateRange.to);
-
-                            // Status filter
-                            const matchesStatus = exportStatus.includes(currentStatus);
-
-                            // Visibility filter
-                            const matchesVisibility = exportReservationVisibility === "All" ? true :
-                                exportReservationVisibility === "Unarchived" ? reservation.reservationVisibility === "Unarchived" :
-                                    exportReservationVisibility === "Archived" ? reservation.reservationVisibility === "Archived" : false;
-
-                            // Type filter
-                            const matchesType = exportReservationType === "All" ? true :
-                                exportReservationType === "Equipment" ? reservation.reservationType === "Equipment" :
-                                    exportReservationType === "Facility" ? reservation.reservationType === "Facility" :
-                                        exportReservationType === "Equipment and Facility" ? reservation.reservationType === "Equipment and Facility" : false;
-
-                            const matchesAuthorRole = exportAuthorRole === "All" ? true :
-                                exportAuthorRole === "Unit Owners" ? reservation.reserveePosition === "Unit Owner" :
-                                    exportAuthorRole === "Admins" ? reservation.reserveePosition != "Unit Owner" : false;
-
-                            return matchesReservationDate && matchesCreatedDate && matchesStatus &&
-                                matchesVisibility && matchesType &&
-                                matchesAuthorRole;
-                        });
-
-                        // Add the filtered data
-                        filteredReservations.forEach(reservation => {
-
-                            if (amenity.amenityType === "Equipment") {
-                                ws.addRow({
-                                    amenityName: reservation._id,
-                                    amenityType: reservation.reserveeId,
-                                    amenityStockMax: reservation.reserveeBlkLt,
-                                    amenityQuantityMin: reservation.reservationType,
-                                    amenityQuantityMax: reservation.reservationAmenities.map(a => {
-                                        if (a.amenityType === "Equipment") {
-                                            return `${a.amenityName} (${a.amenityQuantity})`
-                                        } else {
-                                            return `${a.amenityName}`
-                                        }
-                                    }).join(', '),
-                                    amenityDescription: reservation.reservationStatus[reservation.reservationStatus.length - 1].status,
-                                    amenityReminder: format(new Date(reservation.reservationDate), "MMM d, yyyy"),
-                                    amenityVisibility: reservation.reservationVisibility,
-                                    amenityCreatedAt: format(new Date(reservation.createdAt), "MMM d, yyyy"),
-                                })
-                            }
-
-                            if (amenity.amenityType === "Facility") {
-                                ws.addRow({
-                                    amenityName: reservation._id,
-                                    amenityType: reservation.reserveeId,
-                                    amenityAddress: reservation.reserveeBlkLt,
-                                    amenityDescription: reservation.reservationType,
-                                    amenityReminder: reservation.reservationAmenities.map(a => {
-                                        if (a.amenityType === "Equipment") {
-                                            return `${a.amenityName} (${a.amenityQuantity})`
-                                        } else {
-                                            return `${a.amenityName}`
-                                        }
-                                    }).join(', '),
-                                    amenityVisibility: reservation.reservationStatus[reservation.reservationStatus.length - 1].status,
-                                    amenityCreatedAt: format(new Date(reservation.reservationDate), "MMM d, yyyy"),
-                                    reservationVisibility: reservation.reservationVisibility,
-                                    reservationCreatedAt: format(new Date(reservation.createdAt), "MMM d, yyyy"),
-                                })
-                            }
-
-                        });
-
-                        // Style the header row
-                        ws.getRow(6).font = { bold: true };
-                    }
-
-                    const buffer = await wb.csv.writeBuffer();
-                    zip.file(amenity.amenityName + " - " + format(new Date(), "MMM d, yyyy") + ".csv", buffer);
-                }));
-
-                const zipContent = await zip.generateAsync({ type: "blob" });
-                saveAs(zipContent, "Amenities - " + format(new Date(), "MMM d, yyyy") + ".zip");
+            Object.assign(wb, getWorkbookConfig(user));
+
+            const exportOptions = {
+                dateRange: exportReservationDateRange,
+                createdAtRange: exportCreatedAtDateRange,
+                status: exportStatus,
+                visibility: exportReservationVisibility,
+                type: exportReservationType,
+                authorRole: exportAuthorRole
+            };
+
+            if (type === "excel") {
+                await handleExcelExport(wb, amenities, exportOptions);
+            } else if (type === "csv") {
+                await handleCsvExport(amenities, exportOptions);
             }
 
         } catch (error) {
@@ -977,9 +358,180 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
         } finally {
             setLoading(false);
         }
+    };
 
-    }
+    const handleExcelExport = async (wb: Workbook, amenities: AmenityType[], exportOptions: any) => {
+        // Add equipment worksheet
+        const ews = wb.addWorksheet('Equipment Amenities');
+        ews.columns = getEquipmentColumns();
+        amenities.filter(a => a.amenityType === "Equipment")
+            .forEach(amenity => addAmenityRow(ews, amenity));
 
+        // Add facility worksheet  
+        const fws = wb.addWorksheet('Facility Amenities');
+        fws.columns = getFacilityColumns();
+        amenities.filter(a => a.amenityType === "Facility")
+            .forEach(amenity => addAmenityRow(fws, amenity));
+
+        if (includeReservationOptions) {
+            await addReservationWorksheets(wb, amenities, exportOptions);
+        }
+
+        const buffer = await wb.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `Amenities - ${format(new Date(), "MMM d, yyyy")}.xlsx`);
+    };
+
+    const handleCsvExport = async (amenities: AmenityType[], exportOptions: any) => {
+        const zip = new JSZip();
+
+        // Add basic amenity data CSVs
+        if (includeBasicInfo) {
+            await addAmenityCsvFiles(zip, amenities);
+        }
+
+        // Add reservation data CSVs
+        if (includeReservationOptions) {
+            await addReservationCsvFiles(zip, amenities, exportOptions);
+        }
+
+        const zipContent = await zip.generateAsync({ type: "blob" });
+        saveAs(zipContent, `Amenities - ${format(new Date(), "MMM d, yyyy")}.zip`);
+    };
+    const addAmenityRow = (ws: any, amenity: AmenityType) => {
+        const row = {
+            amenityName: amenity.amenityName,
+            amenityType: amenity.amenityType,
+            amenityStockMax: amenity.amenityStockMax,
+            amenityQuantityMin: amenity.amenityQuantityMin,
+            amenityQuantityMax: amenity.amenityQuantityMax,
+            amenityAddress: amenity.amenityAddress,
+            amenityDescription: amenity.amenityDescription,
+            amenityReminder: amenity.amenityReminder,
+            amenityVisibility: amenity.amenityVisibility,
+            amenityCreatedAt: format(new Date(amenity.createdAt), "MMM d, yyyy"),
+            amenityCreator: amenity.amenityCreator
+        };
+        ws.addRow(row);
+    };
+
+    const addReservationWorksheets = async (wb: Workbook, amenities: AmenityType[], exportOptions: any) => {
+        amenities.forEach(amenity => {
+            const amenityReservations = reservations.filter(r => r.reservationAmenities.some(res => res._id === amenity._id));
+            const filteredReservations = filterReservations(amenityReservations, exportOptions);
+
+            if (filteredReservations) {
+                const ws = wb.addWorksheet(`${amenity.amenityName} Reservations`);
+                ws.columns = [
+                    { header: "Reservation ID", key: "_id", width: 25 },
+                    { header: "Reservee ID", key: "reserveeId", width: 25 },
+                    { header: "Reservee Block and Lot", key: "reserveeBlkLt", width: 25 },
+                    { header: "Reservation Type", key: "reservationType", width: 25 },
+                    { header: "Reservation Amenities", key: "reservationAmenities", width: 25 },
+                    { header: "Reservation Status", key: "reservationStatus", width: 20 },
+                    { header: "Reservation Date", key: "reservationDate", width: 25 },
+                    { header: "Reservation Reason", key: "reservationReason", width: 50 },
+                    { header: "Reservation Visibility", key: "reservationVisibility", width: 20 },
+                    { header: "Created At", key: "createdAt", width: 15 }
+                ];
+
+                filteredReservations.forEach(reservation => {
+                    ws.addRow({
+                        _id: reservation._id,
+                        reserveeId: reservation.reserveeId,
+                        reservationBlkLt: reservation.reserveeBlkLt,
+                        reservationType: reservation.reservationType,
+                        reservationAmenities: reservation.reservationAmenities.map(reservationAmenity => {
+                            if (reservationAmenity.amenityType === "Equipment") {
+                                return `${reservationAmenity.amenityName} (${reservationAmenity.amenityQuantity})`
+                            } else {
+                                return `${reservationAmenity.amenityName}`
+                            }
+                        }).join(', '),
+                        reservationStatus: reservation.reservationStatus[reservation.reservationStatus.length - 1].status,
+                        reservationDate: format(new Date(reservation.reservationDate), "MMM d, yyyy"),
+                        reservationReason: reservation.reservationReason,
+                        reservationVisibility: reservation.reservationVisibility,
+                        createdAt: format(new Date(reservation.createdAt), "MMM d, yyyy"),
+                    });
+                });
+            }
+        });
+    };
+
+    const addAmenityCsvFiles = async (zip: JSZip, amenities: AmenityType[]) => {
+        const equipment = amenities.filter(a => a.amenityType === "Equipment");
+        const facilities = amenities.filter(a => a.amenityType === "Facility");
+
+        if (equipment.length) {
+            const equipmentCsv = equipment.map(amenity => ({
+                Name: amenity.amenityName,
+                Type: amenity.amenityType,
+                Stock: amenity.amenityStockMax,
+                "Min Quantity": amenity.amenityQuantityMin,
+                "Max Quantity": amenity.amenityQuantityMax,
+                Description: amenity.amenityDescription,
+                Reminder: amenity.amenityReminder,
+                Visibility: amenity.amenityVisibility,
+                "Created At": format(new Date(amenity.createdAt), "MMM d, yyyy"),
+                Creator: amenity.amenityCreator
+            }));
+            zip.file("Equipment Amenities - " + format(new Date(), "MMM d, yyyy") + ".csv", generateCsv(equipmentCsv));
+        }
+
+        if (facilities.length) {
+            const facilitiesCsv = facilities.map(amenity => ({
+                Name: amenity.amenityName,
+                Type: amenity.amenityType,
+                Address: amenity.amenityAddress,
+                Description: amenity.amenityDescription,
+                Reminder: amenity.amenityReminder,
+                Visibility: amenity.amenityVisibility,
+                "Created At": format(new Date(amenity.createdAt), "MMM d, yyyy"),
+                Creator: amenity.amenityCreator
+            }));
+            zip.file("Facility Amenities - " + format(new Date(), "MMM d, yyyy") + ".csv", generateCsv(facilitiesCsv));
+        }
+    };
+
+    const addReservationCsvFiles = async (zip: JSZip, amenities: AmenityType[], exportOptions: any) => {
+        amenities.forEach(amenity => {
+            const amenityReservations = reservations.filter(r => r.reservationAmenities.some(res => res._id === amenity._id));
+            const filteredReservations = filterReservations(amenityReservations, exportOptions);
+
+            if (filteredReservations.length > 0) {
+                const reservationsCsv = filteredReservations.map(reservation => ({
+                    "Reservation ID": reservation._id,
+                    "Reservee ID": reservation.reserveeId,
+                    "Reservee Block and Lot": reservation.reserveeBlkLt,
+                    "Reservation Type": reservation.reservationType,
+                    "Reservation Amenities": reservation.reservationAmenities.map(reservationAmenity => {
+                        if (reservationAmenity.amenityType === "Equipment") {
+                            return `${reservationAmenity.amenityName} (${reservationAmenity.amenityQuantity})`
+                        } else {
+                            return `${reservationAmenity.amenityName}`
+                        }
+                    }).join(', '),
+                    "Reservation Status": reservation.reservationStatus[reservation.reservationStatus.length - 1].status,
+                    "Reservation Date": format(new Date(reservation.reservationDate), "MMM d, yyyy"),
+                    "Reservation Reason": reservation.reservationReason,
+                    "Reservation Visibility": reservation.reservationVisibility,
+                    "Created At": format(new Date(reservation.createdAt), "MMM d, yyyy"),
+                }));
+
+                zip.file(`${amenity.amenityName} Reservations - ${format(new Date(), "MMM d, yyyy")}.csv`, generateCsv(reservationsCsv));
+            }
+        });
+    };
+
+    const generateCsv = (data: any[]) => {
+        if (data.length === 0) return '';
+        const headers = Object.keys(data[0]);
+        const csvRows = [
+            headers.join(','),
+            ...data.map(row => headers.map(header => JSON.stringify(row[header])).join(','))
+        ];
+        return csvRows.join('\n');
+    };
     // Redirect to Amenity Form Function
     const navToAmenityForm = () => {
         const reservationFormPath = "/amenities/create";

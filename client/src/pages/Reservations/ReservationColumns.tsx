@@ -115,9 +115,9 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
             return (
                 <div className="flex items-center justify-center pr-5 w-full">
                     <Badge variant={
-                        status === "Pending" ? "warning" :
-                            status === "Approved" ? "default" :
-                                status === "Rejected" ? "destructive" :
+                        ["Pending", "Ongoing", "For Return"].some(s => s === status) ? "warning" :
+                            ["Approved", "Returned", "Completed"].some(s => s === status) ? "default" :
+                                ["Rejected", "Cancelled"].some(s => s === status) ? "destructive" :
                                     "outline"
                     }>
                         {status}
