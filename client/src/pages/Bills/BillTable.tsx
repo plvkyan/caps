@@ -146,6 +146,8 @@ import { DateRange } from "react-day-picker";
 import { useAuthContext } from "@/hooks/useAuthContext";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import { BillType } from "@/types/bill-type";
+import JSZip from "jszip";
+import { getUnarchivedBillPresets } from "@/data/bills-api";
 
 
 
@@ -194,6 +196,8 @@ export default function BillTable<TData extends BillData, TValue>({
     const [rowSelection, setRowSelection] = useState({});
     // Loading State
     const [loading, setLoading] = useState(false);
+
+    const [billPresets, setBillPresets] = useState<any[]>([]);
 
     // Custom States
     // Date Range State
@@ -262,6 +266,31 @@ export default function BillTable<TData extends BillData, TValue>({
             sessionStorage.removeItem("archiveSuccessful");
         }
 
+        const fetchBillPresets = async () => {
+            try {
+                const response = await getUnarchivedBillPresets();
+                if (!response.ok) {
+                    throw new Error('Failed to fetch bill presets');
+                }
+                const data = await response.json();
+                setBillPresets(data);
+            } catch (error) {
+                if (error instanceof Error) {
+                    toast.error(error.message, {
+                        closeButton: true,
+                        duration: 10000,
+                    });
+                } else {
+                    toast.error('An unknown error occurred', {
+                        closeButton: true,
+                        duration: 10000,
+                    });
+                }
+            }
+        }
+
+        fetchBillPresets();
+
     }, []);
 
     // Update the table filter when date range changes
@@ -281,248 +310,436 @@ export default function BillTable<TData extends BillData, TValue>({
 
     // Functions
     // Helper functions for export
-    // const getWorkbookConfig = (user: any) => ({
-    //     creator: user.userBlkLt,
-    //     lastModifiedBy: user.userBlkLt,
-    //     created: new Date(),
-    //     modified: new Date(),
-    // });
+    const getWorkbookConfig = (user: any) => ({
+        creator: user.userBlkLt,
+        lastModifiedBy: user.userBlkLt,
+        created: new Date(),
+        modified: new Date(),
+    });
 
-    // const getBillColumns = () => [
-    //     { header: "Bill ID", key: "_id", width: 25 },
-    //     { header: "Bill Title", key: "billTitle", width: 40 },
-    //     { header: "Bill Type", key: "billType", width: 20 },
-    //     { header: "Bill Due Date", key: "billDueDate", width: 20 },
-    //     { header: "Bill Amount", key: "billAmount", width: 20 },
-    //     { header: "Bill Recurring Date", key: "billRecurringDate", width: 20 },
-    //     { header: "Bill Description", key: "billDescription", width: 70 },
-    //     { header: "Bill Creator ID", key: "billCreatorId", width: 20 },
-    //     { header: "Bill Creator", key: "billCreatorBlkLt", width: 20 },
-    //     { header: "Bill Creator Position", key: "billCreatorPosition", width: 20 },
-    //     { header: "Bill Visibility", key: "billVisibility", width: 20 },
-    //     { header: "Created At", key: "createdAt", width: 20 },
-    // ]
+    const getBillColumns = () => [
+        { header: "Bill ID", key: "_id", width: 25 },
+        { header: "Bill Title", key: "billTitle", width: 40 },
+        { header: "Bill Type", key: "billType", width: 20 },
+        { header: "Bill Due Date", key: "billDueDate", width: 20 },
+        { header: "Bill Amount", key: "billAmount", width: 20 },
+        { header: "Bill Recurring Date", key: "billRecurringDate", width: 20 },
+        { header: "Bill Description", key: "billDescription", width: 70 },
+        { header: "Bill Creator ID", key: "billCreatorId", width: 20 },
+        { header: "Bill Creator", key: "billCreatorBlkLt", width: 20 },
+        { header: "Bill Creator Position", key: "billCreatorPosition", width: 20 },
+        { header: "Bill Visibility", key: "billVisibility", width: 20 },
+        { header: "Created At", key: "createdAt", width: 20 },
+    ];
 
-    // const filterBills = (bills: any[], exportOptions: any) => {
+    const getBillPresetColumns = () => [
+        { header: "Bill Preset ID", key: "_id", width: 25 },
+        { header: "Bill Preset Title", key: "billPresetTitle", width: 40 },
+        { header: "Bill Preset Type", key: "billPresetType", width: 20 },
+        { header: "Bill Preset Amount", key: "billPresetAmount", width: 20 },
+        { header: "Bill Preset Recurring Date", key: "billPresetRecurringDate", width: 20 },
+        { header: "Bill Preset Description", key: "billPresetDescription", width: 70 },
+        { header: "Bill Preset Creator ID", key: "billPresetCreatorId", width: 20 },
+        { header: "Bill Preset Creator", key: "billPresetCreatorBlkLt", width: 20 },
+        { header: "Bill Preset Creator Position", key: "billPresetCreatorPosition", width: 20 },
+        { header: "Bill Preset Visibility", key: "billPresetVisibility", width: 20 },
+        { header: "Created At", key: "createdAt", width: 20 },
+    ];
 
-    //     return bills.filter(bill => {
-            
-    //     })
-    // }
+    const getBillPayorColumns = () => [
+        { header: "Payor ID", key: "payorId", width: 25 },
+        { header: "Payor Block and Lot", key: "payorBlkLt", width: 25 },
+        { header: "Payor Email", key: "payorEmail", width: 25 },
+        { header: "Payor Status", key: "payorStatus", width: 25 },
+        { header: "Payor Paid Date", key: "payorPaidDate", width: 25 },
+    ];
 
-    // const handleExport = async (type: String) => {
+    const filterBills = (bills: any[], exportOptions: any) => {
+        return bills.filter(bill => {
+            const billDueDate = new Date(bill.billDueDate);
+            const createdAt = new Date(bill.createdAt);
+
+            // Date range filters
+            const matchesReservationDate = !exportOptions.dueDateRange?.from || !exportOptions.dueDateRange?.to ||
+                (billDueDate >= exportOptions.dueDateRange.from && billDueDate <= exportOptions.dueDateRange.to);
+
+            const matchesCreatedDate = !exportOptions.creationDateRange?.from || !exportOptions.creationDateRange?.to ||
+                (createdAt >= exportOptions.creationDateRange.from && createdAt <= exportOptions.creationDateRange.to);
+
+            // Visibility filter
+            const matchesVisibility = exportOptions.visibility === "All" ? true :
+                exportOptions.visibility === bill.billVisibility;
+
+            // Bill type filter
+            const matchesType = exportBillType === "All" ? true :
+                exportOptions.type === bill.billType;
+
+            // Filter payors based on status and paid date
+            bill.billPayors = bill.billPayors.filter(payor => {
+                // Check if payor status matches selected statuses
+                const matchesStatus = exportOptions.status.includes(payor.billStatus);
+
+                // Check if paid date is within range (only for paid bills)
+                const payorPaidDate = payor.billPaidDate ? new Date(payor.billPaidDate) : null;
+
+                const matchesPaidDate = !exportOptions.paidDateRange?.from || !exportOptions.paidDateRange?.to ||
+                    !payorPaidDate || // Include unpaid bills
+                    (payorPaidDate >= exportOptions.paidDateRange.from && payorPaidDate <= exportOptions.paidDateRange.to);
+
+                return matchesStatus && matchesPaidDate;
+            });
+
+            // Only include bills that still have payors after filtering
+            return matchesReservationDate && matchesCreatedDate &&
+                matchesVisibility && matchesType;
+            // && bill.billPayors.length > 0;
+        })
+    };
+
+    const handleExport = async (type: String) => {
+        setLoading(true);
+
+        try {
+            if (!data) throw new Error('Bill data not available');
+            if (!includeBillBasicInfo && !includePayorInfo && !includeBillPresetInfo) {
+                throw new Error('Please select at least one information to include in the export');
+            }
+
+            const bills: BillType[] = data as any;
+            const wb = new Workbook();
+            Object.assign(wb, getWorkbookConfig(user));
+
+            const exportOptions = {
+                dueDateRange: exportDueDateRange,
+                creationDateRange: exportCreationDateRange,
+                paidDateRange: exportBillPaidDateRange,
+                status: exportBillStatus,
+                visibility: exportBillVisibility,
+                type: exportBillType,
+            }
+
+            if (type === "excel") {
+                await handleExcelExport(wb, bills, exportOptions);
+            } else if (type === "csv") {
+                await handleCsvExport(bills, exportOptions);
+            }
+
+        } catch (error) {
+            console.log(error)
+            toast.error(error instanceof Error ? error.message : 'Failed to export data');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const handleExcelExport = async (wb: Workbook, bills: BillType[], exportOptions: any) => {
+
+        const filteredBills = filterBills(bills, exportOptions);
+
+        if (includeBillBasicInfo) {
+            const ws = wb.addWorksheet("Bills - " + format(new Date(), "MMM d, yyyy"));
+            ws.columns = getBillColumns();
+            filteredBills.forEach(bill => addBillRow(ws, bill));
+        }
+
+        if (includeBillPresetInfo) {
+            const ws = wb.addWorksheet("Bill Presets - " + format(new Date(), "MMM d, yyyy"));
+            ws.columns = getBillPresetColumns();
+            billPresets.forEach(preset => {
+                ws.addRow({
+                    _id: preset._id,
+                    billPresetTitle: preset.billPresetTitle,
+                    billPresetType: preset.billPresetType,
+                    billPresetAmount: PHPesos.format(preset.billPresetAmount),
+                    billPresetRecurringDate: preset.billPresetRecurringDate ? preset.billPresetRecurringDate : "N/A",
+                    billPresetDescription: preset.billPresetDescription,
+                    billPresetCreatorId: preset.billPresetCreatorId,
+                    billPresetCreatorBlkLt: preset.billPresetCreatorBlkLt,
+                    billPresetCreatorPosition: preset.billPresetCreatorPosition,
+                    billPresetVisibility: preset.billPresetVisibility,
+                    createdAt: format(new Date(preset.createdAt), "MMM d, yyyy"),
+                })
+            })
+        }
+
+        if (includePayorInfo) {
+            filteredBills.forEach(bill => {
+
+                const worksheetName = (billTitle: string) => {
+                    const existingWorksheet = wb.worksheets.find(ws => ws.name.startsWith(billTitle));
+                    if (existingWorksheet) {
+                        // Find existing sheets with same name and get highest number
+                        const similarSheets = wb.worksheets.filter(ws => ws.name.startsWith(billTitle));
+                        const num = similarSheets.length;
+                        return `${billTitle} (${num}) Payors - ${format(new Date(), "MMM d, yyyy")}`;
+                    }
+                    return `${billTitle} Payors - ${format(new Date(), "MMM d, yyyy")}`;
+                };
+
+                const ws = wb.addWorksheet(worksheetName(bill.billTitle));
+                ws.columns = getBillPayorColumns();
+
+                bill.billPayors.forEach(payor => {
+                    ws.addRow({
+                        payorId: payor.payorId,
+                        payorBlkLt: payor.payorBlkLt,
+                        payorEmail: payor.payorEmail ? payor.payorEmail : "N/A",
+                        payorStatus: payor.billStatus,
+                        payorPaidDate: payor.billPaidDate ? format(new Date(payor.billPaidDate), "MMM d, yyyy") : "N/A",
+                    })
+                })
+            })
+        }
+
+        const buffer = await wb.xlsx.writeBuffer();
+        saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Bills - " + format(new Date(), "MMM d, yyyy") + ".xlsx");
+    }
+
+    const handleCsvExport = async (bills: BillType[], exportOptions: any) => {
+
+        const filteredBills = filterBills(bills, exportOptions);
+        const zip = new JSZip();
+
+        if (includeBillBasicInfo) {
+            await addBillCsvFiles(zip, filteredBills);
+        }
+
+        if (includeBillPresetInfo) {
+            await addBillPresetCsvFiles(zip, billPresets);
+        }
+
+        if (includePayorInfo) {
+            await addPayorCsvFiles(zip, filteredBills);
+        }
+
+        const zipContent = await zip.generateAsync({ type: "blob" });
+        saveAs(zipContent, "Bills - " + format(new Date(), "MMM d, yyyy") + ".zip");
+    }
+
+    const addBillCsvFiles = async (zip: JSZip, bills: BillType[]) => {
+        const billsCsv = bills.map(bill => {
+            return {
+                "Bill ID": bill._id,
+                "Bill Title": bill.billTitle,
+                "Bill Type": bill.billType,
+                "Bill Due Date": format(new Date(bill.billDueDate), "MMM d, yyyy"),
+                "Bill Amount": PHPesos.format(bill.billAmount),
+                "Bill Recurring Date": bill.billRecurringDate ? bill.billRecurringDate : "N/A",
+                "Bill Description": bill.billDescription,
+                "Bill Creator ID": bill.billCreatorId,
+                "Bill Creator": bill.billCreatorBlkLt,
+                "Bill Creator Position": bill.billCreatorPosition,
+                "Bill Visibility": bill.billVisibility,
+                "Created At": format(new Date(bill.createdAt), "MMM d, yyyy"),
+            }
+        });
+
+        zip.file("Bills - " + format(new Date(), "MMM d, yyyy") + ".csv", generateCsv(billsCsv));
+    }
+
+    const addBillPresetCsvFiles = async (zip: JSZip, billPresets: any[]) => {
+        const presetsCsv = billPresets.map(preset => {
+            return {
+                "Bill Preset ID": preset._id,
+                "Bill Preset Title": preset.billPresetTitle,
+                "Bill Preset Type": preset.billPresetType,
+                "Bill Preset Amount": PHPesos.format(preset.billPresetAmount),
+                "Bill Preset Recurring Date": preset.billPresetRecurringDate ? preset.billPresetRecurringDate : "N/A",
+                "Bill Preset Description": preset.billPresetDescription,
+                "Bill Preset Creator ID": preset.billPresetCreatorId,
+                "Bill Preset Creator": preset.billPresetCreatorBlkLt,
+                "Bill Preset Creator Position": preset.billPresetCreatorPosition,
+                "Bill Preset Visibility": preset.billPresetVisibility,
+                "Created At": format(new Date(preset.createdAt), "MMM d, yyyy"),
+            }
+        });
+
+        zip.file("Bill Presets - " + format(new Date(), "MMM d, yyyy") + ".csv", generateCsv(presetsCsv));
+    }
+
+    const addPayorCsvFiles = async (zip: JSZip, bills: BillType[]) => {
+        bills.map(bill => {
+            const payorsCsv = bill.billPayors.map(payor => {
+                return {
+                    "Payor ID": payor.payorId,
+                    "Payor Block and Lot": payor.payorBlkLt,
+                    "Payor Email": payor.payorEmail ? payor.payorEmail : "N/A",
+                    "Payor Status": payor.billStatus,
+                    "Payor Paid Date": payor.billPaidDate ? format(new Date(payor.billPaidDate), "MMM d, yyyy") : "N/A",
+                }
+            });
+
+            const similarBills = bills.filter(b => b.billTitle === bill.billTitle);
+            const billIndex = similarBills.findIndex(b => b._id === bill._id) + 1;
+            const fileName = similarBills.length > 1 ?
+                `${bill.billTitle} (${billIndex}) - ${format(new Date(), "MMM d, yyyy")}.csv` :
+                `${bill.billTitle} - ${format(new Date(), "MMM d, yyyy")}.csv`;
+            zip.file(fileName, generateCsv(payorsCsv));
+        })
+
+    }
+
+    const addBillRow = (ws: any, bill: BillType) => {
+        ws.addRow({
+            _id: bill._id,
+            billTitle: bill.billTitle,
+            billType: bill.billType,
+            billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
+            billAmount: PHPesos.format(bill.billAmount),
+            billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
+            billDescription: bill.billDescription,
+            billCreatorId: bill.billCreatorId,
+            billCreatorBlkLt: bill.billCreatorBlkLt,
+            billCreatorPosition: bill.billCreatorPosition,
+            billVisibility: bill.billVisibility,
+            createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
+        })
+    }
+
+    const generateCsv = (data: any[]) => {
+        if (data.length === 0) return '';
+        const headers = Object.keys(data[0]);
+        const csvRows = [
+            headers.join(','),
+            ...data.map(row => headers.map(header => JSON.stringify(row[header])).join(','))
+        ];
+        return csvRows.join('\n');
+    };
+
+    // const handleExportz = async (type: String) => {
     //     setLoading(true);
 
     //     try {
+
     //         if (!data) throw new Error('Bill data not available');
+
     //         if (!includeBillBasicInfo && !includePayorInfo && !includeBillPresetInfo) {
-    //             throw new Error('Please select at least one information to include in the export');
+    //             toast.error('Please select at least one information to include in the export');
     //         }
 
     //         const bills: BillType[] = data as any;
-    //         const wb = new Workbook();
-    //         Object.assign(wb, getWorkbookConfig(user));
 
-    //         const exportOptions = {
-    //             dueDateRange: exportDueDateRange,
-    //             creationDateRange: exportCreationDateRange,
-    //             paidDateRange: exportBillPaidDateRange,
-    //             status: exportBillStatus,
-    //             visibility: exportBillVisibility,
-    //             type: exportBillType,
+    //         const wb = new Workbook();
+
+    //         wb.creator = user.userBlkLt;
+    //         wb.lastModifiedBy = user.userBlkLt;
+    //         wb.created = new Date();
+    //         wb.modified = new Date();
+
+    //         if (type === "excel" && includeBillBasicInfo) {
+
+    //             const ws = wb.addWorksheet("Bills - " + format(new Date(), "MMM d, yyyy"));
+
+    //             // Filter bills based on export options
+    //             // Then apply all other filters
+    //             const filteredBills = bills.filter(bill => {
+    //                 const billDueDate = new Date(bill.billDueDate);
+    //                 const createdAt = new Date(bill.createdAt);
+
+    //                 // Date range filters
+    //                 const matchesReservationDate = !exportDueDateRange?.from || !exportDueDateRange?.to ||
+    //                     (billDueDate >= exportDueDateRange.from && billDueDate <= exportDueDateRange.to);
+
+    //                 const matchesCreatedDate = !exportCreationDateRange?.from || !exportCreationDateRange?.to ||
+    //                     (createdAt >= exportCreationDateRange.from && createdAt <= exportCreationDateRange.to);
+
+    //                 // Visibility filter
+    //                 const matchesVisibility = exportBillVisibility === "All" ? true :
+    //                     exportBillVisibility === "Unarchived" ? bill.billVisibility === "Unarchived" :
+    //                         exportBillVisibility === "Archived" ? bill.billVisibility === "Archived" : false;
+
+    //                 // Bill type filter
+    //                 const matchesType = exportBillType === "All" ? true :
+    //                     exportBillType === "One-time" ? bill.billType === "One-time" :
+    //                         exportBillType === "Recurring" ? bill.billType === "Recurring" : false;
+
+    //                 // Filter payors based on status and paid date
+    //                 bill.billPayors = bill.billPayors.filter(payor => {
+    //                     // Check if payor status matches selected statuses
+    //                     const matchesStatus = exportBillStatus.includes(payor.billStatus);
+
+    //                     // Check if paid date is within range (only for paid bills)
+    //                     const payorPaidDate = payor.billPaidDate ? new Date(payor.billPaidDate) : null;
+    //                     const matchesPaidDate = !exportBillPaidDateRange?.from || !exportBillPaidDateRange?.to ||
+    //                         !payorPaidDate || // Include unpaid bills
+    //                         (payorPaidDate >= exportBillPaidDateRange.from && payorPaidDate <= exportBillPaidDateRange.to);
+
+    //                     return matchesStatus && matchesPaidDate;
+    //                 });
+
+    //                 // Only include bills that still have payors after filtering
+    //                 return matchesReservationDate && matchesCreatedDate &&
+    //                     matchesVisibility && matchesType && bill.billPayors.length > 0;
+    //             });
+
+    //             ws.columns = [
+    //                 { header: "Bill ID", key: "_id", width: 25 },
+    //                 { header: "Bill Title", key: "billTitle", width: 40 },
+    //                 { header: "Bill Type", key: "billType", width: 20 },
+    //                 { header: "Bill Due Date", key: "billDueDate", width: 20 },
+    //                 { header: "Bill Amount", key: "billAmount", width: 20 },
+    //                 { header: "Bill Recurring Date", key: "billRecurringDate", width: 20 },
+    //                 { header: "Bill Description", key: "billDescription", width: 70 },
+    //                 { header: "Bill Creator ID", key: "billCreatorId", width: 20 },
+    //                 { header: "Bill Creator", key: "billCreatorBlkLt", width: 20 },
+    //                 { header: "Bill Creator Position", key: "billCreatorPosition", width: 20 },
+    //                 { header: "Bill Visibility", key: "billVisibility", width: 20 },
+    //                 { header: "Created At", key: "createdAt", width: 20 },
+    //             ];
+
+    //             ws.getRow(1).eachCell(cell => {
+    //                 cell.font = { bold: true };
+    //             });
+
+    //             // Add the filtered data
+    //             filteredBills.forEach(bill => {
+
+    //                 ws.addRow({
+    //                     _id: bill._id,
+    //                     billTitle: bill.billTitle,
+    //                     billType: bill.billType,
+    //                     billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
+    //                     billAmount: PHPesos.format(bill.billAmount),
+    //                     billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
+    //                     billDescription: bill.billDescription,
+    //                     billCreatorId: bill.billCreatorId,
+    //                     billCreatorBlkLt: bill.billCreatorBlkLt,
+    //                     billCreatorPosition: bill.billCreatorPosition,
+    //                     billVisibility: bill.billVisibility,
+    //                     createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
+    //                 })
+
+    //             });
+
     //         }
+
+
+
+
+
+
+
+
 
     //         if (type === "excel") {
-    //             await handleExcelExport(wb, bills, exportOptions);
-    //         } else if (type === "csv") {
-    //             // await handleCsvExport(wb, bills, exportOptions);
+    //             const buffer = await wb.xlsx.writeBuffer();
+    //             saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Bills - " + format(new Date(), "MMM d, yyyy") + ".xlsx");
     //         }
+
+    //         if (type === "csv") {
+    //             const buffer = await wb.csv.writeBuffer();
+    //             saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Bills - " + format(new Date(), "MMM d, yyyy") + ".csv");
+    //         }
+
+
 
     //     } catch (error) {
     //         toast.error(error instanceof Error ? error.message : 'Failed to export data');
     //     } finally {
     //         setLoading(false);
     //     }
+
     // }
-
-    // const handleExcelExport = async (wb: Workbook, bills: BillType[], exportOptions: any) => {
-    //     const ws = wb.addWorksheet("Bills - " + format(new Date(), "MMM d, yyyy"));
-    //     ws.columns = getBillColumns();
-
-    //     const filteredBills = filterBills(bills, exportOptions);
-
-    //     filteredBills.forEach(bill => {
-    //         ws.addRow({
-    //             _id: bill._id,
-    //             billTitle: bill.billTitle,
-    //             billType: bill.billType,
-    //             billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
-    //             billAmount: PHPesos.format(bill.billAmount),
-    //             billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
-    //             billDescription: bill.billDescription,
-    //             billCreatorId: bill.billCreatorId,
-    //             billCreatorBlkLt: bill.billCreatorBlkLt,
-    //             billCreatorPosition: bill.billCreatorPosition,
-    //             billVisibility: bill.billVisibility,
-    //             createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
-    //         })
-    //     });
-
-    //     const buffer = await wb.xlsx.writeBuffer();
-    //     saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Bills - " + format(new Date(), "MMM d, yyyy") + ".xlsx");
-    // }
-
-    // const addBillRow = (ws: any, bill: BillType) => {
-    //     ws.addRow({
-    //         _id: bill._id,
-    //         billTitle: bill.billTitle,
-    //         billType: bill.billType,
-    //         billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
-    //         billAmount: PHPesos.format(bill.billAmount),
-    //         billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
-    //         billDescription: bill.billDescription,
-    //         billCreatorId: bill.billCreatorId,
-    //         billCreatorBlkLt: bill.billCreatorBlkLt,
-    //         billCreatorPosition: bill.billCreatorPosition,
-    //         billVisibility: bill.billVisibility,
-    //         createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
-    //     })
-    // }
-
-    const handleExportz = async (type: String) => {
-        setLoading(true);
-
-        try {
-
-            if (!data) throw new Error('Bill data not available');
-
-            if (!includeBillBasicInfo && !includePayorInfo && !includeBillPresetInfo) {
-                toast.error('Please select at least one information to include in the export');
-            }
-
-            const bills: BillType[] = data as any;
-
-            const wb = new Workbook();
-
-            wb.creator = user.userBlkLt;
-            wb.lastModifiedBy = user.userBlkLt;
-            wb.created = new Date();
-            wb.modified = new Date();
-
-            if (type ==="excel" && includeBillBasicInfo) {
-                
-                const ws = wb.addWorksheet("Bills - " + format(new Date(), "MMM d, yyyy"));
-
-                // Filter bills based on export options
-                // Then apply all other filters
-                const filteredBills = bills.filter(bill => {
-                    const billDueDate = new Date(bill.billDueDate);
-                    const createdAt = new Date(bill.createdAt);
-
-                    // Date range filters
-                    const matchesReservationDate = !exportDueDateRange?.from || !exportDueDateRange?.to ||
-                        (billDueDate >= exportDueDateRange.from && billDueDate <= exportDueDateRange.to);
-
-                    const matchesCreatedDate = !exportCreationDateRange?.from || !exportCreationDateRange?.to ||
-                        (createdAt >= exportCreationDateRange.from && createdAt <= exportCreationDateRange.to);
-
-                    // Visibility filter
-                    const matchesVisibility = exportBillVisibility === "All" ? true :
-                        exportBillVisibility === "Unarchived" ? bill.billVisibility === "Unarchived" :
-                            exportBillVisibility === "Archived" ? bill.billVisibility === "Archived" : false;
-
-                    // Bill type filter
-                    const matchesType = exportBillType === "All" ? true :
-                        exportBillType === "One-time" ? bill.billType === "One-time" :
-                            exportBillType === "Recurring" ? bill.billType === "Recurring" : false;
-
-                    // Filter payors based on status and paid date
-                    bill.billPayors = bill.billPayors.filter(payor => {
-                        // Check if payor status matches selected statuses
-                        const matchesStatus = exportBillStatus.includes(payor.billStatus);
-
-                        // Check if paid date is within range (only for paid bills)
-                        const payorPaidDate = payor.billPaidDate ? new Date(payor.billPaidDate) : null;
-                        const matchesPaidDate = !exportBillPaidDateRange?.from || !exportBillPaidDateRange?.to ||
-                            !payorPaidDate || // Include unpaid bills
-                            (payorPaidDate >= exportBillPaidDateRange.from && payorPaidDate <= exportBillPaidDateRange.to);
-
-                        return matchesStatus && matchesPaidDate;
-                    });
-
-                    // Only include bills that still have payors after filtering
-                    return matchesReservationDate && matchesCreatedDate &&
-                        matchesVisibility && matchesType && bill.billPayors.length > 0;
-                });
-
-                ws.columns = [
-                    { header: "Bill ID", key: "_id", width: 25 },
-                    { header: "Bill Title", key: "billTitle", width: 40 },
-                    { header: "Bill Type", key: "billType", width: 20 },
-                    { header: "Bill Due Date", key: "billDueDate", width: 20 },
-                    { header: "Bill Amount", key: "billAmount", width: 20 },
-                    { header: "Bill Recurring Date", key: "billRecurringDate", width: 20 },
-                    { header: "Bill Description", key: "billDescription", width: 70 },
-                    { header: "Bill Creator ID", key: "billCreatorId", width: 20 },
-                    { header: "Bill Creator", key: "billCreatorBlkLt", width: 20 },
-                    { header: "Bill Creator Position", key: "billCreatorPosition", width: 20 },
-                    { header: "Bill Visibility", key: "billVisibility", width: 20 },
-                    { header: "Created At", key: "createdAt", width: 20 },
-                ];
-    
-                ws.getRow(1).eachCell(cell => {
-                    cell.font = { bold: true };
-                });
-    
-                // Add the filtered data
-                filteredBills.forEach(bill => {
-    
-                    ws.addRow({
-                        _id: bill._id,
-                        billTitle: bill.billTitle,
-                        billType: bill.billType,
-                        billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
-                        billAmount: PHPesos.format(bill.billAmount),
-                        billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
-                        billDescription: bill.billDescription,
-                        billCreatorId: bill.billCreatorId,
-                        billCreatorBlkLt: bill.billCreatorBlkLt,
-                        billCreatorPosition: bill.billCreatorPosition,
-                        billVisibility: bill.billVisibility,
-                        createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
-                    })
-    
-                });
-
-            }
-
-
-
-
-
-
-
-            
-
-            if (type === "excel") {
-                const buffer = await wb.xlsx.writeBuffer();
-                saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Bills - " + format(new Date(), "MMM d, yyyy") + ".xlsx");
-            }
-
-            if (type === "csv") {
-                const buffer = await wb.csv.writeBuffer();
-                saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Bills - " + format(new Date(), "MMM d, yyyy") + ".csv");
-            }
-
-
-
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : 'Failed to export data');
-        } finally {
-            setLoading(false);
-        }
-
-    }
 
 
 
@@ -1137,13 +1354,13 @@ export default function BillTable<TData extends BillData, TValue>({
 
                             <DropdownMenuContent align="center" className="mt-1">
                                 <DropdownMenuItem
-                                    onClick={() => handleExportz("excel")}
+                                    onClick={() => handleExport("excel")}
                                 >
                                     .xslx
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem
-                                    onClick={() => handleExportz("csv")}
+                                    onClick={() => handleExport("csv")}
                                 >
                                     .csv
                                 </DropdownMenuItem>

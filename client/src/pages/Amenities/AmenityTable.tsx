@@ -300,6 +300,19 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
         { header: "Created By", key: "amenityCreator", width: 15 }
     ];
 
+    const getReservationColumns = () => [
+        { header: "Reservation ID", key: "_id", width: 25 },
+        { header: "Reservee ID", key: "reserveeId", width: 25 },
+        { header: "Reservee Block and Lot", key: "reserveeBlkLt", width: 25 },
+        { header: "Reservation Type", key: "reservationType", width: 25 },
+        { header: "Reservation Amenities", key: "reservationAmenities", width: 25 },
+        { header: "Reservation Status", key: "reservationStatus", width: 20 },
+        { header: "Reservation Date", key: "reservationDate", width: 25 },
+        { header: "Reservation Reason", key: "reservationReason", width: 50 },
+        { header: "Reservation Visibility", key: "reservationVisibility", width: 20 },
+        { header: "Created At", key: "createdAt", width: 15 }
+    ];
+
     const filterReservations = (reservations: any[], exportOptions: any) => {
         return reservations.filter(reservation => {
             const reservationDate = new Date(reservation.reservationDate);
@@ -313,10 +326,13 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                 (createdAt >= exportOptions.createdAtRange.from && createdAt <= exportOptions.createdAtRange.to);
 
             const matchesStatus = exportOptions.status.includes(currentStatus);
+
             const matchesVisibility = exportOptions.visibility === "All" ? true :
                 reservation.reservationVisibility === exportOptions.visibility;
+
             const matchesType = exportOptions.type === "All" ? true :
                 reservation.reservationType === exportOptions.type;
+                
             const matchesAuthorRole = exportOptions.authorRole === "All" ? true :
                 exportOptions.authorRole === "Unit Owners" ? reservation.reserveePosition === "Unit Owner" :
                     reservation.reserveePosition !== "Unit Owner";
@@ -403,6 +419,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
         const zipContent = await zip.generateAsync({ type: "blob" });
         saveAs(zipContent, `Amenities - ${format(new Date(), "MMM d, yyyy")}.zip`);
     };
+
     const addAmenityRow = (ws: any, amenity: AmenityType) => {
         const row = {
             amenityName: amenity.amenityName,
@@ -427,18 +444,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
             if (filteredReservations) {
                 const ws = wb.addWorksheet(`${amenity.amenityName} Reservations`);
-                ws.columns = [
-                    { header: "Reservation ID", key: "_id", width: 25 },
-                    { header: "Reservee ID", key: "reserveeId", width: 25 },
-                    { header: "Reservee Block and Lot", key: "reserveeBlkLt", width: 25 },
-                    { header: "Reservation Type", key: "reservationType", width: 25 },
-                    { header: "Reservation Amenities", key: "reservationAmenities", width: 25 },
-                    { header: "Reservation Status", key: "reservationStatus", width: 20 },
-                    { header: "Reservation Date", key: "reservationDate", width: 25 },
-                    { header: "Reservation Reason", key: "reservationReason", width: 50 },
-                    { header: "Reservation Visibility", key: "reservationVisibility", width: 20 },
-                    { header: "Created At", key: "createdAt", width: 15 }
-                ];
+                ws.columns = getReservationColumns();
 
                 filteredReservations.forEach(reservation => {
                     ws.addRow({
