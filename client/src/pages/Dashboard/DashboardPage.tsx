@@ -802,14 +802,14 @@ export default function ReservationPage() {
                                                 />
                                                 <Area
                                                     dataKey="previousRevenue"
-                                                    type="natural"
+                                                    type="bump"
                                                     fill="url(#fillPreviousRevenue)"
                                                     stroke="var(--color-previousRevenue)"
                                                     stackId="a"
                                                 />
                                                 <Area
                                                     dataKey="currentRevenue"
-                                                    type="natural"
+                                                    type="bump"
                                                     fill="url(#fillCurrentRevenue)"
                                                     stroke="var(--color-currentRevenue)"
                                                     stackId="a"
@@ -839,7 +839,7 @@ export default function ReservationPage() {
                                     >
                                         <PieChart>
                                             <ChartTooltip
-                                                content={<ChartTooltipContent nameKey="users" hideLabel />}
+                                                content={<ChartTooltipContent nameKey="status" hideLabel />}
                                             />
                                             <Pie
                                                 data={memberships}
@@ -860,7 +860,7 @@ export default function ReservationPage() {
                                                         </text>
                                                     )
                                                 }}
-                                                nameKey="browser"
+                                                nameKey="status"
                                             />
                                             <ChartLegend
                                                 content={<ChartLegendContent nameKey="status" />}
