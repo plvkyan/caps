@@ -226,7 +226,8 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
     // Export states
     // Show export states
     const [showExportDialog, setShowExportDialog] = useState(false);
-    const [includeBasicInfo, setIncludeBasicInfo] = useState(true);
+    const [includeEquipmentBasicInfo, setIncludeEquipmentBasicInfo] = useState(true);
+    const [includeFacilityBasicInfo, setIncludeFacilityBasicInfo] = useState(true);
     const [includeReservationOptions, setIncludeReservationOptions] = useState(true);
     const [showReservationOptions, setShowReservationOptions] = useState(true);
 
@@ -330,7 +331,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
         try {
             if (!data) throw new Error('Amenity data not available');
-            if (!includeBasicInfo && !includeReservationOptions) {
+            if (!includeEquipmentBasicInfo && !includeFacilityBasicInfo && !includeReservationOptions) {
                 throw new Error('Please select at least one export option');
             }
 
@@ -361,17 +362,22 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
     };
 
     const handleExcelExport = async (wb: Workbook, amenities: AmenityType[], exportOptions: any) => {
-        // Add equipment worksheet
-        const ews = wb.addWorksheet('Equipment Amenities');
-        ews.columns = getEquipmentColumns();
-        amenities.filter(a => a.amenityType === "Equipment")
-            .forEach(amenity => addAmenityRow(ews, amenity));
 
-        // Add facility worksheet  
-        const fws = wb.addWorksheet('Facility Amenities');
-        fws.columns = getFacilityColumns();
-        amenities.filter(a => a.amenityType === "Facility")
-            .forEach(amenity => addAmenityRow(fws, amenity));
+        if (includeEquipmentBasicInfo) {
+            // Add equipment worksheet
+            const ews = wb.addWorksheet('Equipment Amenities');
+            ews.columns = getEquipmentColumns();
+            amenities.filter(a => a.amenityType === "Equipment")
+                .forEach(amenity => addAmenityRow(ews, amenity));
+        }
+
+        if (includeFacilityBasicInfo) {
+            // Add facility worksheet  
+            const fws = wb.addWorksheet('Facility Amenities');
+            fws.columns = getFacilityColumns();
+            amenities.filter(a => a.amenityType === "Facility")
+                .forEach(amenity => addAmenityRow(fws, amenity));
+        }
 
         if (includeReservationOptions) {
             await addReservationWorksheets(wb, amenities, exportOptions);
@@ -385,7 +391,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
         const zip = new JSZip();
 
         // Add basic amenity data CSVs
-        if (includeBasicInfo) {
+        if (includeEquipmentBasicInfo || includeFacilityBasicInfo) {
             await addAmenityCsvFiles(zip, amenities);
         }
 
@@ -438,7 +444,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                     ws.addRow({
                         _id: reservation._id,
                         reserveeId: reservation.reserveeId,
-                        reservationBlkLt: reservation.reserveeBlkLt,
+                        reserveeBlkLt: reservation.reserveeBlkLt,
                         reservationType: reservation.reservationType,
                         reservationAmenities: reservation.reservationAmenities.map(reservationAmenity => {
                             if (reservationAmenity.amenityType === "Equipment") {
@@ -462,7 +468,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
         const equipment = amenities.filter(a => a.amenityType === "Equipment");
         const facilities = amenities.filter(a => a.amenityType === "Facility");
 
-        if (equipment.length) {
+        if (equipment.length && includeEquipmentBasicInfo) {
             const equipmentCsv = equipment.map(amenity => ({
                 Name: amenity.amenityName,
                 Type: amenity.amenityType,
@@ -478,7 +484,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
             zip.file("Equipment Amenities - " + format(new Date(), "MMM d, yyyy") + ".csv", generateCsv(equipmentCsv));
         }
 
-        if (facilities.length) {
+        if (facilities.length && includeFacilityBasicInfo) {
             const facilitiesCsv = facilities.map(amenity => ({
                 Name: amenity.amenityName,
                 Type: amenity.amenityType,
@@ -498,7 +504,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
             const amenityReservations = reservations.filter(r => r.reservationAmenities.some(res => res._id === amenity._id));
             const filteredReservations = filterReservations(amenityReservations, exportOptions);
 
-            if (filteredReservations.length > 0) {
+            if (filteredReservations.length) {
                 const reservationsCsv = filteredReservations.map(reservation => ({
                     "Reservation ID": reservation._id,
                     "Reservee ID": reservation.reserveeId,
@@ -532,6 +538,9 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
         ];
         return csvRows.join('\n');
     };
+
+
+
     // Redirect to Amenity Form Function
     const navToAmenityForm = () => {
         const reservationFormPath = "/amenities/create";
@@ -543,6 +552,9 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
         const amenityDetailsPath = "/amenities/" + id;
         navigate(amenityDetailsPath);
     }
+
+
+
 
 
     return (
@@ -691,12 +703,23 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
                     {/* Amenity Basic Information */}
                     <div className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 "
-                        + (!includeBasicInfo ? "text-muted-foreground/50" : "text-white/90")
+                        + (!includeEquipmentBasicInfo ? "text-muted-foreground/50" : "text-white/90")
                     }>
-                        <Label className="text-sm"> Amenity basic information </Label>
+                        <Label className="text-sm"> Equipment basic information </Label>
                         <Checkbox
-                            checked={includeBasicInfo}
-                            onCheckedChange={(checked) => setIncludeBasicInfo(!!checked)}
+                            checked={includeEquipmentBasicInfo}
+                            onCheckedChange={(checked) => setIncludeEquipmentBasicInfo(!!checked)}
+                        />
+                    </div>
+
+                    {/* Amenity Basic Information */}
+                    <div className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 "
+                        + (!includeFacilityBasicInfo ? "text-muted-foreground/50" : "text-white/90")
+                    }>
+                        <Label className="text-sm"> Facility basic information </Label>
+                        <Checkbox
+                            checked={includeFacilityBasicInfo}
+                            onCheckedChange={(checked) => setIncludeFacilityBasicInfo(!!checked)}
                         />
                     </div>
 
@@ -1012,7 +1035,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
                                 <Button
                                     className=""
-                                    disabled={(!includeBasicInfo && !includeReservationOptions) || loading}
+                                    disabled={(!includeEquipmentBasicInfo && !includeFacilityBasicInfo && !includeReservationOptions) || loading}
                                     size="sm"
                                 >
                                     {loading ? <LoadingSpinner className="h-7 w-7" /> : <Download className="h-7 w-7" />}

@@ -280,7 +280,116 @@ export default function BillTable<TData extends BillData, TValue>({
 
 
     // Functions
-    const handleExport = async (type: String) => {
+    // Helper functions for export
+    // const getWorkbookConfig = (user: any) => ({
+    //     creator: user.userBlkLt,
+    //     lastModifiedBy: user.userBlkLt,
+    //     created: new Date(),
+    //     modified: new Date(),
+    // });
+
+    // const getBillColumns = () => [
+    //     { header: "Bill ID", key: "_id", width: 25 },
+    //     { header: "Bill Title", key: "billTitle", width: 40 },
+    //     { header: "Bill Type", key: "billType", width: 20 },
+    //     { header: "Bill Due Date", key: "billDueDate", width: 20 },
+    //     { header: "Bill Amount", key: "billAmount", width: 20 },
+    //     { header: "Bill Recurring Date", key: "billRecurringDate", width: 20 },
+    //     { header: "Bill Description", key: "billDescription", width: 70 },
+    //     { header: "Bill Creator ID", key: "billCreatorId", width: 20 },
+    //     { header: "Bill Creator", key: "billCreatorBlkLt", width: 20 },
+    //     { header: "Bill Creator Position", key: "billCreatorPosition", width: 20 },
+    //     { header: "Bill Visibility", key: "billVisibility", width: 20 },
+    //     { header: "Created At", key: "createdAt", width: 20 },
+    // ]
+
+    // const filterBills = (bills: any[], exportOptions: any) => {
+
+    //     return bills.filter(bill => {
+            
+    //     })
+    // }
+
+    // const handleExport = async (type: String) => {
+    //     setLoading(true);
+
+    //     try {
+    //         if (!data) throw new Error('Bill data not available');
+    //         if (!includeBillBasicInfo && !includePayorInfo && !includeBillPresetInfo) {
+    //             throw new Error('Please select at least one information to include in the export');
+    //         }
+
+    //         const bills: BillType[] = data as any;
+    //         const wb = new Workbook();
+    //         Object.assign(wb, getWorkbookConfig(user));
+
+    //         const exportOptions = {
+    //             dueDateRange: exportDueDateRange,
+    //             creationDateRange: exportCreationDateRange,
+    //             paidDateRange: exportBillPaidDateRange,
+    //             status: exportBillStatus,
+    //             visibility: exportBillVisibility,
+    //             type: exportBillType,
+    //         }
+
+    //         if (type === "excel") {
+    //             await handleExcelExport(wb, bills, exportOptions);
+    //         } else if (type === "csv") {
+    //             // await handleCsvExport(wb, bills, exportOptions);
+    //         }
+
+    //     } catch (error) {
+    //         toast.error(error instanceof Error ? error.message : 'Failed to export data');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }
+
+    // const handleExcelExport = async (wb: Workbook, bills: BillType[], exportOptions: any) => {
+    //     const ws = wb.addWorksheet("Bills - " + format(new Date(), "MMM d, yyyy"));
+    //     ws.columns = getBillColumns();
+
+    //     const filteredBills = filterBills(bills, exportOptions);
+
+    //     filteredBills.forEach(bill => {
+    //         ws.addRow({
+    //             _id: bill._id,
+    //             billTitle: bill.billTitle,
+    //             billType: bill.billType,
+    //             billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
+    //             billAmount: PHPesos.format(bill.billAmount),
+    //             billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
+    //             billDescription: bill.billDescription,
+    //             billCreatorId: bill.billCreatorId,
+    //             billCreatorBlkLt: bill.billCreatorBlkLt,
+    //             billCreatorPosition: bill.billCreatorPosition,
+    //             billVisibility: bill.billVisibility,
+    //             createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
+    //         })
+    //     });
+
+    //     const buffer = await wb.xlsx.writeBuffer();
+    //     saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Bills - " + format(new Date(), "MMM d, yyyy") + ".xlsx");
+    // }
+
+    // const addBillRow = (ws: any, bill: BillType) => {
+    //     ws.addRow({
+    //         _id: bill._id,
+    //         billTitle: bill.billTitle,
+    //         billType: bill.billType,
+    //         billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
+    //         billAmount: PHPesos.format(bill.billAmount),
+    //         billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
+    //         billDescription: bill.billDescription,
+    //         billCreatorId: bill.billCreatorId,
+    //         billCreatorBlkLt: bill.billCreatorBlkLt,
+    //         billCreatorPosition: bill.billCreatorPosition,
+    //         billVisibility: bill.billVisibility,
+    //         createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
+    //     })
+    // }
+
+    const handleExportz = async (type: String) => {
         setLoading(true);
 
         try {
@@ -1028,13 +1137,13 @@ export default function BillTable<TData extends BillData, TValue>({
 
                             <DropdownMenuContent align="center" className="mt-1">
                                 <DropdownMenuItem
-                                    onClick={() => handleExport("excel")}
+                                    onClick={() => handleExportz("excel")}
                                 >
                                     .xslx
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem
-                                    onClick={() => handleExport("csv")}
+                                    onClick={() => handleExportz("csv")}
                                 >
                                     .csv
                                 </DropdownMenuItem>
