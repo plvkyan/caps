@@ -869,166 +869,37 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
                                 {/* Export reservation status */}
                                 <div className="flex flex-col gap-4 pt-1 pb-4 w-full">
-
                                     <Label className="text-sm text-muted-foreground"> Reservation Status </Label>
-
                                     <div className="flex flex-row flex-wrap gap-12">
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.length === 9}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([
-                                                            'Pending',
-                                                            'Cancelled',
-                                                            'Void',
-                                                            'Approved',
-                                                            'Rejected',
-                                                            'Ongoing',
-                                                            'For Return',
-                                                            'Returned',
-                                                            'Completed'
-                                                        ]);
-                                                    } else {
-                                                        setExportStatus([]);
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> All </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.includes('Pending')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([...exportStatus, 'Pending']);
-                                                    } else {
-                                                        setExportStatus(exportStatus.filter(status => status !== 'Pending'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Pending </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.includes('Approved')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([...exportStatus, 'Approved']);
-                                                    } else {
-                                                        setExportStatus(exportStatus.filter(status => status !== 'Approved'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Approved </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.includes('Rejected')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([...exportStatus, 'Rejected']);
-                                                    } else {
-                                                        setExportStatus(exportStatus.filter(status => status !== 'Rejected'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Rejected </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.includes('Ongoing')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([...exportStatus, 'Ongoing']);
-                                                    } else {
-                                                        setExportStatus(exportStatus.filter(status => status !== 'Ongoing'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Ongoing </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.includes('Void')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([...exportStatus, 'Void']);
-                                                    } else {
-                                                        setExportStatus(exportStatus.filter(status => status !== 'Void'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Void </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.includes('Cancelled')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([...exportStatus, 'Cancelled']);
-                                                    } else {
-                                                        setExportStatus(exportStatus.filter(status => status !== 'Cancelled'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Cancelled </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.includes('For Return')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([...exportStatus, 'For Return']);
-                                                    } else {
-                                                        setExportStatus(exportStatus.filter(status => status !== 'For Return'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> For Return </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.includes('Returned')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([...exportStatus, 'Returned']);
-                                                    } else {
-                                                        setExportStatus(exportStatus.filter(status => status !== 'Returned'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Returned </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportStatus.includes('Completed')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setExportStatus([...exportStatus, 'Completed']);
-                                                    } else {
-                                                        setExportStatus(exportStatus.filter(status => status !== 'Completed'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Completed </Label>
-                                        </div>
-
+                                        {[
+                                            { label: 'All', value: 'All', statuses: ['Pending', 'Cancelled', 'Void', 'Approved', 'Rejected', 'Ongoing', 'For Return', 'Returned', 'Completed'] },
+                                            { label: 'Pending', value: 'Pending' },
+                                            { label: 'Approved', value: 'Approved' },
+                                            { label: 'Rejected', value: 'Rejected' },
+                                            { label: 'Ongoing', value: 'Ongoing' },
+                                            { label: 'Void', value: 'Void' },
+                                            { label: 'Cancelled', value: 'Cancelled' },
+                                            { label: 'For Return', value: 'For Return' },
+                                            { label: 'Returned', value: 'Returned' },
+                                            { label: 'Completed', value: 'Completed' }
+                                        ].map(({ label, value, statuses }) => (
+                                            <div key={value} className="flex items-center gap-2">
+                                                <Checkbox
+                                                    checked={value === 'All' ? exportStatus.length === 9 : exportStatus.includes(value)}
+                                                    onCheckedChange={(checked) => {
+                                                        if (value === 'All') {
+                                                            setExportStatus(checked ? statuses ?? [] : []);
+                                                        } else {
+                                                            setExportStatus(checked ? [...exportStatus, value] : exportStatus.filter(status => status !== value));
+                                                        }
+                                                    }}
+                                                />
+                                                <Label className="text-sm"> {label} </Label>
+                                            </div>
+                                        ))}
                                     </div>
-
-
-
                                 </div>
+
 
                                 {/* Export reservation visibility */}
                                 <div className="flex-intial w-[200px] flex flex-col gap-1">
