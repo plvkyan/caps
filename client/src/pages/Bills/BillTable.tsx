@@ -317,12 +317,28 @@ export default function BillTable<TData extends BillData, TValue>({
         modified: new Date(),
     });
 
-    const getBillColumns = () => [
+    const getAdminBillColumns = () => [
         { header: "Bill ID", key: "_id", width: 25 },
         { header: "Bill Title", key: "billTitle", width: 40 },
         { header: "Bill Type", key: "billType", width: 20 },
         { header: "Bill Due Date", key: "billDueDate", width: 20 },
         { header: "Bill Amount", key: "billAmount", width: 20 },
+        { header: "Bill Recurring Date", key: "billRecurringDate", width: 20 },
+        { header: "Bill Description", key: "billDescription", width: 70 },
+        { header: "Bill Creator ID", key: "billCreatorId", width: 20 },
+        { header: "Bill Creator", key: "billCreatorBlkLt", width: 20 },
+        { header: "Bill Creator Position", key: "billCreatorPosition", width: 20 },
+        { header: "Bill Visibility", key: "billVisibility", width: 20 },
+        { header: "Created At", key: "createdAt", width: 20 },
+    ];
+
+    const getUnitOwnerBillColumns = () => [
+        { header: "Bill ID", key: "_id", width: 25 },
+        { header: "Bill Title", key: "billTitle", width: 40 },
+        { header: "Bill Type", key: "billType", width: 20 },
+        { header: "Bill Due Date", key: "billDueDate", width: 20 },
+        { header: "Bill Amount", key: "billAmount", width: 20 },
+        { header: "Bill Status", key: "billStatus", width: 20 },
         { header: "Bill Recurring Date", key: "billRecurringDate", width: 20 },
         { header: "Bill Description", key: "billDescription", width: 70 },
         { header: "Bill Creator ID", key: "billCreatorId", width: 20 },
@@ -404,6 +420,11 @@ export default function BillTable<TData extends BillData, TValue>({
             if (!includeBillBasicInfo && !includePayorInfo && !includeBillPresetInfo) {
                 throw new Error('Please select at least one information to include in the export');
             }
+            if (user.userRole !== "Admin" && user.userPosition === "Unit Owner") {
+                setIncludeBasicInfo(true);
+                setIncludePayorInfo(false);
+                setIncludeBillPresetInfo(false);
+            }
 
             const bills: BillType[] = data as any;
             const wb = new Workbook();
@@ -438,7 +459,12 @@ export default function BillTable<TData extends BillData, TValue>({
 
         if (includeBillBasicInfo) {
             const ws = wb.addWorksheet("Bills - " + format(new Date(), "MMM d, yyyy"));
-            ws.columns = getBillColumns();
+
+            if (user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
+                ws.columns = getAdminBillColumns();
+            } else {
+                ws.columns = getUnitOwnerBillColumns();
+            }
             filteredBills.forEach(bill => addBillRow(ws, bill));
         }
 
@@ -517,24 +543,49 @@ export default function BillTable<TData extends BillData, TValue>({
     }
 
     const addBillCsvFiles = async (zip: JSZip, bills: BillType[]) => {
-        const billsCsv = bills.map(bill => {
-            return {
-                "Bill ID": bill._id,
-                "Bill Title": bill.billTitle,
-                "Bill Type": bill.billType,
-                "Bill Due Date": format(new Date(bill.billDueDate), "MMM d, yyyy"),
-                "Bill Amount": PHPesos.format(bill.billAmount),
-                "Bill Recurring Date": bill.billRecurringDate ? bill.billRecurringDate : "N/A",
-                "Bill Description": bill.billDescription,
-                "Bill Creator ID": bill.billCreatorId,
-                "Bill Creator": bill.billCreatorBlkLt,
-                "Bill Creator Position": bill.billCreatorPosition,
-                "Bill Visibility": bill.billVisibility,
-                "Created At": format(new Date(bill.createdAt), "MMM d, yyyy"),
-            }
-        });
+        if (user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
+            const billsCsv = bills.map(bill => {
+                return {
+                    "Bill ID": bill._id,
+                    "Bill Title": bill.billTitle,
+                    "Bill Type": bill.billType,
+                    "Bill Due Date": format(new Date(bill.billDueDate), "MMM d, yyyy"),
+                    "Bill Amount": PHPesos.format(bill.billAmount),
+                    "Bill Recurring Date": bill.billRecurringDate ? bill.billRecurringDate : "N/A",
+                    "Bill Description": bill.billDescription,
+                    "Bill Creator ID": bill.billCreatorId,
+                    "Bill Creator": bill.billCreatorBlkLt,
+                    "Bill Creator Position": bill.billCreatorPosition,
+                    "Bill Visibility": bill.billVisibility,
+                    "Created At": format(new Date(bill.createdAt), "MMM d, yyyy"),
+                }
+            });
 
-        zip.file("Bills - " + format(new Date(), "MMM d, yyyy") + ".csv", generateCsv(billsCsv));
+            zip.file("Bills - " + format(new Date(), "MMM d, yyyy") + ".csv", generateCsv(billsCsv));
+        }
+
+        if (user.userRole !== "Admin" && user.userPosition === "Unit Owner") {
+            const billsCsv = bills.map(bill => {
+                return {
+                    "Bill ID": bill._id,
+                    "Bill Title": bill.billTitle,
+                    "Bill Type": bill.billType,
+                    "Bill Due Date": format(new Date(bill.billDueDate), "MMM d, yyyy"),
+                    "Bill Amount": PHPesos.format(bill.billAmount),
+                    "Bill Status": bill.billPayors.filter(payor => payor.payorId === user._id)[0].billStatus,
+                    "Bill Recurring Date": bill.billRecurringDate ? bill.billRecurringDate : "N/A",
+                    "Bill Description": bill.billDescription,
+                    "Bill Creator ID": bill.billCreatorId,
+                    "Bill Creator": bill.billCreatorBlkLt,
+                    "Bill Creator Position": bill.billCreatorPosition,
+                    "Bill Visibility": bill.billVisibility,
+                    "Created At": format(new Date(bill.createdAt), "MMM d, yyyy"),
+                }
+            });
+
+            zip.file("Bills - " + format(new Date(), "MMM d, yyyy") + ".csv", generateCsv(billsCsv));
+        }
+
     }
 
     const addBillPresetCsvFiles = async (zip: JSZip, billPresets: any[]) => {
@@ -580,21 +631,43 @@ export default function BillTable<TData extends BillData, TValue>({
     }
 
     const addBillRow = (ws: any, bill: BillType) => {
-        ws.addRow({
-            _id: bill._id,
-            billTitle: bill.billTitle,
-            billType: bill.billType,
-            billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
-            billAmount: PHPesos.format(bill.billAmount),
-            billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
-            billDescription: bill.billDescription,
-            billCreatorId: bill.billCreatorId,
-            billCreatorBlkLt: bill.billCreatorBlkLt,
-            billCreatorPosition: bill.billCreatorPosition,
-            billVisibility: bill.billVisibility,
-            createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
-        })
+
+        if (user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
+            ws.addRow({
+                _id: bill._id,
+                billTitle: bill.billTitle,
+                billType: bill.billType,
+                billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
+                billAmount: PHPesos.format(bill.billAmount),
+                billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
+                billDescription: bill.billDescription,
+                billCreatorId: bill.billCreatorId,
+                billCreatorBlkLt: bill.billCreatorBlkLt,
+                billCreatorPosition: bill.billCreatorPosition,
+                billVisibility: bill.billVisibility,
+                createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
+            })
+        }
+
+        if (user.userRole !== "Admin" && user.userPosition === "Unit Owner") {
+            ws.addRow({
+                _id: bill._id,
+                billTitle: bill.billTitle,
+                billType: bill.billType,
+                billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
+                billAmount: PHPesos.format(bill.billAmount),
+                billStatus: bill.billPayors.filter(payor => payor.payorId === user._id)[0].billStatus,
+                billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
+                billDescription: bill.billDescription,
+                billCreatorId: bill.billCreatorId,
+                billCreatorBlkLt: bill.billCreatorBlkLt,
+                billCreatorPosition: bill.billCreatorPosition,
+                billVisibility: bill.billVisibility,
+                createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
+            })
+        }
     }
+
 
     const generateCsv = (data: any[]) => {
         if (data.length === 0) return '';
@@ -605,142 +678,6 @@ export default function BillTable<TData extends BillData, TValue>({
         ];
         return csvRows.join('\n');
     };
-
-    // const handleExportz = async (type: String) => {
-    //     setLoading(true);
-
-    //     try {
-
-    //         if (!data) throw new Error('Bill data not available');
-
-    //         if (!includeBillBasicInfo && !includePayorInfo && !includeBillPresetInfo) {
-    //             toast.error('Please select at least one information to include in the export');
-    //         }
-
-    //         const bills: BillType[] = data as any;
-
-    //         const wb = new Workbook();
-
-    //         wb.creator = user.userBlkLt;
-    //         wb.lastModifiedBy = user.userBlkLt;
-    //         wb.created = new Date();
-    //         wb.modified = new Date();
-
-    //         if (type === "excel" && includeBillBasicInfo) {
-
-    //             const ws = wb.addWorksheet("Bills - " + format(new Date(), "MMM d, yyyy"));
-
-    //             // Filter bills based on export options
-    //             // Then apply all other filters
-    //             const filteredBills = bills.filter(bill => {
-    //                 const billDueDate = new Date(bill.billDueDate);
-    //                 const createdAt = new Date(bill.createdAt);
-
-    //                 // Date range filters
-    //                 const matchesReservationDate = !exportDueDateRange?.from || !exportDueDateRange?.to ||
-    //                     (billDueDate >= exportDueDateRange.from && billDueDate <= exportDueDateRange.to);
-
-    //                 const matchesCreatedDate = !exportCreationDateRange?.from || !exportCreationDateRange?.to ||
-    //                     (createdAt >= exportCreationDateRange.from && createdAt <= exportCreationDateRange.to);
-
-    //                 // Visibility filter
-    //                 const matchesVisibility = exportBillVisibility === "All" ? true :
-    //                     exportBillVisibility === "Unarchived" ? bill.billVisibility === "Unarchived" :
-    //                         exportBillVisibility === "Archived" ? bill.billVisibility === "Archived" : false;
-
-    //                 // Bill type filter
-    //                 const matchesType = exportBillType === "All" ? true :
-    //                     exportBillType === "One-time" ? bill.billType === "One-time" :
-    //                         exportBillType === "Recurring" ? bill.billType === "Recurring" : false;
-
-    //                 // Filter payors based on status and paid date
-    //                 bill.billPayors = bill.billPayors.filter(payor => {
-    //                     // Check if payor status matches selected statuses
-    //                     const matchesStatus = exportBillStatus.includes(payor.billStatus);
-
-    //                     // Check if paid date is within range (only for paid bills)
-    //                     const payorPaidDate = payor.billPaidDate ? new Date(payor.billPaidDate) : null;
-    //                     const matchesPaidDate = !exportBillPaidDateRange?.from || !exportBillPaidDateRange?.to ||
-    //                         !payorPaidDate || // Include unpaid bills
-    //                         (payorPaidDate >= exportBillPaidDateRange.from && payorPaidDate <= exportBillPaidDateRange.to);
-
-    //                     return matchesStatus && matchesPaidDate;
-    //                 });
-
-    //                 // Only include bills that still have payors after filtering
-    //                 return matchesReservationDate && matchesCreatedDate &&
-    //                     matchesVisibility && matchesType && bill.billPayors.length > 0;
-    //             });
-
-    //             ws.columns = [
-    //                 { header: "Bill ID", key: "_id", width: 25 },
-    //                 { header: "Bill Title", key: "billTitle", width: 40 },
-    //                 { header: "Bill Type", key: "billType", width: 20 },
-    //                 { header: "Bill Due Date", key: "billDueDate", width: 20 },
-    //                 { header: "Bill Amount", key: "billAmount", width: 20 },
-    //                 { header: "Bill Recurring Date", key: "billRecurringDate", width: 20 },
-    //                 { header: "Bill Description", key: "billDescription", width: 70 },
-    //                 { header: "Bill Creator ID", key: "billCreatorId", width: 20 },
-    //                 { header: "Bill Creator", key: "billCreatorBlkLt", width: 20 },
-    //                 { header: "Bill Creator Position", key: "billCreatorPosition", width: 20 },
-    //                 { header: "Bill Visibility", key: "billVisibility", width: 20 },
-    //                 { header: "Created At", key: "createdAt", width: 20 },
-    //             ];
-
-    //             ws.getRow(1).eachCell(cell => {
-    //                 cell.font = { bold: true };
-    //             });
-
-    //             // Add the filtered data
-    //             filteredBills.forEach(bill => {
-
-    //                 ws.addRow({
-    //                     _id: bill._id,
-    //                     billTitle: bill.billTitle,
-    //                     billType: bill.billType,
-    //                     billDueDate: format(new Date(bill.billDueDate), "MMM d, yyyy"),
-    //                     billAmount: PHPesos.format(bill.billAmount),
-    //                     billRecurringDate: bill.billRecurringDate ? bill.billRecurringDate : "N/A",
-    //                     billDescription: bill.billDescription,
-    //                     billCreatorId: bill.billCreatorId,
-    //                     billCreatorBlkLt: bill.billCreatorBlkLt,
-    //                     billCreatorPosition: bill.billCreatorPosition,
-    //                     billVisibility: bill.billVisibility,
-    //                     createdAt: format(new Date(bill.createdAt), "MMM d, yyyy"),
-    //                 })
-
-    //             });
-
-    //         }
-
-
-
-
-
-
-
-
-
-    //         if (type === "excel") {
-    //             const buffer = await wb.xlsx.writeBuffer();
-    //             saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Bills - " + format(new Date(), "MMM d, yyyy") + ".xlsx");
-    //         }
-
-    //         if (type === "csv") {
-    //             const buffer = await wb.csv.writeBuffer();
-    //             saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Bills - " + format(new Date(), "MMM d, yyyy") + ".csv");
-    //         }
-
-
-
-    //     } catch (error) {
-    //         toast.error(error instanceof Error ? error.message : 'Failed to export data');
-    //     } finally {
-    //         setLoading(false);
-    //     }
-
-    // }
-
 
 
 
@@ -774,20 +711,20 @@ export default function BillTable<TData extends BillData, TValue>({
 
             <div className="flex justify-between">
 
-                <div></div>
+                <div>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowExportDialog(true)}
+                    >
+                        <Share className="h-7 w-7" />
+                        Export
+                    </Button>
+                </div>
 
 
                 {user && user.userRole === "Admin" && (
                     <div className="flex items-end gap-2">
-
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setShowExportDialog(true)}
-                        >
-                            <Share className="h-7 w-7" />
-                            Export
-                        </Button>
 
                         <Button className="" onClick={navToBillPresetForm} size="sm" variant="outline" >
                             <CirclePlus className="h-4 w-4" />
@@ -798,7 +735,6 @@ export default function BillTable<TData extends BillData, TValue>({
                             <CirclePlus className="h-4 w-4" />
                             Create Bill
                         </Button>
-
 
                     </ div>
                 )}
@@ -978,18 +914,21 @@ export default function BillTable<TData extends BillData, TValue>({
                         onOpenChange={setShowBillOptions}
                         open={!includeBillBasicInfo ? false : showBillOptions}
                     >
-
-                        <Checkbox
-                            checked={includeBillBasicInfo}
-                            onCheckedChange={(checked) => setIncludeBasicInfo(!!checked)}
-                            className="absolute top-5 right-6 z-50"
-                        />
+                        {user && user.userRole === "Admin" && user.userPosition !== "Unit Owner" && (
+                            <Checkbox
+                                checked={includeBillBasicInfo}
+                                onCheckedChange={(checked) => setIncludeBasicInfo(!!checked)}
+                                className="absolute top-5 right-6 z-50"
+                            />
+                        )}
 
                         <CollapsibleTrigger className={"flex gap-2 items-center w-full "
                             + (!includeBillBasicInfo ? "text-muted-foreground/50" : "text-white/90")}
                         >
+                            {user && user.userRole !== "Admin" && user.userPosition === "Unit Owner" ? (
+                                <Label className="text-sm cursor-pointer"> Bill information </Label>
+                            ) : <Label className="text-sm cursor-pointer"> Bill basic information </Label>}
 
-                            <Label className="text-sm cursor-pointer"> Bill basic information </Label>
                             <div className={"flex items-center justify-center h-6 w-6 rounded-md " + (includeBillBasicInfo ? "hover:bg-accent" : null)}>
                                 {!showBillOptions || !includeBillBasicInfo ? <ChevronDown className="h-4 w-4" />
                                     : < ChevronUp className="h-4 w-4" />}
@@ -1107,6 +1046,80 @@ export default function BillTable<TData extends BillData, TValue>({
 
                                 </div>
 
+                                {user && user.userRole !== "Admin" && user.userPosition === "Unit Owner" && (
+                                    <div className="w-full">
+                                        <div className="flex flex-col gap-4 pt-1 pb-4">
+
+                                            <Label className="text-sm text-muted-foreground"> Payor Status </Label>
+
+                                            <div className="flex flex-row flex-wrap gap-12">
+
+                                                <div className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        checked={exportBillStatus.length === 3}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setBillExportStatus([
+                                                                    'Pending',
+                                                                    'Paid',
+                                                                    'Overdue',
+                                                                ]);
+                                                            } else {
+                                                                setBillExportStatus([]);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Label className="text-sm"> All </Label>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        checked={exportBillStatus.includes('Pending')}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setBillExportStatus([...exportBillStatus, 'Pending']);
+                                                            } else {
+                                                                setBillExportStatus(exportBillStatus.filter(status => status !== 'Pending'));
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Label className="text-sm"> Pending </Label>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        checked={exportBillStatus.includes('Paid')}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setBillExportStatus([...exportBillStatus, 'Paid']);
+                                                            } else {
+                                                                setBillExportStatus(exportBillStatus.filter(status => status !== 'Paid'));
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Label className="text-sm"> Paid </Label>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        checked={exportBillStatus.includes('Overdue')}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setBillExportStatus([...exportBillStatus, 'Overdue']);
+                                                            } else {
+                                                                setBillExportStatus(exportBillStatus.filter(status => status !== 'Overdue'));
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Label className="text-sm"> Overdue </Label>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Export reservation visibility */}
                                 {user && user.userRole === "Admin" && user.userPosition !== "Unit Owner" && (
 
@@ -1166,174 +1179,178 @@ export default function BillTable<TData extends BillData, TValue>({
 
                     </Collapsible>
 
-                    <Collapsible
-                        className="relative w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:transition-all data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
-                        disabled={!includePayorInfo}
-                        onOpenChange={setShowPayorOptions}
-                        open={!includePayorInfo ? false : showPayorOptions}
-                    >
-
-                        <Checkbox
-                            checked={includePayorInfo}
-                            onCheckedChange={(checked) => setIncludePayorInfo(!!checked)}
-                            className="absolute top-5 right-6 z-50"
-                        />
-
-                        <CollapsibleTrigger className={"flex gap-2 items-center w-full "
-                            + (!includePayorInfo ? "text-muted-foreground/50" : "text-white/90")}
+                    {user && user.userRole === "Admin" && user.userPosition !== "Unit Owner" && (
+                        <Collapsible
+                            className="relative w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:transition-all data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+                            disabled={!includePayorInfo}
+                            onOpenChange={setShowPayorOptions}
+                            open={!includePayorInfo ? false : showPayorOptions}
                         >
 
-                            <Label className="text-sm cursor-pointer"> Bill payors information </Label>
-                            <div className={"flex items-center justify-center h-6 w-6 rounded-md " + (includePayorInfo ? "hover:bg-accent" : null)}>
-                                {!showPayorOptions || !includePayorInfo ? <ChevronDown className="h-4 w-4" />
-                                    : < ChevronUp className="h-4 w-4" />}
-                            </div>
+                            <Checkbox
+                                checked={includePayorInfo}
+                                onCheckedChange={(checked) => setIncludePayorInfo(!!checked)}
+                                className="absolute top-5 right-6 z-50"
+                            />
 
-                        </CollapsibleTrigger>
+                            <CollapsibleTrigger className={"flex gap-2 items-center w-full "
+                                + (!includePayorInfo ? "text-muted-foreground/50" : "text-white/90")}
+                            >
 
-                        <CollapsibleContent>
+                                <Label className="text-sm cursor-pointer"> Bill payors information </Label>
+                                <div className={"flex items-center justify-center h-6 w-6 rounded-md " + (includePayorInfo ? "hover:bg-accent" : null)}>
+                                    {!showPayorOptions || !includePayorInfo ? <ChevronDown className="h-4 w-4" />
+                                        : < ChevronUp className="h-4 w-4" />}
+                                </div>
 
-                            <div className="flex flex-wrap gap-y-6 gap-x-16 my-4">
+                            </CollapsibleTrigger>
 
-                                {/* Export paid date range */}
-                                <div className="flex flex-wrap gap-y-6 gap-x-16 w-full">
-                                    <div className="flex-intial min-w-[250px] flex flex-col">
+                            <CollapsibleContent>
 
-                                        {/* Export paid date range header */}
-                                        <Label className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            Included paid dates
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <div className="rounded-full w-fit h-fit cursor-pointer text-gray-200/30">
-                                                            <Info className="w-4 h-4" />
-                                                        </div>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p> Include all dates by default. </p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </Label>
+                                <div className="flex flex-wrap gap-y-6 gap-x-16 my-4">
 
-                                        <p className="font-light text-sm text-muted-foreground pb-1.5">
-                                            Export payors paid on these dates:
-                                        </p>
+                                    {/* Export paid date range */}
+                                    <div className="flex flex-wrap gap-y-6 gap-x-16 w-full">
+                                        <div className="flex-intial min-w-[250px] flex flex-col">
 
-                                        {/* Date Range Filter Button */}
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    className="justify-start font-normal"
-                                                    id="date"
-                                                    variant="outline"
-                                                >
-                                                    <CalendarRange className="mr-2 h-4 w-4 opacity-50" />
-                                                    {exportBillPaidDateRange?.from && exportBillPaidDateRange?.to
-                                                        ? `${format(exportBillPaidDateRange.from, "MMM d, yyyy")} - ${format(exportBillPaidDateRange.to, "MMM d, yyyy")}`
-                                                        : "All paid dates"}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-fit">
-                                                <Calendar
-                                                    initialFocus
-                                                    mode="range"
-                                                    defaultMonth={exportBillPaidDateRange?.from}
-                                                    selected={exportBillPaidDateRange}
-                                                    onSelect={setExportBillPaidDateRange}
-                                                    numberOfMonths={2}
+                                            {/* Export paid date range header */}
+                                            <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                Included paid dates
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <div className="rounded-full w-fit h-fit cursor-pointer text-gray-200/30">
+                                                                <Info className="w-4 h-4" />
+                                                            </div>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p> Include all dates by default. </p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </Label>
+
+                                            <p className="font-light text-sm text-muted-foreground pb-1.5">
+                                                Export payors paid on these dates:
+                                            </p>
+
+                                            {/* Date Range Filter Button */}
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        className="justify-start font-normal"
+                                                        id="date"
+                                                        variant="outline"
+                                                    >
+                                                        <CalendarRange className="mr-2 h-4 w-4 opacity-50" />
+                                                        {exportBillPaidDateRange?.from && exportBillPaidDateRange?.to
+                                                            ? `${format(exportBillPaidDateRange.from, "MMM d, yyyy")} - ${format(exportBillPaidDateRange.to, "MMM d, yyyy")}`
+                                                            : "All paid dates"}
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-fit">
+                                                    <Calendar
+                                                        initialFocus
+                                                        mode="range"
+                                                        defaultMonth={exportBillPaidDateRange?.from}
+                                                        selected={exportBillPaidDateRange}
+                                                        onSelect={setExportBillPaidDateRange}
+                                                        numberOfMonths={2}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-4 pt-1 pb-4">
+
+                                        <Label className="text-sm text-muted-foreground"> Payor Status </Label>
+
+                                        <div className="flex flex-row flex-wrap gap-12">
+
+                                            <div className="flex items-center gap-2">
+                                                <Checkbox
+                                                    checked={exportBillStatus.length === 3}
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setBillExportStatus([
+                                                                'Pending',
+                                                                'Paid',
+                                                                'Overdue',
+                                                            ]);
+                                                        } else {
+                                                            setBillExportStatus([]);
+                                                        }
+                                                    }}
                                                 />
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-                                </div>
+                                                <Label className="text-sm"> All </Label>
+                                            </div>
 
-                                <div className="flex flex-col gap-4 pt-1 pb-4">
+                                            <div className="flex items-center gap-2">
+                                                <Checkbox
+                                                    checked={exportBillStatus.includes('Pending')}
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setBillExportStatus([...exportBillStatus, 'Pending']);
+                                                        } else {
+                                                            setBillExportStatus(exportBillStatus.filter(status => status !== 'Pending'));
+                                                        }
+                                                    }}
+                                                />
+                                                <Label className="text-sm"> Pending </Label>
+                                            </div>
 
-                                    <Label className="text-sm text-muted-foreground"> Payor Status </Label>
+                                            <div className="flex items-center gap-2">
+                                                <Checkbox
+                                                    checked={exportBillStatus.includes('Paid')}
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setBillExportStatus([...exportBillStatus, 'Paid']);
+                                                        } else {
+                                                            setBillExportStatus(exportBillStatus.filter(status => status !== 'Paid'));
+                                                        }
+                                                    }}
+                                                />
+                                                <Label className="text-sm"> Paid </Label>
+                                            </div>
 
-                                    <div className="flex flex-row flex-wrap gap-12">
+                                            <div className="flex items-center gap-2">
+                                                <Checkbox
+                                                    checked={exportBillStatus.includes('Overdue')}
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setBillExportStatus([...exportBillStatus, 'Overdue']);
+                                                        } else {
+                                                            setBillExportStatus(exportBillStatus.filter(status => status !== 'Overdue'));
+                                                        }
+                                                    }}
+                                                />
+                                                <Label className="text-sm"> Overdue </Label>
+                                            </div>
 
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportBillStatus.length === 3}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setBillExportStatus([
-                                                            'Pending',
-                                                            'Paid',
-                                                            'Overdue',
-                                                        ]);
-                                                    } else {
-                                                        setBillExportStatus([]);
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> All </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportBillStatus.includes('Pending')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setBillExportStatus([...exportBillStatus, 'Pending']);
-                                                    } else {
-                                                        setBillExportStatus(exportBillStatus.filter(status => status !== 'Pending'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Pending </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportBillStatus.includes('Paid')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setBillExportStatus([...exportBillStatus, 'Paid']);
-                                                    } else {
-                                                        setBillExportStatus(exportBillStatus.filter(status => status !== 'Paid'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Paid </Label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                checked={exportBillStatus.includes('Overdue')}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setBillExportStatus([...exportBillStatus, 'Overdue']);
-                                                    } else {
-                                                        setBillExportStatus(exportBillStatus.filter(status => status !== 'Overdue'));
-                                                    }
-                                                }}
-                                            />
-                                            <Label className="text-sm"> Overdue </Label>
                                         </div>
 
                                     </div>
 
                                 </div>
 
-                            </div>
+                            </CollapsibleContent>
 
-                        </CollapsibleContent>
+                        </Collapsible>
+                    )}
 
-                    </Collapsible>
-
-                    <div
-                        className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 cursor-pointer " + (!includeBillPresetInfo ? "text-muted-foreground/50" : "text-white/90")}
-                        onClick={() => setIncludeBillPresetInfo(!includeBillPresetInfo)}
-                    >
-                        <Label className="text-sm"> Bill presets information </Label>
-                        <Checkbox
-                            checked={includeBillPresetInfo}
-                            onCheckedChange={(checked) => setIncludeBillPresetInfo(!!checked)}
-                        />
-                    </div>
+                    {user && user.userRole === "Admin" && user.userPosition !== "Unit Owner" && (
+                        <div
+                            className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 cursor-pointer " + (!includeBillPresetInfo ? "text-muted-foreground/50" : "text-white/90")}
+                            onClick={() => setIncludeBillPresetInfo(!includeBillPresetInfo)}
+                        >
+                            <Label className="text-sm"> Bill presets information </Label>
+                            <Checkbox
+                                checked={includeBillPresetInfo}
+                                onCheckedChange={(checked) => setIncludeBillPresetInfo(!!checked)}
+                            />
+                        </div>
+                    )}
 
                     <DialogFooter>
 

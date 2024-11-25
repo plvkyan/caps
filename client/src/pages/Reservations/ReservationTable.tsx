@@ -755,11 +755,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
             </div >
 
-
-
             <div className="flex justify-between">
-
-
 
                 <div>
 
