@@ -709,9 +709,12 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                     </DialogHeader>
 
                     {/* Amenity Basic Information */}
-                    <div className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 "
+                    <div 
+                    className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 cursor-pointer "
                         + (!includeEquipmentBasicInfo ? "text-muted-foreground/50" : "text-white/90")
-                    }>
+                    }
+                    onClick={() => setIncludeEquipmentBasicInfo(!includeEquipmentBasicInfo)}
+                    >
                         <Label className="text-sm"> Equipment basic information </Label>
                         <Checkbox
                             checked={includeEquipmentBasicInfo}
@@ -720,9 +723,12 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                     </div>
 
                     {/* Amenity Basic Information */}
-                    <div className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 "
-                        + (!includeFacilityBasicInfo ? "text-muted-foreground/50" : "text-white/90")
-                    }>
+                    <div
+                        className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 cursor-pointer "
+                            + (!includeFacilityBasicInfo ? "text-muted-foreground/50" : "text-white/90")
+                        }
+                        onClick={() => setIncludeFacilityBasicInfo(!includeFacilityBasicInfo)}
+                    >
                         <Label className="text-sm"> Facility basic information </Label>
                         <Checkbox
                             checked={includeFacilityBasicInfo}
