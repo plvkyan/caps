@@ -48,6 +48,8 @@ import { ThemeToggle } from "@/components/custom/ThemeToggle";
 // shacdn Sonner Import 
 import { toast } from "sonner";
 
+import { isValidPhoneNumber } from "react-phone-number-input";
+
 
 
 // Data table imports
@@ -81,14 +83,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { PencilLine, Save, TriangleAlert } from "lucide-react"
+import { Eye, EyeOff, PencilLine, Save, TriangleAlert } from "lucide-react"
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner"
 import { updateUser } from "@/data/user-api"
+import { PhoneInput } from "@/components/ui/phone-input"
 
 
 
 // Types Imports
-
 
 
 
@@ -108,6 +110,12 @@ const emailFormSchema = z.object({
     userEmail: z.string().email().min(1, "Email is required."),
 });
 
+const mobileNoFormSchema = z.object({
+    userMobileNo: z
+        .string()
+        .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
+});
+
 
 
 export default function Settings() {
@@ -124,10 +132,16 @@ export default function Settings() {
     const [editPassword, setEditPassword] = useState<boolean>(false);
     // Edit email state
     const [editEmail, setEditEmail] = useState<boolean>(false);
+    // Edit mobile no
+    const [editMobileNo, setEditMobileNo] = useState<boolean>(false);
     // Error state
     const [error, setError] = useState<string>("");
     // Loading state
     const [loading, setLoading] = useState<boolean>(false);
+
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+
+    const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
 
 
@@ -139,6 +153,13 @@ export default function Settings() {
         resolver: zodResolver(emailFormSchema),
         defaultValues: {
             userEmail: user.userEmail,
+        }
+    })
+
+    const mobileNoForm = useForm<z.infer<typeof mobileNoFormSchema>>({
+        resolver: zodResolver(mobileNoFormSchema),
+        defaultValues: {
+            userMobileNo: user.userMobileNo,
         }
     })
 
@@ -155,15 +176,6 @@ export default function Settings() {
     // Functions
     const handleDiscard = async () => {
 
-        if (editEmail && editPassword) {
-            setEditEmail(false)
-            setEditPassword(false)
-            emailForm.reset({
-                userEmail: user.userEmail
-            })
-            passwordForm.reset()
-        }
-
         if (editEmail) {
             setEditEmail(false)
             emailForm.reset({
@@ -172,8 +184,18 @@ export default function Settings() {
         }
 
         if (editPassword) {
+            passwordForm.reset({
+                userPassword: "",
+                userConfirmPassword: ""
+            })
             setEditPassword(false)
-            passwordForm.reset()
+        }
+
+        if (editMobileNo) {
+            setEditMobileNo(false)
+            mobileNoForm.reset({
+                userMobileNo: user.userMobileNo
+            })
         }
 
     }
@@ -183,58 +205,52 @@ export default function Settings() {
             setLoading(true);
             setError("");
 
-            if (editEmail && editPassword) {
+            if (editEmail) {
                 const emailData = emailForm.getValues();
-                const passwordData = passwordForm.getValues();
-
                 user.userEmail = emailData.userEmail;
+            }
+
+            if (editMobileNo) {
+                const mobileNoData = mobileNoForm.getValues();
+                user.userMobileNo = mobileNoData.userMobileNo;
+            }
+
+            if (editPassword) {
+                const passwordData = passwordForm.getValues();
                 user.userPassword = passwordData.userPassword;
+            }
 
+            const response = await updateUser(user._id, user);
 
-                const response = await updateUser(user._id, user);
-                if (response.ok) {
-                    localStorage.setItem('user', JSON.stringify(user));
-                    toast.success("Credentials updated successfully.", {
-                        closeButton: true,
-                        duration: 10000
-                    })
+            if (response.ok) {
+                localStorage.setItem('user', JSON.stringify(user));
+                toast.success("Credentials updated successfully.", {
+                    closeButton: true,
+                    duration: 10000
+                })
+
+                if (editEmail) {
                     emailForm.reset({
                         userEmail: user.userEmail
                     })
-                    passwordForm.reset()
-                    setEditEmail(false);
-                    setEditPassword(false);
-                }
-            } else if (editEmail) {
-                const emailData = emailForm.getValues();
-                user.userEmail = emailData.userEmail;
-
-
-                const response = await updateUser(user._id, user);
-                if (response.ok) {
-                    localStorage.setItem('user', JSON.stringify(user));
-                    toast.success("Email changed successfully.", {
-                        closeButton: true,
-                        duration: 10000
-                    })
-                    emailForm.reset({
-                        userEmail: user.userEmail
-                    })
-                    passwordForm.reset()
                     setEditEmail(false);
                 }
-            } else if (editPassword) {
-                const passwordData = passwordForm.getValues();
-                user.userPassword = passwordData.userPassword;
 
-                const response = await updateUser(user._id, user);
-                if (response.ok) {
-                    toast.success("Password changed successfully.", {
-                        closeButton: true,
-                        duration: 10000
+                if (editMobileNo) {
+                    mobileNoForm.reset({
+                        userMobileNo: user.userMobileNo
+                    })
+                    setEditMobileNo(false);
+                }
+
+                if (editPassword) {
+                    passwordForm.reset({
+                        userPassword: "",
+                        userConfirmPassword: ""
                     })
                     setEditPassword(false);
                 }
+
             }
         } catch (error: any) {
             setError(error.message || "Failed to update user information");
@@ -242,10 +258,6 @@ export default function Settings() {
             setLoading(false);
         }
     }
-
-
-
-
 
     return (
 
@@ -345,7 +357,7 @@ export default function Settings() {
                                     render={({ field }) => {
 
                                         return (
-                                            <FormItem className="flex flex-col gap-2 my-6">
+                                            <FormItem className="relative flex flex-col gap-2 my-6">
 
                                                 <FormLabel className="flex items-center gap-2 font-normal">
                                                     Password
@@ -362,10 +374,21 @@ export default function Settings() {
                                                         id="userPassword"
                                                         placeholder={editPassword ? "Enter a new password" : undefined}
                                                         required
-                                                        type="password"
+                                                        type={showPassword ? "text" : "password"}
                                                         {...field}
                                                     />
                                                 </FormControl>
+
+                                                {editPassword && (
+                                                    <Button
+                                                        className="absolute w-7 h-7 top-[23px] right-0.5 bg-background hover:bg-background"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        type="button"
+                                                    >
+                                                        {showPassword ? <Eye className="absolute text-muted-foreground w-4 h-4 right-3 top-3" /> : <EyeOff className="absolute text-muted-foreground w-4 h-4 right-3 top-3" />}
+                                                    </Button>
+                                                )}
+
                                                 <FormMessage />
                                             </FormItem>
                                         )
@@ -379,7 +402,7 @@ export default function Settings() {
                                         render={({ field }) => {
 
                                             return (
-                                                <FormItem className="flex flex-col gap-2 my-6">
+                                                <FormItem className="relative flex flex-col gap-2 my-6">
 
                                                     <FormLabel className="flex items-center gap-2 font-normal">
                                                         Confirm Password
@@ -396,10 +419,17 @@ export default function Settings() {
                                                             id="userConfirmPassword"
                                                             placeholder={editPassword ? "Confirm new password" : undefined}
                                                             required
-                                                            type="password"
+                                                            type={showConfirmPassword ? "text" : "password"}
                                                             {...field}
                                                         />
                                                     </FormControl>
+                                                    <Button
+                                                        className="absolute w-7 h-7 top-[23px] right-0.5 bg-background hover:bg-background"
+                                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                        type="button"
+                                                    >
+                                                        {showConfirmPassword ? <Eye className="absolute text-muted-foreground w-4 h-4 right-3 top-3" /> : <EyeOff className="absolute text-muted-foreground w-4 h-4 right-3 top-3" />}
+                                                    </Button>
                                                     <FormMessage />
                                                 </FormItem>
                                             )
@@ -453,6 +483,46 @@ export default function Settings() {
 
                         </Form>
 
+                        <Form {...mobileNoForm}>
+
+                            <form onSubmit={mobileNoForm.handleSubmit(handleSubmit)}>
+
+                                <FormField
+                                    control={mobileNoForm.control}
+                                    name="userMobileNo"
+                                    render={({ field }) => {
+
+                                        return (
+                                            <FormItem className="flex flex-col gap-2 my-6">
+
+                                                <FormLabel className="flex items-center gap-2 font-normal">
+                                                    Mobile No.
+                                                    {!editMobileNo ?
+                                                        <PencilLine className="h-4 w-4 text-muted-foreground cursor-pointer" onClick={() => setEditMobileNo(!editMobileNo)} /> :
+                                                        <span className="text-destructive"> * </span>
+                                                    }
+                                                </FormLabel>
+
+                                                <FormControl>
+                                                    <PhoneInput
+                                                        disabled={!editMobileNo}
+                                                        id="userMobileNo"
+                                                        placeholder={editMobileNo ? "Enter a new mobile number" : undefined}
+                                                        required
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription className="text-xs text-muted-foreground font-light">Used to notify you of any important information. Inputting your mobile number means you consent to receiving calls and SMS messages from the HOA.</FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )
+                                    }}
+                                />
+
+                            </form>
+
+                        </Form>
+
                         <div className="flex flex-col gap-2 my-6">
 
                             <Label className="font-normal">
@@ -477,7 +547,7 @@ export default function Settings() {
                             <Input disabled value={user.userRole} />
 
                             {user && user.userPosition != "Unit Owner" ?
-                                <p className="text-xs text-muted-foreground font-light">You have access to most of the system's features and are responsible of managing the HOA. You cannot change this.</p> :
+                                <p className="text-xs text-muted-foreground font-light">You have access to most of the system's features and is responsible of managing the HOA. You cannot change this.</p> :
                                 <p className="text-xs text-muted-foreground font-light">An outstanding member of the HOA can take advantage of its benefits. You cannot change this.</p>
                             }
 
@@ -515,10 +585,11 @@ export default function Settings() {
                                 <Button
                                     className="w-fit mt-8 mb-4"
                                     onClick={async () => {
-                                        if (editEmail && editPassword) {
+                                        if (editEmail && editPassword && editMobileNo) {
                                             const emailValid = await emailForm.trigger();
+                                            const mobileNoValid = await mobileNoForm.trigger();
                                             const passwordValid = await passwordForm.trigger();
-                                            if (emailValid && passwordValid) {
+                                            if (emailValid && passwordValid && mobileNoValid) {
                                                 await handleSubmit();
                                             }
                                         } else if (editEmail) {
@@ -529,6 +600,32 @@ export default function Settings() {
                                         } else if (editPassword) {
                                             const passwordValid = await passwordForm.trigger();
                                             if (passwordValid) {
+                                                await handleSubmit();
+                                            }
+                                        } else if (editMobileNo) {
+                                            const mobileNoValid = await mobileNoForm.trigger();
+                                            if (mobileNoValid) {
+                                                await handleSubmit();
+                                            }
+                                        } else if (editEmail && editMobileNo) {
+                                            const emailValid = await emailForm.trigger();
+                                            const mobileNoValid = await mobileNoForm.trigger();
+
+                                            if (emailValid && mobileNoValid) {
+                                                await handleSubmit();
+                                            }
+                                        } else if (editEmail && editPassword) {
+                                            const emailValid = await emailForm.trigger();
+                                            const passwordValid = await passwordForm.trigger();
+
+                                            if (emailValid && passwordValid) {
+                                                await handleSubmit();
+                                            }
+                                        } else if (editPassword && editMobileNo) {
+                                            const passwordValid = await passwordForm.trigger();
+                                            const mobileNoValid = await mobileNoForm.trigger();
+
+                                            if (passwordValid && mobileNoValid) {
                                                 await handleSubmit();
                                             }
                                         }
