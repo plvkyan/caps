@@ -142,18 +142,37 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
 
             const status = row.original.billPayors.find(payor => payor.payorId === userFunction()._id);
 
-            return (
-                <div>
-                    <Badge variant={
-                        status?.billStatus === "Pending" ? "warning" :
-                            status?.billStatus === "Paid" ? "default" :
-                                status?.billStatus === "Overdue" ? "destructive" :
-                                    "outline"
-                    }>
-                        {status?.billStatus}
-                    </Badge>
-                </div>
-            )
+            if (userFunction().userPosition === "Unit Owner" && userFunction().userRole === "Unit Owner") {
+                return (
+                    <div>
+                        <Badge variant={
+                            status?.billStatus === "Pending" ? "warning" :
+                                status?.billStatus === "Paid" ? "default" :
+                                    status?.billStatus === "Overdue" ? "destructive" :
+                                        "outline"
+                        }>
+                            {status?.billStatus}
+                        </Badge>
+                    </div>
+                )
+            }
+
+            if (userFunction().userPosition !== "Unit Owner" && userFunction().userRole === "Admin") {
+                return (
+                    <div>
+                        <Badge variant={
+                            status?.billStatus === "Pending" ? "warning" :
+                                status?.billStatus === "Paid" ? "default" :
+                                    status?.billStatus === "Overdue" ? "destructive" :
+                                        "outline"
+                        }>
+                            {status?.billStatus}
+                        </Badge>
+                    </div>
+                )
+            }
+
+            
         },
     },
     {

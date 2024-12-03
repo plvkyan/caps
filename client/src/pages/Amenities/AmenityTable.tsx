@@ -332,7 +332,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
             const matchesType = exportOptions.type === "All" ? true :
                 reservation.reservationType === exportOptions.type;
-                
+
             const matchesAuthorRole = exportOptions.authorRole === "All" ? true :
                 exportOptions.authorRole === "Unit Owners" ? reservation.reserveePosition === "Unit Owner" :
                     reservation.reserveePosition !== "Unit Owner";
@@ -566,24 +566,25 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
     return (
 
         <>
+            <div className="flex flex-col">
+                <h1 className="font-semibold text-2xl"> Amenities </h1>
+                <h3 className="font-light text-muted-foreground"> A list of all available amenities. </h3>
+            </div>
 
             <div className="flex justify-between">
 
-                <div className="flex flex-col">
-                    <h1 className="font-semibold text-2xl"> Amenities </h1>
-                    <h3 className="font-light text-muted-foreground"> A list of all available amenities. </h3>
-                </div>
+                <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowExportDialog(true)}
+                >
+                    <Share className="h-7 w-7" />
+                    Export
+                </Button>
 
                 <div className="flex items-end gap-2">
 
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowExportDialog(true)}
-                    >
-                        <Share className="h-7 w-7" />
-                        Export
-                    </Button>
+
 
                     <Button className="" onClick={navToAmenityForm} size="sm" variant="default" >
                         <CirclePlus className="h-4 w-4" />

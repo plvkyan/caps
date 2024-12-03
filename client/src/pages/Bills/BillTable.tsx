@@ -127,7 +127,7 @@ import {
 // date-fns format Function Import
 import { format } from "date-fns";
 
-// import JSZip from "jszip";
+import JSZip from "jszip";
 
 import { saveAs } from "file-saver";
 
@@ -146,7 +146,6 @@ import { DateRange } from "react-day-picker";
 import { useAuthContext } from "@/hooks/useAuthContext";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import { BillType } from "@/types/bill-type";
-import JSZip from "jszip";
 import { getUnarchivedBillPresets } from "@/data/bills-api";
 
 
