@@ -262,7 +262,10 @@ export const BillForm = () => {
     };
 
     // handleBillPresets function
-    const handleBillPresets = (preset) => {
+    const handleBillPresets = (presetTitle) => {
+
+        const preset = billPresets.find((preset) => preset.billPresetTitle === presetTitle);
+
         billForm.setValue("billTitle", preset.billPresetTitle);
         billForm.setValue("billType", preset.billPresetType);
         billForm.setValue("billDescription", preset.billPresetDescription);
@@ -352,7 +355,6 @@ export const BillForm = () => {
 
             if (!response.ok) {
                 const data = await response.json();
-                console.log(data.error);
                 throw data.error;
             }
 
@@ -519,13 +521,18 @@ export const BillForm = () => {
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </Label>
-                                                <Select>
+                                                <Select
+                                                    onValueChange={(value) => { handleBillPresets(value) }}
+                                                >
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select bill preset" />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         {billPresets.length > 0 ? billPresets.map((preset) => (
-                                                            <SelectItem key={preset._id} value={preset.billPresetTitle} onClick={() => handleBillPresets(preset)}>
+                                                            <SelectItem
+                                                                key={preset._id}
+                                                                value={preset.billPresetTitle}
+                                                            >
                                                                 {preset.billPresetTitle}
                                                             </SelectItem>
                                                         )) : (
@@ -568,6 +575,7 @@ export const BillForm = () => {
                                                             <RadioGroup
                                                                 className="flex justify-evenly w-full"
                                                                 defaultValue="One-time"
+                                                                value={field.value}
                                                                 onValueChange={field.onChange}
                                                             >
                                                                 <FormItem className="flex items-center gap-3">
@@ -689,7 +697,7 @@ export const BillForm = () => {
                                                                     selected={field.value}
                                                                     onSelect={field.onChange}
                                                                     disabled={(date) =>
-                                                                        date > new Date() || date < new Date("1900-01-01")
+                                                                        date < new Date()
                                                                     }
                                                                     initialFocus
                                                                 />

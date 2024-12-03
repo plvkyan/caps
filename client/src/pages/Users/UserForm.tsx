@@ -112,11 +112,14 @@ import * as z from "zod";
 // Zod Resolver Import
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { isValidPhoneNumber } from "react-phone-number-input";
+
 
 
 // Data Imports
 // User API Imports
 import { createUser, getAllUsers } from "@/data/user-api";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 
 
@@ -128,7 +131,10 @@ const userFormSchema = z.object({
     userPassword: z.string().min(1, "Password is required."),
     userConfirmPassword: z.string().min(1, "Confirm password is required."),
     userEmail: z.string().optional(),
-    userMobileNo: z.string().optional(),
+    userMobileNo: z
+        .string()
+        .refine(isValidPhoneNumber, { message: "Invalid phone number" })
+        .optional(),
     userRole: z.string().min(1, "User role is required."),
     userPosition: z.string().min(1, "User position is required."),
     userStatus: z.string().optional(),
@@ -567,10 +573,10 @@ export default function UserForm() {
                                                             </TooltipProvider>
                                                         </FormLabel>
                                                         <FormControl>
-                                                            <Input
+                                                            <PhoneInput
                                                                 id="userMobileNo"
-                                                                placeholder="Enter Mobile Number"
-                                                                type="text"
+                                                                placeholder="Enter mobile number"
+                                                                required
                                                                 {...field}
                                                             />
                                                         </FormControl>

@@ -160,7 +160,7 @@ export const ASSOCIATION_NAV_DATA = {
 export const ADMIN_SUPPORT_NAV_DATA = {
     items: [
         ARCHIVES,
-        LOGS,
+        // LOGS,
         SETTINGS,
     ]
 }
