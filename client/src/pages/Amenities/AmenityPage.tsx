@@ -68,8 +68,8 @@ import { AmenityType } from "@/types/amenity-type"
 // All unarchived amenities API Import
 import { getUnarchivedAmenities } from "@/data/amenity-api.ts";
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Bell } from "lucide-react"
+// import { Button } from "@/components/ui/button"
+// import { Bell } from "lucide-react"
 import { ReservationType } from "@/types/reservation-type"
 import { getAllReservations } from "@/data/reservation-api"
 
@@ -210,7 +210,7 @@ export default function AmenityPage() {
                         {/* Account navigation */}
                         <div className="hidden md:flex items-center gap-2">
 
-                            <Button
+                            {/* <Button
                                 className="group relative h-10 w-10"
                                 variant="outline"
                                 size="sm"
@@ -218,7 +218,7 @@ export default function AmenityPage() {
                                 <div className="absolute -top-1 -right-1 bg-destructive w-[0.8rem] h-[0.8rem] transition-all rounded-full text-center z-50 group-hover:bg-destructive/90" />
                                 <Bell className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
                                 <span className="sr-only">Toggle theme</span>
-                            </Button>
+                            </Button> */}
 
                             <ThemeToggle />
                             <NavUser />
