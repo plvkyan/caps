@@ -1415,9 +1415,12 @@ export default function AmenityDetails() {
                                 </DialogHeader>
 
                                 {/* Amenity Basic Information */}
-                                <div className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 "
-                                    + (!includeBasicInfo ? "text-muted-foreground/50" : "text-white/90")
-                                }>
+                                <div
+                                    className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 cursor-pointer "
+                                        + (!includeBasicInfo ? "text-muted-foreground/50" : "text-white/90")
+                                    }
+                                    onClick={() => setIncludeBasicInfo(!includeBasicInfo)}
+                                >
                                     <Label className="text-sm"> Amenity basic information </Label>
                                     <Checkbox
                                         checked={includeBasicInfo}
@@ -1817,7 +1820,7 @@ export default function AmenityDetails() {
                                                 disabled={(!includeBasicInfo && !includeReservationOptions) || loading}
                                                 size="sm"
                                             >
-                                                { loading ? <LoadingSpinner className="h-7 w-7" /> : <Download className="h-7 w-7" />}
+                                                {loading ? <LoadingSpinner className="h-7 w-7" /> : <Download className="h-7 w-7" />}
                                                 Download
                                                 <ChevronDown className="h-7 w-7" />
                                             </Button>
@@ -1826,15 +1829,15 @@ export default function AmenityDetails() {
 
                                         <DropdownMenuContent align="center" className="mt-1">
                                             <DropdownMenuItem
-                                            onClick={() => handleExport("excel")}
+                                                onClick={() => handleExport("excel")}
                                             >
-                                                .xslx 
+                                                .xslx
                                             </DropdownMenuItem>
 
                                             <DropdownMenuItem
-                                            onClick={() => handleExport("csv")}
+                                                onClick={() => handleExport("csv")}
                                             >
-                                                .csv 
+                                                .csv
                                             </DropdownMenuItem>
 
                                         </DropdownMenuContent>
