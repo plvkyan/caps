@@ -904,7 +904,7 @@ export default function UserDetails() {
                                         {/* Reservations header */}
                                         <div className="flex flex-col">
                                             <Label className="text-lg font-semibold"> {users.userBlkLt + " bills"} </Label>
-                                            <p className="text-sm font-normal text-muted-foreground"> A list of all reservations created by this {users.userRole.toLowerCase()}. </p>
+                                            <p className="text-sm font-normal text-muted-foreground"> A list of all bills issued to this {users.userRole.toLowerCase()}. </p>
                                         </div>
 
                                         <div className="flex flex-col">

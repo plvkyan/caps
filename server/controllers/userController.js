@@ -282,7 +282,7 @@ const bulkUnarchiveUsers = async (req, res) => {
         }
 
         // Get block/lot numbers of users to be unarchived
-        const blkLtNumbers = usersToUnarchive.map(user => user.userBlkLt);
+        const blkLtNumbers = usersToUnarchive.map(user => user.userBlkLt);  
 
         // Check for existing unarchived users with same block/lot numbers
         const existingUnarchived = await User.find({
@@ -294,6 +294,24 @@ const bulkUnarchiveUsers = async (req, res) => {
             return res.status(400).json({
                 error: 'Cannot unarchive users. Some block/lot numbers are already in use by unarchived accounts.'
             });
+        }
+
+        const positions = usersToUnarchive.map(user => user.userPosition);
+
+        // Skip position validation for Unit Owners and Admins
+        if (!positions.every(position => ['Unit Owner', 'Admin'].includes(position))) {
+            // Check for existing unarchived users with same positions (excluding Unit Owners and Admins)
+            const existingPositions = await User.find({
+                userPosition: { $in: positions },
+                userVisibility: "Unarchived",
+                userPosition: { $nin: ['Unit Owner', 'Admin'] }
+            });
+
+            if (existingPositions.length > 0) {
+                return res.status(400).json({
+                    error: 'Cannot unarchive users. Some positions are already occupied by unarchived accounts.'
+                });
+            }
         }
 
         // Update multiple users
@@ -345,6 +363,24 @@ const unarchiveUser = async (req, res) => {
             return res.status(400).json({
                 error: 'Cannot unarchive user. Block/lot number is already in use by an unarchived account.'
             });
+        }
+
+        // Skip position validation for Unit Owners and Admins
+        if (!(['Unit Owner', 'Admin'].includes(userToUnarchive.userPosition) && 
+            ['Unit Owner', 'Admin'].includes(userToUnarchive.userRole))) {
+            
+            // Check for existing unarchived user with same position (excluding Unit Owners and Admins)
+            const existingPosition = await User.findOne({
+                userPosition: userToUnarchive.userPosition,
+                userVisibility: "Unarchived",
+                userPosition: { $nin: ['Unit Owner', 'Admin'] }
+            });
+
+            if (existingPosition) {
+                return res.status(400).json({
+                    error: `Cannot unarchive user. Position ${userToUnarchive.userPosition} is already occupied.`
+                });
+            }
         }
 
         // Update user visibility
