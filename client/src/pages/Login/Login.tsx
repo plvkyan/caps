@@ -49,6 +49,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 // Hooks
 import { useLogin } from "@/hooks/useLogin"
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 
 
@@ -68,6 +70,8 @@ const formSchema = zod.object({
 const Login = () => {
 
     const { login, error, isLoading } = useLogin()
+
+    const [showPassword, setShowPassword] = useState(false);
 
     const form = useForm<zod.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -162,7 +166,7 @@ const Login = () => {
 
                                                 <FormItem>
 
-                                                    <div className="grid">
+                                                    <div className="relative grid">
 
                                                         <div className="flex items-center pb-2">
 
@@ -195,12 +199,20 @@ const Login = () => {
                                                             <Input
                                                                 id="userPassword"
                                                                 placeholder="Password"
-                                                                type="password"
+                                                                type={showPassword ? "text" : "password"}
                                                                 {...field}
                                                                 required
                                                             />
 
                                                         </FormControl>
+
+                                                        <Button
+                                                            className="absolute w-7 h-7 top-[33px] right-0.5 bg-background hover:bg-background"
+                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            type="button"
+                                                        >
+                                                            {showPassword ? <Eye className="absolute text-muted-foreground w-4 h-4 right-3 top-3" /> : <EyeOff className="absolute text-muted-foreground w-4 h-4 right-3 top-3" />}
+                                                        </Button>
 
                                                     </div>
 
@@ -214,7 +226,7 @@ const Login = () => {
 
                                     <Button
                                         className="w-full"
-                                        disabled={isLoading}    
+                                        disabled={isLoading}
                                     >
                                         Login
                                         {isLoading && <LoadingSpinner className="h-4 w-4" />}
@@ -244,9 +256,9 @@ const Login = () => {
 
                                     <div className="">
 
-                                            <FormMessage />
+                                        <FormMessage />
 
-                                            {error && <div className="text-destructive"> {error} </div>} 
+                                        {error && <div className="text-destructive"> {error} </div>}
 
                                     </div>
 
