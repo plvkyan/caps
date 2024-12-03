@@ -6,6 +6,8 @@
 import {
     ChevronLeft,
     CirclePlus,
+    Eye,
+    EyeOff,
     Info,
     TriangleAlert
 } from "lucide-react";
@@ -183,6 +185,8 @@ export default function UserForm() {
     // State for loading state
     const [loading, setLoading] = useState(false);
 
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
 
 
@@ -466,7 +470,7 @@ export default function UserForm() {
                                             name="userPassword"
                                             render={({ field }) => {
                                                 return (
-                                                    <FormItem className="flex flex-col gap-2">
+                                                    <FormItem className="relative flex flex-col gap-2">
                                                         <FormLabel className="font-normal">
                                                             Password
                                                             <span className="text-destructive"> * </span>
@@ -477,10 +481,17 @@ export default function UserForm() {
                                                                 id="userPassword"
                                                                 placeholder="Enter password"
                                                                 required
-                                                                type="password"
+                                                                type={showPassword ? "text" : "password"}
                                                                 {...field}
                                                             />
                                                         </FormControl>
+                                                        <Button
+                                                            className="absolute w-7 h-7 top-[23px] right-0.5 bg-background hover:bg-background"
+                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            type="button"
+                                                        >
+                                                            {showPassword ? <Eye className="absolute text-muted-foreground w-4 h-4 right-3 top-3" /> : <EyeOff className="absolute text-muted-foreground w-4 h-4 right-3 top-3" />}
+                                                        </Button>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )
@@ -493,7 +504,7 @@ export default function UserForm() {
                                             name="userConfirmPassword"
                                             render={({ field }) => {
                                                 return (
-                                                    <FormItem className="flex flex-col gap-2">
+                                                    <FormItem className="relative flex flex-col gap-2">
                                                         <FormLabel className="font-normal">
                                                             Confirm password
                                                             <span className="text-destructive"> * </span>
@@ -504,10 +515,17 @@ export default function UserForm() {
                                                                 id="userConfirmPassword"
                                                                 placeholder="Enter Password Again"
                                                                 required
-                                                                type="password"
+                                                                type={showConfirmPassword ? "text" : "password"}
                                                                 {...field}
                                                             />
                                                         </FormControl>
+                                                        <Button
+                                                            className="absolute w-7 h-7 top-[23px] right-0.5 bg-background hover:bg-background"
+                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                            type="button"
+                                                        >
+                                                            {showConfirmPassword ? <Eye className="absolute text-muted-foreground w-4 h-4 right-3 top-3" /> : <EyeOff className="absolute text-muted-foreground w-4 h-4 right-3 top-3" />}
+                                                        </Button>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )

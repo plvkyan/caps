@@ -119,6 +119,8 @@ import UserReservationTable from "./UserReservationTable"
 import { UserReservationTableColumns } from "./UserReservationColumns"
 import { useAuthContext } from "@/hooks/useAuthContext"
 import { Input } from "@/components/ui/input"
+import UserBillTable from "./UserBillTable"
+import { UserBillTableColumns } from "./UserBillTableColumns"
 
 
 
@@ -157,7 +159,7 @@ export default function UserDetails() {
 
     const [resetConfirmation, setResetConfirmation] = useState<boolean>(false);
 
-    const [showNewPassword, setShowNewPassword] = useState<boolean>(true);
+    const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -894,6 +896,29 @@ export default function UserDetails() {
 
                             </div>
 
+                            {users.userRole === "Unit Owner" && users.userPosition === "Unit Owner" && (
+                                <Card className="col-span-3">
+
+                                    <CardContent className="flex flex-col gap-4 pt-5">
+
+                                        {/* Reservations header */}
+                                        <div className="flex flex-col">
+                                            <Label className="text-lg font-semibold"> {users.userBlkLt + " bills"} </Label>
+                                            <p className="text-sm font-normal text-muted-foreground"> A list of all reservations created by this {users.userRole.toLowerCase()}. </p>
+                                        </div>
+
+                                        <div className="flex flex-col">
+
+                                            <UserBillTable data={bills} columns={UserBillTableColumns} />
+
+                                        </div>
+
+                                    </CardContent>
+
+                                </Card>
+                            )}
+
+
                             <Card className="col-span-3">
 
                                 <CardContent className="flex flex-col gap-4 pt-5">
@@ -901,7 +926,7 @@ export default function UserDetails() {
                                     {/* Reservations header */}
                                     <div className="flex flex-col">
                                         <Label className="text-lg font-semibold"> {users.userBlkLt + " reservations"} </Label>
-                                        <p className="text-sm font-normal text-muted-foreground"> A list of all reservations for this {users.userRole.toLowerCase()}. </p>
+                                        <p className="text-sm font-normal text-muted-foreground"> A list of all reservations created by this {users.userRole.toLowerCase()}. </p>
                                     </div>
 
                                     <div className="flex flex-col">
@@ -944,7 +969,7 @@ export default function UserDetails() {
 
                         <Dialog
                             open={showNewPassword}
-                            onOpenChange={setShowNewPassword}
+                            onOpenChange={() => { setShowNewPassword(false); setNewGeneratedPassword("") }}
                         >
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
@@ -965,7 +990,7 @@ export default function UserDetails() {
                                         </Button>
                                         <Button
                                             className="absolute w-7 h-7 top-[6px] right-7 bg-background hover:bg-background cursor-pointer"
-                                            onClick={() => {navigator.clipboard.writeText(newGeneratedPassword); toast.success("Password copied to clipboard.", {closeButton: true, duration:10000})} }
+                                            onClick={() => { navigator.clipboard.writeText(newGeneratedPassword); toast.success("Password copied to clipboard.", { closeButton: true, duration: 10000 }) }}
                                             type="button"
                                         >
                                             <Copy className="text-muted-foreground w-4 h-4 right-0 top-0" />
