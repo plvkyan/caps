@@ -3,6 +3,17 @@
 
 // Imports
 // shadcn Components Imports
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
 // shadcn AppSidebar Imports
 import { AppSidebar } from "@/components/app-sidebar"
 // shadcn Breadcrumb Imports
@@ -14,6 +25,15 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+
+// shadcn Dialog Component Imports
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 
 // shadcn Dropdown Component Imports
 import {
@@ -84,9 +104,9 @@ import { UserType } from "@/types/user-type"
 
 
 // Data Imports
-import { archiveUser, getSingleUser, unarchiveUser } from "@/data/user-api"
+import { archiveUser, getSingleUser, unarchiveUser, updateUser } from "@/data/user-api"
 import { Button } from "@/components/ui/button"
-import { Archive, ArchiveX, ChevronLeft, EllipsisVertical, RotateCcw, Share } from "lucide-react"
+import { Archive, ArchiveX, ChevronLeft, Copy, EllipsisVertical, Eye, EyeOff, RotateCcw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { ReservationType } from "@/types/reservation-type"
@@ -98,6 +118,7 @@ import { format } from "date-fns"
 import UserReservationTable from "./UserReservationTable"
 import { UserReservationTableColumns } from "./UserReservationColumns"
 import { useAuthContext } from "@/hooks/useAuthContext"
+import { Input } from "@/components/ui/input"
 
 
 
@@ -132,7 +153,13 @@ export default function UserDetails() {
 
     const [averageRating, setAverageRating] = useState<number>();
 
+    const [newGeneratedPassword, setNewGeneratedPassword] = useState<string>("");
 
+    const [resetConfirmation, setResetConfirmation] = useState<boolean>(false);
+
+    const [showNewPassword, setShowNewPassword] = useState<boolean>(true);
+
+    const [showPassword, setShowPassword] = useState<boolean>(false);
 
     // Use Effects
     // Page title effect
@@ -356,6 +383,48 @@ export default function UserDetails() {
         }
     };
 
+    const handleResetPassword = async () => {
+        if (users) {
+            let charset = '!@#$%^&*()0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let newPassword = '';
+
+            for (let i = 0; i < 10; i++) {
+                newPassword +=
+                    charset.charAt(Math.floor(
+                        Math.random() * charset.length));
+            }
+
+            setNewGeneratedPassword(newPassword);
+
+            users.userPassword = newPassword;
+
+            try {
+                setLoading(true);
+
+                const response = await updateUser(users._id, users);
+
+                if (response.ok) {
+                    toast.success("Password updated successfully.", {
+                        closeButton: true,
+                        duration: 10000
+                    })
+
+                    setShowNewPassword(true);
+                }
+
+            } catch (error: any) {
+                toast.error(error.message || "Failed to update user information", {
+                    closeButton: true,
+                    duration: 10000,
+                });
+            } finally {
+                setLoading(false);
+            }
+        }
+
+
+    }
+
 
     return (
 
@@ -482,16 +551,17 @@ export default function UserDetails() {
                                                 </DropdownMenuItem>
                                             )}
 
-                                        <DropdownMenuItem>
+                                        {/* <DropdownMenuItem>
                                             <Share className="h-4 w-4" />
                                             Export .xslx
-                                        </DropdownMenuItem>
+                                        </DropdownMenuItem> */}
                                     </DropdownMenuGroup>
 
                                     <DropdownMenuSeparator />
 
                                     <DropdownMenuItem
                                         className="text-destructive focus:text-red-500"
+                                        onClick={() => setResetConfirmation(true)}
                                     >
                                         <RotateCcw className="h-4 w-4" />
                                         Reset password
@@ -772,7 +842,11 @@ export default function UserDetails() {
                                                     User password
                                                 </Label>
 
-                                                <Button variant="destructive" size="sm">
+                                                <Button
+                                                    onClick={() => setResetConfirmation(true)}
+                                                    size="sm"
+                                                    variant="destructive"
+                                                >
                                                     <RotateCcw />
                                                     Reset password
                                                 </Button>
@@ -842,12 +916,68 @@ export default function UserDetails() {
 
                         </div>
 
+                        <AlertDialog
+                            open={resetConfirmation}
+                            onOpenChange={setResetConfirmation}
+                        >
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Reset password?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will generate a new password for this user that will be shown to you only once.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={() => {
+                                            handleResetPassword();
+                                            setResetConfirmation(false);
+                                        }}
+                                    >
+                                        Continue
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
 
-
-
-
+                        <Dialog
+                            open={showNewPassword}
+                            onOpenChange={setShowNewPassword}
+                        >
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle> New password </DialogTitle>
+                                    <DialogDescription>
+                                        Copy the new password below and show it to the user. This will only be shown once and will be lost forever.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-2">
+                                    <div className="relative flex">
+                                        <Input id="newPassword" value={newGeneratedPassword} className="col-span-3" type={showPassword ? "text" : "password"} />
+                                        <Button
+                                            className="absolute w-7 h-7 top-[6px] right-0.5 bg-background hover:bg-background cursor-pointer"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            type="button"
+                                        >
+                                            {showPassword ? <Eye className="text-muted-foreground w-4 h-4 right-0 top-0" /> : <EyeOff className="text-muted-foreground w-4 h-4 right-3 top-3" />}
+                                        </Button>
+                                        <Button
+                                            className="absolute w-7 h-7 top-[6px] right-7 bg-background hover:bg-background cursor-pointer"
+                                            onClick={() => {navigator.clipboard.writeText(newGeneratedPassword); toast.success("Password copied to clipboard.", {closeButton: true, duration:10000})} }
+                                            type="button"
+                                        >
+                                            <Copy className="text-muted-foreground w-4 h-4 right-0 top-0" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
 
                     </main>
+
+
 
                 ) : (
                     <div className="flex w-full h-full gap-2 items-center justify-center opacity-90">

@@ -153,7 +153,7 @@ const userFormSchema = z.object({
 
 
 
-export default function UserForm() {
+export default function ElectForm() {
 
 
     // Contexts
@@ -276,6 +276,7 @@ export default function UserForm() {
 
     // Helper function to check if position is taken
     const isPositionTaken = (position: string) => {
+        console.log(existingPositions)
         return existingPositions.includes(position) && position !== "Unit Owner";
     };
 
@@ -575,6 +576,7 @@ export default function UserForm() {
                                                             <PhoneInput
                                                                 id="userMobileNo"
                                                                 placeholder="Enter mobile number"
+                                                                required
                                                                 {...field}
                                                             />
                                                         </FormControl>
