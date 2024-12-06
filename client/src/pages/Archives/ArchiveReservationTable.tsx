@@ -170,16 +170,6 @@ export default function ArchiveReservationTable<TData extends ReservationData, T
 
 
 
-    // Effects
-    useEffect(() => {
-
-        if (sessionStorage.getItem("unarchiveSuccessful")) {
-            toast.success("Reservation/s unarchived successfully", { closeButton: true });
-            sessionStorage.removeItem("unarchiveSuccessful");
-        }
-
-    }, []);
-
     // Update the table filter when date range changes
     useEffect(() => {
 
@@ -205,7 +195,7 @@ export default function ArchiveReservationTable<TData extends ReservationData, T
             const response = await unarchiveManyReservations(selectedRowIds);
 
             if (response.ok) {
-                sessionStorage.setItem("unarchiveSuccessful", "true");
+                sessionStorage.setItem("reservationUnarchiveSuccessful", "true");
                 window.location.reload();
             } else {
                 throw new Error("Error unarchiving reservations");

@@ -90,6 +90,7 @@ const AnnouncementDetails = ({ announcement }) => {
 
     if (response.ok) {
       dispatch({ type: "UPDATE_ANNOUNCEMENT", payload: json });
+      sessionStorage.setItem("announcementArchiveSuccessful", "true");
       window.location.reload();
     }
   };
@@ -131,6 +132,7 @@ const AnnouncementDetails = ({ announcement }) => {
 
     if (response.ok) {
       dispatch({ type: "UPDATE_ANNOUNCEMENT", payload: json });
+      sessionStorage.setItem("announcementUnarchiveSuccessful", "true");
       window.location.reload();
     }
   };

@@ -174,10 +174,10 @@ export default function ArchiveAmenitytable<TData extends AmenityData, TValue>({
             const response = await unarchiveManyAmenities(selectedRowIds);
 
             if (response.ok) {
-                sessionStorage.setItem("unarchiveSuccessful", "true");
+                sessionStorage.setItem("amenityUnarchiveSuccessful", "true");
                 window.location.reload();
             } else {
-                throw new Error("Error unarchiving reservations");
+                throw new Error("Error unarchiving amenities");
             }
         } catch (error) {
             toast.error((error as Error).message, { closeButton: true });

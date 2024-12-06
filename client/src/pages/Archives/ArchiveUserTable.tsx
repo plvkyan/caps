@@ -169,7 +169,7 @@ export default function UserTable<TData, TValue>({
                 throw new Error(errorMessages[response.status] || "Error unarchiving users");
             }
 
-            sessionStorage.setItem("unarchiveSuccessful", data.message);
+            sessionStorage.setItem("userUnarchiveSuccessful", data.message);
             window.location.reload();
 
         } catch (error) {

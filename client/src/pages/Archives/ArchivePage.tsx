@@ -145,19 +145,45 @@ export default function ArchivePage() {
     // Use Effects
     // Page title effect
     useEffect(() => {
+
+        if (sessionStorage.getItem("announcementUnarchiveSuccessful")) {
+            toast.success("Announcement unarchived successfully", { closeButton: true, duration: 10000 });
+            sessionStorage.removeItem("announcementUnarchiveSuccessful");
+        }
+
+        if (sessionStorage.getItem("reservationUnarchiveSuccessful")) {
+            toast.success("Reservations unarchived successfully", { closeButton: true, duration: 10000 });
+            sessionStorage.removeItem("reservationUnarchiveSuccessful");
+        }
+
+        if (sessionStorage.getItem("amenityUnarchiveSuccessful")) {
+            toast.success("Amenities unarchived successfully", { closeButton: true, duration: 10000 });
+            sessionStorage.removeItem("amenityUnarchiveSuccessful");
+        }
+
+        if (sessionStorage.getItem("billUnarchiveSuccessful")) {
+            toast.success("Bills unarchived successfully", {
+                closeButton: true,
+                duration: 10000,
+            })
+            sessionStorage.removeItem("billUnarchiveSuccessful");
+        }
+
+        if (sessionStorage.getItem("userUnarchiveSuccessful")) {
+            toast.success("Users unarchived successfully", { 
+                closeButton: true,
+                description: sessionStorage.getItem("userUnarchiveSuccessful") + ".",
+                duration: 10000
+            });
+            sessionStorage.removeItem("userUnarchiveSuccessful");
+        }
+
         document.title = "Archives | GCTMS";
     }, []);
 
     useEffect(() => {
 
-        if (sessionStorage.getItem("unarchiveSuccessful")) {
-            toast.success("Users unarchived successfully", { 
-                closeButton: true,
-                description: sessionStorage.getItem("unarchiveSuccessful"),
-                duration: 10000
-            });
-            sessionStorage.removeItem("unarchiveSuccessful");
-        }
+        
 
         const fetchArchivedReservations = async () => {
             try {

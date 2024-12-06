@@ -64,7 +64,6 @@ import {
 // Utility Imports
 // React Import
 import {
-    useEffect,
     useState
 } from "react";
 
@@ -165,17 +164,6 @@ export default function ArchiveBillTable<TData extends BillData, TValue>({
 
     // Check filtered State
     const isFiltered = table.getState().columnFilters.length > 0;
-
-    useEffect(() => {
-
-        if (sessionStorage.getItem("billUnarchiveSuccessful")) {
-            toast.success("Bill/s unarchived successfully", {
-                closeButton: true,
-                duration: 10000,
-            })
-        }
-
-    }, [])
 
 
 
