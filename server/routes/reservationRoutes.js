@@ -170,7 +170,7 @@ router.patch('/update/status/cancelled/:id', setReservationCancelled);
 router.patch('/update/status/void/:id', setReservationVoid);
 router.patch('/update/images/:id', uploadReservationImages);
 router.patch('/update/visibility/batch/archive', batchArchiveReservations)
-router.patch('/update/visibility/batch/unarchives', batchUnarchiveReservations)
+router.patch('/update/visibility/batch/unarchive', batchUnarchiveReservations)
 
 router.patch('/update/visibility/archive/:id', archiveReservation);
 router.patch('/update/visibility/unarchive/:id', unarchiveReservation);
