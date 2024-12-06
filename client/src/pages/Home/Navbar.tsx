@@ -22,6 +22,7 @@ import { UserDropdown } from "@/components/custom/UserDropDown";
 import { useState } from "react";
 
 import { useAuthContext } from "@/hooks/useAuthContext";
+import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
 
 
@@ -158,7 +159,7 @@ export const Navbar = () => {
 
                     <div className="flex hidden gap-5 md:flex">
 
-                        <ModeToggle />
+                        <ThemeToggle />
 
                         {user &&
                             (

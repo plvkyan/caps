@@ -264,6 +264,14 @@ export const BillForm = () => {
     // handleBillPresets function
     const handleBillPresets = (presetTitle) => {
 
+        if (presetTitle === "None") {
+            billForm.setValue("billTitle", "");
+            billForm.setValue("billType", "One-time");
+            billForm.setValue("billDescription", "");
+            billForm.setValue("billAmount", 0);
+            return;
+        }
+
         const preset = billPresets.find((preset) => preset.billPresetTitle === presetTitle);
 
         billForm.setValue("billTitle", preset.billPresetTitle);
@@ -497,7 +505,7 @@ export const BillForm = () => {
                                 <div className="grid grid-cols-1 w-[550px] max-w-[550px] rounded-md sm:border">
 
                                     {/* Forms container */}
-                                    <div className="flex flex-col gap-4 pb-6 sm:p-8 sm:pb-0 md:pb-8">
+                                    <div className="flex flex-col gap-4 pb-6 sm:p-8 md:pb-8 overflow-auto">
 
                                         {/* Forms header */}
                                         <div className="flex flex-col my-4">
@@ -522,12 +530,16 @@ export const BillForm = () => {
                                                     </TooltipProvider>
                                                 </Label>
                                                 <Select
+                                                    defaultValue="None"
                                                     onValueChange={(value) => { handleBillPresets(value) }}
                                                 >
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select bill preset" />
                                                     </SelectTrigger>
                                                     <SelectContent>
+                                                        <SelectItem value="None">
+                                                            None
+                                                        </SelectItem>
                                                         {billPresets.length > 0 ? billPresets.map((preset) => (
                                                             <SelectItem
                                                                 key={preset._id}
