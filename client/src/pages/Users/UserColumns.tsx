@@ -86,7 +86,7 @@ export const UserTableColumns: ColumnDef<UserType>[] = [
         accessorKey: "userStatus",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Membership Status" />
+                <DataTableColumnHeader column={column} title="Membership Status" className="justify-center" />
             )
         },
         cell: ({ row }) => {
@@ -96,11 +96,19 @@ export const UserTableColumns: ColumnDef<UserType>[] = [
 
             // Return a badge based on the status
             if (status === "Outstanding") {
-                return <Badge variant="default"> {status} </Badge>
+                return (
+                    <div className="flex items-center justify-center pr-5 w-full">
+                        <Badge variant="default"> {status} </Badge>
+                    </div>
+                )
             }
 
             if (status === "Delinquent") {
-                return <Badge variant="warning"> {status} </Badge>
+                return (
+                    <div className="flex items-center justify-center pr-5 w-full">
+                        <Badge variant="warning"> {status} </Badge>
+                    </div>
+                )
             }
 
         },
