@@ -95,15 +95,56 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
     },
     {
         accessorKey: "billType",
+        accessorFn: (row) => {
+
+            if (row.billType === "One-time") {
+                return "One-time";
+            }
+
+            if (row.billType === "Recurring") {
+                const recurringType = row.billRecurringDate;
+                return recurringType;
+            }
+
+        },
         header: ({ column }) => {
             return (
                 <DataTableColumnHeader column={column} title="Type" />
             )
         },
         cell: ({ row }) => {
-            return (
-                <span> {row.original.billType} </span>
-            )
+            const type = row.original.billType;
+
+            if (type === "One-time") {
+                return (
+                    <div>
+                        <span> {type} </span>
+                    </div>
+                )
+            }
+
+            if (type === "Recurring") {
+
+                const recurringType = row.original.billRecurringDate;
+
+                return (
+                    <div>
+                        {
+                            recurringType === "3d" ? <span> Every three (3) days </span> :
+                                recurringType === "1w" ? <span> Every week </span> :
+                                    recurringType === "2w" ? <span> Every two (2) weeks </span> :
+                                        recurringType === "1m" ? <span> Every month </span> :
+                                            recurringType === "2m" ? <span> Every two (2) months </span> :
+                                                recurringType === "3m" ? <span> Every three (3) months </span> :
+                                                    recurringType === "6m" ? <span> Every six (6) months </span> :
+                                                        recurringType === "1y" ? <span> Every year </span> : <span> {type} </span>
+                        }
+                    </div>
+                )
+            }
+        },
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id));
         }
     },
     {
@@ -113,7 +154,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Amount" />
+                <DataTableColumnHeader column={column} title="Amount" className="justify-center" />
             )
         },
         cell: ({ row }) => {
@@ -121,7 +162,9 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
             const amount = row.original.billAmount;
 
             return (
-                <span> {PHPesos.format(amount)} </span>
+                <div className="flex align-center justify-center pr-5 w-full">
+                    <span> {PHPesos.format(amount)} </span>
+                </div>
             )
         },
     },
@@ -129,29 +172,54 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         accessorKey: "billStatus",
         accessorFn: (row) => {
 
-            const status = row.billPayors.find(payor => payor.payorId === userFunction()._id);
+            if (userFunction().userPosition === "Unit Owner" && userFunction().userRole === "Unit Owner") {
+                return row.billPayors.find(payor => payor.payorId === userFunction()._id)?.billStatus;
+            }
 
-            return status?.billStatus;
+            if (userFunction().userPosition !== "Unit Owner" && userFunction().userRole === "Admin") {
+                const payors = row.billPayors;
+                const paidCount = payors.filter(payor => payor.billStatus === "Paid").length;
+
+                if (paidCount === payors.length) {
+                    return "Paid";
+                }
+
+                if (paidCount === 0) {
+                    return "Pending";
+                }
+
+                if (paidCount > 0 && paidCount < payors.length) {
+                    return "Partially paid";
+                }
+            }
+
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Status" />
+                <DataTableColumnHeader column={column} title="Status" className="justify-center" />
             )
         },
         cell: ({ row }) => {
 
-            const status = row.original.billPayors.find(payor => payor.payorId === userFunction()._id);
+            // All bill payors
+            const payors = row.original.billPayors;
+
+            // Find a single payor bill status
+            const payorStatus = payors.find(payor => payor.payorId === userFunction()._id);
+
+            // Count the number of payors with a paid status
+            const payorPaidCount = payors.filter(payor => payor.billStatus === "Paid").length;
 
             if (userFunction().userPosition === "Unit Owner" && userFunction().userRole === "Unit Owner") {
                 return (
-                    <div>
+                    <div className="flex align-center justify-center pr-5 w-full">
                         <Badge variant={
-                            status?.billStatus === "Pending" ? "warning" :
-                                status?.billStatus === "Paid" ? "default" :
-                                    status?.billStatus === "Overdue" ? "destructive" :
+                            payorStatus?.billStatus === "Pending" ? "warning" :
+                                payorStatus?.billStatus === "Paid" ? "default" :
+                                    payorStatus?.billStatus === "Overdue" ? "destructive" :
                                         "outline"
                         }>
-                            {status?.billStatus}
+                            {payorStatus?.billStatus}
                         </Badge>
                     </div>
                 )
@@ -159,20 +227,21 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
 
             if (userFunction().userPosition !== "Unit Owner" && userFunction().userRole === "Admin") {
                 return (
-                    <div>
-                        <Badge variant={
-                            status?.billStatus === "Pending" ? "warning" :
-                                status?.billStatus === "Paid" ? "default" :
-                                    status?.billStatus === "Overdue" ? "destructive" :
-                                        "outline"
-                        }>
-                            {status?.billStatus}
-                        </Badge>
+                    <div className="flex align-center justify-center pr-5 w-full">
+                        <span> {payorPaidCount} out of {payors.length} paid </span>
                     </div>
                 )
             }
+        },
+        filterFn: (row, id, value) => {
 
-            
+            if (userFunction().userPosition === "Unit Owner" && userFunction().userRole === "Unit Owner") {
+                return value.includes(row.original.billPayors.find(payor => payor.payorId === userFunction()._id)?.billStatus);
+            }
+
+            if (userFunction().userPosition !== "Unit Owner" && userFunction().userRole === "Admin") {
+                return value.includes(row.getValue(id));
+            }
         },
     },
     {

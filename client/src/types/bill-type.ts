@@ -9,7 +9,7 @@ export type BillType = {
     billQuantity: number,
     billCurrency: string,
     billAmount: number,
-    billRecurringDate?: Date,
+    billRecurringDate?: String,
     billDueDate: Date,
     billPayors: 
         {

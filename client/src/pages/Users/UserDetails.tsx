@@ -106,7 +106,7 @@ import { UserType } from "@/types/user-type"
 // Data Imports
 import { archiveUser, getSingleUser, unarchiveUser, updateUser } from "@/data/user-api"
 import { Button } from "@/components/ui/button"
-import { Archive, ArchiveX, ChevronLeft, Copy, EllipsisVertical, Eye, EyeOff, RotateCcw } from "lucide-react"
+import { Archive, ArchiveX, ChevronLeft, Copy, EllipsisVertical, Eye, EyeOff, RotateCcw, Share } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { ReservationType } from "@/types/reservation-type"
@@ -535,6 +535,7 @@ export default function UserDetails() {
                                 </DropdownMenuTrigger>
 
                                 <DropdownMenuContent align="end" className="mt-1">
+
                                     <DropdownMenuGroup>
                                         {users.userVisibility === "Archived" ? (
                                             <DropdownMenuItem
@@ -552,11 +553,10 @@ export default function UserDetails() {
                                                     Archive
                                                 </DropdownMenuItem>
                                             )}
-
-                                        {/* <DropdownMenuItem>
+                                        <DropdownMenuItem>
                                             <Share className="h-4 w-4" />
                                             Export .xslx
-                                        </DropdownMenuItem> */}
+                                        </DropdownMenuItem>
                                     </DropdownMenuGroup>
 
                                     <DropdownMenuSeparator />
@@ -568,7 +568,9 @@ export default function UserDetails() {
                                         <RotateCcw className="h-4 w-4" />
                                         Reset password
                                     </DropdownMenuItem>
+
                                 </DropdownMenuContent>
+                                
                             </DropdownMenu>
 
 

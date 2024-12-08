@@ -147,6 +147,10 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import { BillType } from "@/types/bill-type";
 import { getUnarchivedBillPresets } from "@/data/bills-api";
+import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
+import { BILL_TYPE_OPTIONS } from "@/data/bill-type-options";
+import { BILL_STATUS_ADMIN_OPTIONS } from "@/data/bill-status-admin-options";
+import { BILL_STATUS_UNIT_OWNER_OPTIONS } from "@/data/bill-status-unit-owner-options";
 
 
 
@@ -778,7 +782,8 @@ export default function BillTable<TData extends BillData, TValue>({
 
                     <DataTableViewOptions table={table} label="Toggle" />
 
-                    {/* <DataTableFacetedFilter column={table.getColumn("billType")} title="Status" options={RESERVATION_DATA} /> */}
+                    <DataTableFacetedFilter column={table.getColumn("billStatus")} title="Status" options={ user.userRole === "Admin" && user.userPosition !== "Unit Owner" ? BILL_STATUS_ADMIN_OPTIONS : BILL_STATUS_UNIT_OWNER_OPTIONS} />
+                    <DataTableFacetedFilter column={table.getColumn("billType")} title="Type" options={BILL_TYPE_OPTIONS} />
 
                     {isFiltered && (
                         <Button
@@ -809,10 +814,6 @@ export default function BillTable<TData extends BillData, TValue>({
                                 {headerGroup.headers.map((header) => {
 
                                     if (header.id === "_id") {
-                                        return null;
-                                    }
-
-                                    if (header.id === "billStatus" && user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
                                         return null;
                                     }
 
@@ -854,10 +855,6 @@ export default function BillTable<TData extends BillData, TValue>({
                                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </TableCell>
                                                 )
-                                            }
-
-                                            if (cell.column.id === "billStatus" && user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
-                                                return null;
                                             }
 
                                             return (
