@@ -6,6 +6,7 @@
 
 // Lucide React Icons Imports
 import {
+    Archive,
     CalendarRange,
     ChevronDown,
     ChevronUp,
@@ -143,6 +144,7 @@ import { Workbook } from "exceljs";
 
 // React Import
 import {
+    useEffect,
     useState
 } from "react";
 
@@ -152,6 +154,7 @@ import { DateRange } from "react-day-picker";
 import { ReservationType } from "@/types/reservation-type";
 import { useAuthContext } from "@/hooks/useAuthContext";
 import { AmenityType } from "@/types/amenity-type";
+import { bulkArchiveAmenities } from "@/data/amenity-api";
 
 
 // Types
@@ -221,7 +224,9 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
     // Selected Rows State
     const [rowSelection, setRowSelection] = useState({});
 
-
+    // Custom States
+    // Date Range State
+    const [date, setDate] = useState<DateRange | undefined>({ from: undefined, to: undefined })
 
     // Export states
     // Show export states
@@ -265,6 +270,28 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
     // Check filtered State
     const isFiltered = table.getState().columnFilters.length > 0;
 
+
+
+    useEffect(() => {
+        if (sessionStorage.getItem("amenityArchiveSuccessful")) {
+            toast.success("Amenities archived successfully", { closeButton: true, duration: 10000 });
+            sessionStorage.removeItem("amenityArchiveSuccessful");
+        }
+    }, []);
+
+    // Update the table filter when date range changes
+    useEffect(() => {
+
+        if (date?.from && date?.to) {
+            table.getColumn('createdAt')?.setFilterValue({
+                from: date.from,
+                to: date.to,
+            });
+        } else {
+            table.getColumn('createdAt')?.setFilterValue(undefined);
+        }
+
+    }, [date, table]);
 
 
     // Functions
@@ -547,6 +574,26 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
 
 
+    // Handle Archive Button Function
+    const handleArchiveButton = async () => {
+        try {
+            setLoading(true)
+            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as AmenityData)._id);
+            const response = await bulkArchiveAmenities(selectedRowIds);
+
+            if (response.ok) {
+                sessionStorage.setItem("amenityArchiveSuccessful", "true");
+                window.location.reload();
+            } else {
+                throw new Error("Error archiving amenities");
+            }
+        } catch (error) {
+            toast.error((error as Error).message, { closeButton: true });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Redirect to Amenity Form Function
     const navToAmenityForm = () => {
         const reservationFormPath = "/amenities/create";
@@ -584,7 +631,15 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
 
                 <div className="flex items-end gap-2">
 
-
+                    <Button
+                        disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+                        onClick={() => handleArchiveButton()}
+                        size="sm"
+                        variant="outline"
+                    >
+                        <Archive className="h-4 w-4" />
+                        Archive
+                    </Button>
 
                     <Button className="" onClick={navToAmenityForm} size="sm" variant="default" >
                         <CirclePlus className="h-4 w-4" />
@@ -603,8 +658,32 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                     placeholder="Search..."
                 />
 
-                <DataTableViewOptions table={table} label="Toggle" />
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            className="font-normal"
+                            id="date"
+                            variant="outline"
+                        >
+                            <CalendarRange className="mr-2 h-4 w-4" />
+                            {date?.from && date?.to && isFiltered
+                                ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
+                                : "Creation Date Range"}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-fit">
+                        <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={date?.from}
+                            selected={date}
+                            onSelect={setDate}
+                            numberOfMonths={2}
+                        />
+                    </PopoverContent>
+                </Popover>
 
+                <DataTableViewOptions table={table} label="Toggle" />
                 <DataTableFacetedFilter column={table.getColumn("amenityType")} title="Type" options={AMENITY_DATA} />
 
                 {isFiltered && (
@@ -709,11 +788,11 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                     </DialogHeader>
 
                     {/* Amenity Basic Information */}
-                    <div 
-                    className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 cursor-pointer "
-                        + (!includeEquipmentBasicInfo ? "text-muted-foreground/50" : "text-white/90")
-                    }
-                    onClick={() => setIncludeEquipmentBasicInfo(!includeEquipmentBasicInfo)}
+                    <div
+                        className={"flex items-center justify-between w-full pl-5 pr-6 py-4 rounded-md bg-muted/40 cursor-pointer "
+                            + (!includeEquipmentBasicInfo ? "text-muted-foreground/50" : "text-white/90")
+                        }
+                        onClick={() => setIncludeEquipmentBasicInfo(!includeEquipmentBasicInfo)}
                     >
                         <Label className="text-sm"> Equipment basic information </Label>
                         <Checkbox

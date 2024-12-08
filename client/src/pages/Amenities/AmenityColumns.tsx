@@ -41,6 +41,7 @@ import { AmenityType } from "@/types/amenity-type";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { format } from "date-fns";
 
 
 
@@ -186,4 +187,30 @@ export const AmenityTableColumns: ColumnDef<AmenityType>[] = [
             )
         }
     },
+    {
+        accessorKey: "createdAt",
+        accessorFn: (row) => {
+            return format(row.createdAt, "PPP");
+        },
+        header: ({ column }) => {
+            return (
+                <DataTableColumnHeader column={column} title="Created At" />
+            )
+        },
+        cell: ({ row }) => {
+
+            const origDate = row.original.createdAt;
+            const formattedDate = format(origDate, "PP")
+
+            return <div className="font-regular"> {formattedDate} </div>
+        },
+        filterFn: (row, id, value) => {
+            console.log(id);
+            const date = new Date(row.original.createdAt);
+
+            const { from: start, to: end } = value as { from: Date, to: Date };
+
+            return date >= start && date <= end;
+        }
+    }
 ]

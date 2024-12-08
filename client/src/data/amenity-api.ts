@@ -48,7 +48,7 @@ export const unarchiveAmenity = async (id: string) => {
     }));
 }
 
-export const archiveManyAmenities = async (ids) => {
+export const bulkArchiveAmenities = async (ids) => {
     return (await fetch(apiAmenitiesUrl + "/update/visibility/batch/archive", {
         method: 'PATCH',
         headers: {
