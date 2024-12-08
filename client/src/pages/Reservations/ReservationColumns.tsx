@@ -86,7 +86,7 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         accessorKey: "reservationType",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Amenities" />
+                <DataTableColumnHeader column={column} title="Type" />
             )
         },
         cell: ({ row }) => {
@@ -139,7 +139,7 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Reservation Date" className="ml-7 justify-center" />
+                <DataTableColumnHeader column={column} title="Reservation Date" />
             )
         },
         cell: ({ row }) => {
@@ -147,7 +147,7 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
             const origDate = row.original.reservationDate;
             const formattedDate = format(origDate, "PP")
 
-            return <div className="font-regular text-center"> {formattedDate} </div>
+            return <div className="font-regular"> {formattedDate} </div>
         },
         filterFn:
             (row, id, value) => {
@@ -176,7 +176,7 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
             const origDate = row.original.createdAt;
             const formattedDate = format(origDate, "PP")
 
-            return <div className="font-regular ml-1"> {formattedDate} </div>
+            return <div className="font-regular"> {formattedDate} </div>
         }
     }
 ]
