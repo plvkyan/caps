@@ -6,6 +6,7 @@
 
 // Lucide React Icons Imports
 import {
+    Archive,
     CalendarRange,
     ChevronDown,
     ChevronUp,
@@ -146,7 +147,7 @@ import { DateRange } from "react-day-picker";
 import { useAuthContext } from "@/hooks/useAuthContext";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import { BillType } from "@/types/bill-type";
-import { getUnarchivedBillPresets } from "@/data/bills-api";
+import { batchArchiveBills, getUnarchivedBillPresets } from "@/data/bills-api";
 import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
 import { BILL_TYPE_OPTIONS } from "@/data/bill-type-options";
 import { BILL_STATUS_ADMIN_OPTIONS } from "@/data/bill-status-admin-options";
@@ -253,20 +254,9 @@ export default function BillTable<TData extends BillData, TValue>({
     // Effects
     useEffect(() => {
 
-        if (sessionStorage.getItem("approveSuccessful")) {
-            console.log(sessionStorage.getItem("approveSuccessful"));
-            toast.success(sessionStorage.getItem("approveSuccesful"), { closeButton: true });
-            sessionStorage.removeItem("approveSuccessful");
-        }
-
-        if (sessionStorage.getItem("rejectedSuccessful")) {
-            toast.success("Reservation rejected successfully", { closeButton: true });
-            sessionStorage.removeItem("rejectedSuccessful");
-        }
-
-        if (sessionStorage.getItem("archiveSuccessful")) {
-            toast.success("Reservation archived successfully", { closeButton: true });
-            sessionStorage.removeItem("archiveSuccessful");
+        if (sessionStorage.getItem("billArchiveSuccessful")) {
+            toast.success("Bills archived successfully", { closeButton: true, duration: 10000 });
+            sessionStorage.removeItem("billArchiveSuccessful");
         }
 
         const fetchBillPresets = async () => {
@@ -307,6 +297,7 @@ export default function BillTable<TData extends BillData, TValue>({
         } else {
             table.getColumn('billDueDate')?.setFilterValue(undefined);
         }
+
     }, [date, table]);
 
 
@@ -671,7 +662,6 @@ export default function BillTable<TData extends BillData, TValue>({
         }
     }
 
-
     const generateCsv = (data: any[]) => {
         if (data.length === 0) return '';
         const headers = Object.keys(data[0]);
@@ -683,6 +673,26 @@ export default function BillTable<TData extends BillData, TValue>({
     };
 
 
+
+    // Handle Archive Button Function
+    const handleArchiveButton = async () => {
+        try {
+            setLoading(true)
+            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as BillData)._id);
+            const response = await batchArchiveBills(selectedRowIds);
+
+            if (response.ok) {
+                sessionStorage.setItem("billArchiveSuccessful", "true");
+                window.location.reload();
+            } else {
+                throw new Error("Error archiving bills");
+            }
+        } catch (error) {
+            toast.error((error as Error).message, { closeButton: true });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Redirect to Reservation Form Function
     const navToBillForm = () => {
@@ -728,6 +738,16 @@ export default function BillTable<TData extends BillData, TValue>({
 
                 {user && user.userRole === "Admin" && (
                     <div className="flex items-end gap-2">
+
+                        <Button
+                            disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+                            onClick={() => handleArchiveButton()}
+                            size="sm"
+                            variant="outline"
+                        >
+                            <Archive className="h-4 w-4" />
+                            Archive
+                        </Button>
 
                         <Button className="" onClick={navToBillPresetForm} size="sm" variant="outline" >
                             <CirclePlus className="h-4 w-4" />
@@ -782,7 +802,7 @@ export default function BillTable<TData extends BillData, TValue>({
 
                     <DataTableViewOptions table={table} label="Toggle" />
 
-                    <DataTableFacetedFilter column={table.getColumn("billStatus")} title="Status" options={ user.userRole === "Admin" && user.userPosition !== "Unit Owner" ? BILL_STATUS_ADMIN_OPTIONS : BILL_STATUS_UNIT_OWNER_OPTIONS} />
+                    <DataTableFacetedFilter column={table.getColumn("billStatus")} title="Status" options={user.userRole === "Admin" && user.userPosition !== "Unit Owner" ? BILL_STATUS_ADMIN_OPTIONS : BILL_STATUS_UNIT_OWNER_OPTIONS} />
                     <DataTableFacetedFilter column={table.getColumn("billType")} title="Type" options={BILL_TYPE_OPTIONS} />
 
                     {isFiltered && (

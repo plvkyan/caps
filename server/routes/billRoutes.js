@@ -30,6 +30,7 @@ const {
     updateBillPayorStatus,
     archiveBill,
     unarchiveBill,
+    batchArchiveBills,
     unarchiveMultipleBills,
     getAllBillPresets,
     getArchivedBillPresets,
@@ -89,6 +90,9 @@ router.patch('/:id', updateBill)
 router.patch('/status/paid', updateBillPayorStatus);
 
 router.patch('/visibility/archive/:id', archiveBill);
+
+router.patch('/visibility/archive/bulk/_', batchArchiveBills)
+
 
 router.patch('/visibility/unarchive/:id', unarchiveBill);
 

@@ -24,6 +24,18 @@ export const archiveBill = async (billId) => {
     })
 }
 
+export const batchArchiveBills = async (billIds) => {
+    return await fetch(apiBillsUrl + '/visibility/archive/bulk/_', {
+        method: 'PATCH',
+        body: JSON.stringify({
+            billIds: billIds,
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+}
+
 export const unarchiveMultipleBills = async (billIds) => {
     return await fetch(apiBillsUrl + '/visibility/unarchive/bulk/_' , {
         method: 'PATCH',

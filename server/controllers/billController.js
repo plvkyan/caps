@@ -377,6 +377,51 @@ const archiveBill = async (req, res) => {
 }
 
 // Unarchive multiple bills
+const batchArchiveBills = async (req, res) => {
+    const { billIds } = req.body;
+
+    if (!Array.isArray(billIds)) {
+        return res.status(400).json({
+            error: 'Invalid input',
+            description: 'Expected an array of bill IDs'
+        });
+    }
+
+    try {
+        const bills = await Bill.find({ _id: { $in: billIds } });
+
+        if (bills.length === 0) {
+            return res.status(400).json({
+                error: 'No bills found',
+                description: 'None of the provided bill IDs were found'
+            });
+        }
+
+        // Check if any bills are already archived
+        const alreadyArchived = bills.filter(bill => bill.billVisibility === "Archived");
+        if (alreadyArchived.length > 0) {
+            return res.status(400).json({
+                error: 'Some bills are already archived',
+                description: `${alreadyArchived.length} bills are already archived.`
+            });
+        }
+
+        const updatedBills = await Bill.updateMany(
+            { _id: { $in: billIds } },
+            { billVisibility: "Archived" }
+        );
+
+        res.status(200).json({
+            message: `Successfully archived ${updatedBills.modifiedCount} bills`
+        });
+
+    } catch (error) {
+        console.log("Error archiving multiple bills:", error.message);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+// Unarchive multiple bills
 const unarchiveMultipleBills = async (req, res) => {
     const { billIds } = req.body;
 
@@ -435,6 +480,7 @@ module.exports = {
     updateBillPayorStatus,
     archiveBill,
     unarchiveBill,
+    batchArchiveBills,
     unarchiveMultipleBills,
 
     // POST functions
