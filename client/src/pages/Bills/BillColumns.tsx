@@ -154,7 +154,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Amount" className="justify-center" />
+                <DataTableColumnHeader column={column} title="Amount" className="justify-end" />
             )
         },
         cell: ({ row }) => {
@@ -162,7 +162,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
             const amount = row.original.billAmount;
 
             return (
-                <div className="flex align-center justify-center pr-5 w-full">
+                <div className="flex justify-end">
                     <span> {PHPesos.format(amount)} </span>
                 </div>
             )
@@ -196,7 +196,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Status" className="justify-center" />
+                <DataTableColumnHeader column={column} title="Status" />
             )
         },
         cell: ({ row }) => {
@@ -212,7 +212,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
 
             if (userFunction().userPosition === "Unit Owner" && userFunction().userRole === "Unit Owner") {
                 return (
-                    <div className="flex align-center justify-center pr-5 w-full">
+                    <div>
                         <Badge variant={
                             payorStatus?.billStatus === "Pending" ? "warning" :
                                 payorStatus?.billStatus === "Paid" ? "default" :
@@ -227,7 +227,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
 
             if (userFunction().userPosition !== "Unit Owner" && userFunction().userRole === "Admin") {
                 return (
-                    <div className="flex align-center justify-center pr-5 w-full">
+                    <div>
                         <span> {payorPaidCount} out of {payors.length} paid </span>
                     </div>
                 )
@@ -251,7 +251,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Due Date" className="ml-7 justify-center" />
+                <DataTableColumnHeader column={column} title="Due date" />
             )
         },
         cell: ({ row }) => {
@@ -259,18 +259,16 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
             const origDate = row.original.billDueDate;
             const formattedDate = format(origDate, "PP")
 
-            return <div className="font-regular text-center"> {formattedDate} </div>
+            return <div className="font-regular"> {formattedDate} </div>
         },
-        filterFn:
-            (row, id, value) => {
+        filterFn: (row, id, value) => {
+            console.log(id);
+            const date = new Date(row.original.billDueDate);
 
-                console.log(id);
-                const date = new Date(row.original.billDueDate);
+            const { from: start, to: end } = value as { from: Date, to: Date };
 
-                const { from: start, to: end } = value as { from: Date, to: Date };
-
-                return date >= start && date <= end;
-            }
+            return date >= start && date <= end;
+        }
     },
     {
         accessorKey: "createdAt",
@@ -279,7 +277,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Created At" />
+                <DataTableColumnHeader column={column} title="Created at" />
             )
         },
         cell: ({ row }) => {
@@ -287,7 +285,7 @@ export const BillTableColumns: ColumnDef<BillType>[] = [
             const origDate = row.original.createdAt;
             const formattedDate = format(origDate, "PP")
 
-            return <div className="font-regular ml-1"> {formattedDate} </div>
+            return <div className="font-regular"> {formattedDate} </div>
         }
     }
 ]
