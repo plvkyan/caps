@@ -149,6 +149,7 @@ import { STATUS_FILTER_OPTIONS, UserType } from "@/types/user-type";
 import { useAuthContext } from "@/hooks/useAuthContext";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import { DateRange } from "react-day-picker";
+import { USER_POSITION_OPTIONS } from "@/data/user-position-options";
 
 
 
@@ -471,8 +472,8 @@ export default function UserTable<TData, TValue>({
 
                 <DataTableViewOptions table={table} label="Toggle Columns" />
 
-                <DataTableFacetedFilter column={table.getColumn("userStatus")} title="Filter" options={STATUS_FILTER_OPTIONS} />
-                <DataTableFacetedFilter column={table.getColumn("userStatus")} title="Filter" options={STATUS_FILTER_OPTIONS} />
+                <DataTableFacetedFilter column={table.getColumn("userStatus")} title="Status" options={STATUS_FILTER_OPTIONS} />
+                <DataTableFacetedFilter column={table.getColumn("userPosition")} title="Position" options={USER_POSITION_OPTIONS} />
 
                 {isFiltered && (
                     <Button

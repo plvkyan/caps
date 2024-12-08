@@ -145,6 +145,9 @@ export const UserTableColumns: ColumnDef<UserType>[] = [
                 </span>
             )
         },
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id));
+        }
     },
     {
         accessorKey: "createdAt",
