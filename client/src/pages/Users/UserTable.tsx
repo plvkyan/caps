@@ -445,7 +445,7 @@ export default function UserTable<TData, TValue>({
                         variant="outline"
                     >
                         <CirclePlus className="h-4 w-4" />
-                        Bulk Create Users
+                        Bulk create users
                     </Button>
 
                     <Button
@@ -455,7 +455,7 @@ export default function UserTable<TData, TValue>({
                         variant="default"
                     >
                         <CirclePlus className="h-4 w-4" />
-                        Create User
+                        Create user
                     </Button>
 
                 </div>
@@ -470,7 +470,7 @@ export default function UserTable<TData, TValue>({
                     placeholder="Search..."
                 />
 
-                <DataTableViewOptions table={table} label="Toggle Columns" />
+                <DataTableViewOptions table={table} label="Toggle columns" />
 
                 <DataTableFacetedFilter column={table.getColumn("userStatus")} title="Status" options={STATUS_FILTER_OPTIONS} />
                 <DataTableFacetedFilter column={table.getColumn("userPosition")} title="Position" options={USER_POSITION_OPTIONS} />
