@@ -793,7 +793,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                                 size="sm"
                             >
                                 <CircleX className="h-4 w-4 text-destructive" />
-                                Mark as Rejected
+                                Mark as rejected
                             </Button>
                             <Button
                                 disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
@@ -802,7 +802,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                                 size="sm"
                             >
                                 <CircleCheck className="h-4 w-4 text-primary" />
-                                Mark as Approved
+                                Mark as approved
                             </Button>
 
                         </>
@@ -810,7 +810,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
 
                     <Button className="" onClick={navToReservationForm} size="sm" variant="default" >
                         <CirclePlus className="h-4 w-4" />
-                        Create Reservation
+                        Create reservation
                     </Button>
 
                 </div>
@@ -838,7 +838,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                                 <CalendarRange className="mr-2 h-4 w-4" />
                                 {date?.from && date?.to && isFiltered
                                     ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
-                                    : "Reservation Date Range"}
+                                    : "Reservation date range"}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-fit">
@@ -864,7 +864,7 @@ export default function ReservationTable<TData extends ReservationData, TValue>(
                             className="items-center"
                         >
                             <X className="h-4 w-4" />
-                            Reset Filters
+                            Reset filters
                         </Button>
                     )}
 

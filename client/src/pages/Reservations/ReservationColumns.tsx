@@ -73,7 +73,7 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         accessorKey: "reserveeBlkLt",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Block and Lot" />
+                <DataTableColumnHeader column={column} title="Block and lot" />
             )
         },
         cell: ({ row }) => {
@@ -139,7 +139,7 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Reservation Date" />
+                <DataTableColumnHeader column={column} title="Reservation date" />
             )
         },
         cell: ({ row }) => {
@@ -168,7 +168,7 @@ export const ReservationTableColumns: ColumnDef<ReservationType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Created At" />
+                <DataTableColumnHeader column={column} title="Created at" />
             )
         },
         cell: ({ row }) => {
