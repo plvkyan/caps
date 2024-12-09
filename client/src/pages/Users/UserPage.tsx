@@ -84,7 +84,7 @@ export default function UserPage() {
     // Use Effects
     // Page title effect
     useEffect(() => {
-        document.title = "Reservations | GCTMS";
+        document.title = "Users | GCTMS";
     }, []);
 
     useEffect(() => {
