@@ -73,7 +73,7 @@ export const UserTableColumns: ColumnDef<UserType>[] = [
         accessorKey: "userBlkLt",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Block and Lot" />
+                <DataTableColumnHeader column={column} title="Block and lot" />
             )
         },
         cell: ({ row }) => {
@@ -86,7 +86,7 @@ export const UserTableColumns: ColumnDef<UserType>[] = [
         accessorKey: "userStatus",
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Membership Status" className="justify-center" />
+                <DataTableColumnHeader column={column} title="Status" className="justify-center" />
             )
         },
         cell: ({ row }) => {
