@@ -751,12 +751,12 @@ export default function BillTable<TData extends BillData, TValue>({
 
                         <Button className="" onClick={navToBillPresetForm} size="sm" variant="outline" >
                             <CirclePlus className="h-4 w-4" />
-                            Create Bill Preset
+                            Create bill preset
                         </Button>
 
                         <Button className="" onClick={navToBillForm} size="sm" variant="default" >
                             <CirclePlus className="h-4 w-4" />
-                            Create Bill
+                            Create bill
                         </Button>
 
                     </ div>
@@ -785,7 +785,7 @@ export default function BillTable<TData extends BillData, TValue>({
                                 <CalendarRange className="mr-2 h-4 w-4" />
                                 {date?.from && date?.to && isFiltered
                                     ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
-                                    : "Due Date Range"}
+                                    : "Due date range"}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-fit">
