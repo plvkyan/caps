@@ -194,7 +194,7 @@ export const AmenityTableColumns: ColumnDef<AmenityType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Created At" />
+                <DataTableColumnHeader column={column} title="Created at" />
             )
         },
         cell: ({ row }) => {

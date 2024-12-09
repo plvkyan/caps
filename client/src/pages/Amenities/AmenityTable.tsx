@@ -668,7 +668,7 @@ export default function AmenityTable<TData extends AmenityData, TValue>({
                             <CalendarRange className="mr-2 h-4 w-4" />
                             {date?.from && date?.to && isFiltered
                                 ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
-                                : "Creation Date Range"}
+                                : "Creation date range"}
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-fit">
