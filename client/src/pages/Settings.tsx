@@ -94,16 +94,20 @@ import { PhoneInput } from "@/components/ui/phone-input"
 
 
 
+const passwordValidation = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-__+.]){1,}).{8,}$/;
+
 const passwordFormSchema = z.object({
-    userPassword: z.string().min(1, "Password is required."),
-    userConfirmPassword: z.string().min(1, "You are required to confirm your password."),
+    userPassword: z.string()
+        .min(8, { message: "Password must be at least 8 characters long." })
+        .regex(passwordValidation, "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character."),
+    userConfirmPassword: z.string()
+        .min(1, { message: "You are required to confirm your password." }),
 }).refine(
-    (data) => {
-        return data.userPassword === data.userConfirmPassword;
-    }, {
-    message: "Passwords do not match.",
-    path: ["userConfirmPassword"],
-}
+    (data) => data.userPassword === data.userConfirmPassword,
+    {
+        message: "Passwords do not match.",
+        path: ["userConfirmPassword"],
+    }
 );
 
 const emailFormSchema = z.object({
@@ -143,6 +147,8 @@ export default function Settings() {
 
     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
+    const [passwordStrength, setPasswordStrength] = useState<string>("None");
+
 
 
     const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
@@ -171,7 +177,15 @@ export default function Settings() {
         document.title = "Settings | GCTMS";
     }, []);
 
+    useEffect(() => {
+        if (passwordForm.watch().userPassword) {
+            setPasswordStrength(evaluatePasswordStrength(passwordForm.watch().userPassword));
+        }
 
+        if (passwordForm.watch().userPassword === "") {
+            setPasswordStrength("None");
+        }
+    }, [passwordForm.watch().userPassword]);
 
     // Functions
     const handleDiscard = async () => {
@@ -256,6 +270,40 @@ export default function Settings() {
             setError(error.message || "Failed to update user information");
         } finally {
             setLoading(false);
+        }
+    }
+
+    const evaluatePasswordStrength = (password) => {
+        let score = 0;
+
+        if (!password) return 'None';
+
+        // Check password length
+        if (password.length > 8) score += 1;
+        // Contains lowercase
+        if (/[a-z]/.test(password)) score += 1;
+        // Contains uppercase
+        if (/[A-Z]/.test(password)) score += 1;
+        // Contains numbers
+        if (/\d/.test(password)) score += 1;
+        // Contains special characters
+        if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+        switch (score) {
+            case 0:
+                return 'Weak';
+            case 1:
+                return 'Weak';
+            case 2:
+                return 'Weak';
+            case 3:
+                return 'Fair';
+            case 4:
+                return 'Good';
+            case 5:
+                return 'Strong';
+            default:
+                return 'None';
         }
     }
 
@@ -389,7 +437,15 @@ export default function Settings() {
                                                     </Button>
                                                 )}
 
+                                                {editPassword && (
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs text-muted-foreground font-light">Password strength: </span>
+                                                        <span className={`text-xs font-semibold ${passwordStrength === 'None' ? 'text-muted-foreground' : passwordStrength === 'Weak' ? 'text-destructive' : passwordStrength === 'Fair' ? 'text-warning' : passwordStrength === "Good" ? 'text-foreground' : passwordStrength === "Strong" ? 'text-primary' : 'text-foreground'}`}>{passwordStrength}</span>
+                                                    </div>
+                                                )}
+
                                                 <FormMessage />
+
                                             </FormItem>
                                         )
                                     }}
