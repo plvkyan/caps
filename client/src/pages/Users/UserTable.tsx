@@ -590,7 +590,7 @@ export default function UserTable<TData, TValue>({
                         <CollapsibleTrigger className="flex gap-2 items-center w-full text-white/90"
                         >
                             <Label className="text-sm cursor-pointer"> User information </Label>
-                            <div className="flex items-center justify-center h-6 w-6 rounded-md">
+                            <div className="flex items-center justify-center h-6 w-6 rounded-md hover:bg-accent">
                                 {!showUserOptions ? <ChevronDown className="h-4 w-4" />
                                     : < ChevronUp className="h-4 w-4" />}
                             </div>
