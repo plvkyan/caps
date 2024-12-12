@@ -935,7 +935,7 @@ export default function ReservationDetails() {
                                     </>
                                 )}
 
-                                {user.userRole === "Unit Owner" && user.userPosition === "Unit Owner" && reservation && reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Pending" && (
+                                {user.userRole === "Unit Owner" && user.userPosition === "Unit Owner" && reservation && new Date(reservation.reservationDate) >= new Date(new Date().setDate(new Date().getDate() + 7)) && reservation.reservationStatus[reservation.reservationStatus.length - 1].status === "Pending" && (
                                     <Button
                                         onClick={handleCancelReservation}
                                         size="sm"
