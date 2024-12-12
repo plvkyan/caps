@@ -59,10 +59,9 @@ export function DataTableViewOptions<TData>({
 
                 <Button
                     variant="outline"
-                    className="hidden lg:flex"
                 >
                     <Eye className="h-4 w-4" />
-                    { label }
+                    <span className="hidden lg:flex"> { label } </span>
                 </Button>
 
             </DropdownMenuTrigger>
