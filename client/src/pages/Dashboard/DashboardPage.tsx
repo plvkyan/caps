@@ -413,9 +413,9 @@ export default function ReservationPage() {
                 ((currentRevenue - previousRevenue) / previousRevenue) * 100;
 
             return {
-                current: currentRevenue,
-                previous: previousRevenue,
-                percentageChange: percentageChange
+                current: Math.round(currentRevenue),
+                previous: Math.round(previousRevenue),
+                percentageChange: Math.round(percentageChange)
             };
         };
 
