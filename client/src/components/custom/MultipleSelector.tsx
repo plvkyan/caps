@@ -12,6 +12,7 @@ import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui
 export interface Option {
     value: string;
     label: string;
+    id?: string;
     disable?: boolean;
     /** fixed option that can't be removed. */
     fixed?: boolean;
