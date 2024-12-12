@@ -212,7 +212,7 @@ export const BillForm = () => {
                 }
                 const data = await response.json();
                 setUsers(data);
-                setOptions(data.map((user) => ({ label: user.userBlkLt, value: user._id })));
+                setOptions(data.map((user) => ({ label: user.userBlkLt, value: user.userBlkLt, id: user._id })));
             } catch (error) {
                 if (error instanceof Error) {
                     setError(error.message);
@@ -330,7 +330,7 @@ export const BillForm = () => {
         }
 
         const tempPayors = values.billPayors.map((payor) => {
-            const matchingUser = users.find((user) => user._id === payor.value);
+            const matchingUser = users.find((user) => user._id === payor.id);
             if (matchingUser) {
                 return {
                     payorId: matchingUser._id,
