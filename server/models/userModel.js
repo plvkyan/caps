@@ -59,25 +59,44 @@ const userSchema = new Schema({
         required: false,
         default: "Outstanding"
     },
+    userCreatorId: {
+        type: String,
+        required: true,
+    },
+    userCreatorBlkLt: {
+        type: String,
+        required: true,
+    },
+    userCreatorPosition: {
+        type: String,
+        required: true
+    },
     // The user's visibility status in the system
     userVisibility: {
         type: String,
         required: false,
         default: "Unarchived"
     },
+    userVisibilityDate: {
+        type: Date,
+        required: false,
+    },
 }, { timestamps: true })
 
 
 // User static methods
 // Static signup method for creating a new user
-userSchema.statics.signup = async function(
-    userBlkLt, 
-    userPassword, 
+userSchema.statics.signup = async function (
+    userBlkLt,
+    userPassword,
     userEmail,
     userMobileNo,
-    userRole, 
-    userPosition, 
-    userStatus, 
+    userRole,
+    userPosition,
+    userStatus,
+    userCreatorId,
+    userCreatorBlkLt,
+    userCreatorPosition,
     userVisibility,
 ) {
     try {
@@ -117,14 +136,17 @@ userSchema.statics.signup = async function(
 
         // Create the user
         const user = await this.create({
-            userBlkLt: userBlkLt, 
-            userPassword: hash, 
+            userBlkLt: userBlkLt,
+            userPassword: hash,
             userEmail: userEmail,
             userMobileNo: userMobileNo,
-            userRole: userRole, 
-            userPosition: userPosition, 
-            userStatus: userStatus, 
-            userVisibility: userVisibility 
+            userRole: userRole,
+            userPosition: userPosition,
+            userStatus: userStatus,
+            userCreatorId: userCreatorId,
+            userCreatorBlkLt: userCreatorBlkLt,
+            userCreatorPosition: userCreatorPosition,
+            userVisibility: userVisibility
         })
 
         // Return the user
@@ -138,13 +160,16 @@ userSchema.statics.signup = async function(
 
 
 
-userSchema.statics.bulkSignup = async function(
+userSchema.statics.bulkSignup = async function (
     startBlock,
     endBlock,
     startLot,
     endLot,
     defaultPassword,
     defaultStatus,
+    userCreatorId,
+    userCreatorBlkLt,
+    userCreatorPosition,
     defaultVisibility
 ) {
     try {
@@ -183,6 +208,9 @@ userSchema.statics.bulkSignup = async function(
                     userRole: defaultRole,
                     userPosition: defaultPosition,
                     userStatus: defaultStatus,
+                    userCreatorId: userCreatorId,
+                    userCreatorBlkLt: userCreatorBlkLt,
+                    userCreatorPosition: userCreatorPosition,
                     userVisibility: defaultVisibility
                 });
             }
@@ -206,41 +234,49 @@ userSchema.statics.bulkSignup = async function(
 
 
 // Static Login Method
-userSchema.statics.login = async function(
-    userBlkLt, 
-    userPassword, 
+userSchema.statics.login = async function (
+    userBlkLt,
+    userPassword,
 ) {
 
-    // Validation if login fields are filled
-    if (!userBlkLt) {
-        throw Error('Block and lot is required.')
+    try {
+        // Validation if login fields are filled
+        if (!userBlkLt) {
+            throw Error('Block and lot is required.')
+        }
+
+        if (!userPassword) {
+            throw Error('Password is required.')
+        }
+
+        // Finding the user account
+        const user = await this.findOne({
+            userBlkLt,
+            userVisibility: 'Unarchived'
+        })
+
+        // If user does not exist, throw error
+        if (!user) {
+            throw Error('User not found')
+        }
+
+        // Compare the user's password with the hashed password
+        const isPasswordMatch = await bcrypt.compare(userPassword, user.userPassword)
+
+        // If the passwords do not match, throw error
+        if (!isPasswordMatch) {
+            throw Error('Incorrect password.')
+        }
+        
+        delete user.userPassword;
+
+        // Return the user
+        return user;
+    } catch (error) {
+        console.error('Error in login:', error);
+        throw error; // Re-throw the error to be handled by the calling function
     }
 
-    if (!userPassword) {
-        throw Error('Password is required.')
-    }
-
-    // Finding the user account
-    const user = await this.findOne({ 
-        userBlkLt, 
-        userVisibility: 'Unarchived' 
-    })   
-    
-    // If user does not exist, throw error
-    if (!user) {
-        throw Error('User not found')
-    }
-
-    // Compare the user's password with the hashed password
-    const isPasswordMatch = await bcrypt.compare(userPassword, user.userPassword)   
-    
-    // If the passwords do not match, throw error
-    if (!isPasswordMatch) {
-        throw Error('Incorrect password.')
-    }
-
-    // Return the user
-    return user;
 }
 
 

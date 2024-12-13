@@ -12,7 +12,7 @@ const apiUsersUrl = apiBaseUrl + '/users';
 
 
 // POST request to create a new user
-export const createUser = async (userBlkLt: String, userPassword: String, userEmail: String | undefined, userMobileNo: String | undefined, userRole: String, userPosition: String, userStatus: String | undefined, userVisibility: String | undefined) => {
+export const createUser = async (userBlkLt: String, userPassword: String, userEmail: String | undefined, userMobileNo: String | undefined, userRole: String, userPosition: String, userStatus: String | undefined, userCreatorId: String, userCreatorBlkLt: String, userCreatorPosition: String, userVisibility: String | undefined) => {
     return (await fetch(apiUsersUrl + '/signup', {
         body: JSON.stringify({
             userBlkLt: userBlkLt,
@@ -22,6 +22,9 @@ export const createUser = async (userBlkLt: String, userPassword: String, userEm
             userRole: userRole, 
             userPosition: userPosition, 
             userStatus: userStatus, 
+            userCreatorId: userCreatorId,
+            userCreatorBlkLt: userCreatorBlkLt,
+            userCreatorPosition: userCreatorPosition,
             userVisibility: userVisibility,
         }),
         headers: {
@@ -32,7 +35,7 @@ export const createUser = async (userBlkLt: String, userPassword: String, userEm
 }
 
 // POST request to create a new user
-export const bulkCreateUsers = async (startBlock: number, endBlock: number, startLot: number, endLot: number, defaultPassword: String, defaultStatus: String | undefined, defaultVisibility: String | undefined) => {
+export const bulkCreateUsers = async (startBlock: number, endBlock: number, startLot: number, endLot: number, defaultPassword: String, defaultStatus: String | undefined,  userCreatorId: String, userCreatorBlkLt: String, userCreatorPosition: String,  defaultVisibility: String | undefined) => {
     return (await fetch(apiUsersUrl + '/signup/bulk', {
         body: JSON.stringify({
             startBlock: startBlock,
@@ -41,6 +44,9 @@ export const bulkCreateUsers = async (startBlock: number, endBlock: number, star
             endLot: endLot,
             defaultPassword: defaultPassword, 
             defaultStatus: defaultStatus, 
+            userCreatorId: userCreatorId,
+            userCreatorBlkLt: userCreatorBlkLt,
+            userCreatorPosition: userCreatorPosition,
             defaultVisibility: defaultVisibility,
         }),
         headers: {
@@ -75,7 +81,13 @@ export const getUnitOwners = async () => {
     return (await fetch(apiUsersUrl + '/unarchived/unit-owners'));
 }
 
+export const getUsersMadeBy = async (userId: String) => {
+    return (await fetch(apiUsersUrl + '/unarchived/created-by/' + userId));
+}
 
+export const getAllOfficers = async () => {
+    return (await fetch(apiUsersUrl + '/officers/'));
+}
 
 
 // PATCH functions

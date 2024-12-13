@@ -132,6 +132,39 @@ const getUnarchivedBillPresets = async (req, res) => {
     }
 }
 
+const getCreatedBills = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: "Invalid user ID" });
+    }
+
+    try {
+        const bills = await Bill.find({ billCreatorId: id })
+            .sort({ createdAt: -1 })
+            .lean();
+        res.status(200).json(bills);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const getCreatedBillPresets = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: "Invalid user ID" });
+    }
+
+    try {
+        const billPresets = await BillPreset.find({ billPresetCreatorId: id })
+            .sort({ createdAt: -1 })
+            .lean();
+        res.status(200).json(billPresets);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 
 
 
@@ -475,6 +508,8 @@ module.exports = {
     getUnarchivedBillPresets,
     getArchivedBillPresets,
     getAllBillPresets,
+    getCreatedBills,
+    getCreatedBillPresets,
 
 
     updateBillPayorStatus,

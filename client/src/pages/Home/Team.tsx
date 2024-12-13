@@ -1,99 +1,40 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 import {
     Card,
-    CardContent,
+    // CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { getAllOfficers } from "@/data/user-api";
+import { UserType } from "@/types/user-type";
+import { useEffect, useState } from "react";
 
 
 
-interface TeamProps {
-    imageUrl: string;
-    avatar: string;
-    name: string;
-    position: string;
-    socialNetworks: SociaNetworkslProps[];
-}
 
-interface SociaNetworkslProps {
-    name: string;
-    url: string;
-}
-
-
-
-const teamList: TeamProps[] = [
-
-    {
-        imageUrl: "",
-        avatar: "HL",
-        name: "Hannah Kristeen Labordo",
-        position: "President",
-        socialNetworks: [
-        { name: "Linkedin", url: "http://linkedin.com" },
-        {
-            name: "Facebook",
-            url: "https://www.facebook.com/",
-        },
-        {
-            name: "Instagram",
-            url: "https://www.instagram.com/",
-        },
-        ],
-    },
-    {
-        imageUrl: "",
-        avatar: "BN",
-        name: "Beth Nocedal",
-        position: "Vice President",
-        socialNetworks: [
-        { name: "Linkedin", url: "http://linkedin.com" },
-        {
-            name: "Facebook",
-            url: "https://www.facebook.com/",
-        },
-        {
-            name: "Instagram",
-            url: "https://www.instagram.com/",
-        },
-        ],
-    },
-    {
-        imageUrl: "",
-        avatar: "HS",
-        name: "Hanah Rose Saayo",
-        position: "Secretary",
-        socialNetworks: [
-        { name: "Linkedin", url: "http://linkedin.com" },
-
-        {
-            name: "Instagram",
-            url: "https://www.instagram.com/",
-        },
-        ],
-    },
-    {
-        imageUrl: "",
-        avatar: "RD",
-        name: "Ralph Andrew De Regla",
-        position: "Treasurer",
-        socialNetworks: [
-        { name: "Linkedin", url: "http://linkedin.com" },
-        {
-            name: "Facebook",
-            url: "https://www.facebook.com/",
-        },
-        ],
-    },
-
-];
 
 export const Team = () => {
 
+    // const [editMode, setEditMode] = useState(false);
+    const [officers, setOfficers] = useState<UserType[]>([]);
 
+    useEffect(() => {
 
+        const fetchOfficers = async () => {
+            try {
+                const response = await getAllOfficers();
+                const data = await response.json();
+
+                setOfficers(data);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        fetchOfficers();
+
+    }, []);
 
     return (
 
@@ -105,75 +46,32 @@ export const Team = () => {
             <h2 className="text-3xl md:text-4xl font-bold">
                 Our
                 <span className="bg-gradient-to-b from-primary/60 to-primary text-transparent bg-clip-text">
-                {" "} Homeowners Association {" "}
+                    {" "} Homeowners Association {" "}
                 </span>
                 Officers
             </h2>
 
             <p className="mt-4 mb-10 text-xl text-muted-foreground">
-                These are Grand Cedar Homes' current elected officers from 2024.
+                These are the names of our current Grand Cedar Homes officers.
             </p>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 gap-y-10">
-
-                {teamList.map(
-                ({ avatar, name, position }: TeamProps) => (
-                    
+            <div className="flex flex-wrap gap-8 gap-y-10">
+                {officers && [...officers].sort((a, b) => {
+                    const positions = ["President", "Vice President", "Secretary", "Treasurer", "Auditor"];
+                    return positions.indexOf(a.userPosition) - positions.indexOf(b.userPosition);
+                }).map((officer) => (
                     <Card
-                        key={name}
-                        className="bg-muted/50 relative mt-8 flex flex-col justify-center items-center"
+                        key={officer._id}
+                        className="w-[calc(33.333%-1.333rem)] min-w-[250px] flex-grow bg-muted/50 relative flex flex-col justify-center items-center py-4"
                     >
-                        <CardHeader className="mt-8 flex justify-center items-center pb-2">
-
-                            {/* <img
-                                src={imageUrl}
-                                alt={`${name} ${position}`}
-                                className="absolute -top-12 rounded-full w-24 h-24 aspect-square object-cover"
-                            /> */}
-                            
-
-                            <Avatar className="absolute -top-12 rounded-full w-24 h-24 aspect-square object-cover">
-                                <AvatarFallback> {avatar} </AvatarFallback>
-                            </Avatar>
-
-                            <CardTitle className="text-center"> {name} </CardTitle>
+                        <CardHeader className="flex justify-center items-center pb-2">
+                            <CardTitle className="text-center">{officer.userBlkLt}</CardTitle>
                             <CardDescription className="text-primary">
-                                {position}
+                                {officer.userPosition}
                             </CardDescription>
-
                         </CardHeader>
-
-                        <CardContent className="text-center pb-2">
-                            {/* <p> Lorem ipsum dolor sit amet, consectetur adipisicing elit. </p> */}
-                        </CardContent>
-
-                        {/* <CardFooter>
-
-                            {socialNetworks.map(({ name, url }: SociaNetworkslProps) => (
-
-                            <div key={name}>
-                                <a
-                                    rel="noreferrer noopener"
-                                    href={url}
-                                    target="_blank"
-                                    className={buttonVariants({
-                                        variant: "ghost",
-                                        size: "sm",
-                                    })}
-                                >
-                                    <span className="sr-only"> {name} icon </span>
-                                    {socialIcon(name)}
-                                </a>
-
-                            </div>
-                            ))}
-
-                        </CardFooter> */}
-
                     </Card>
-                )
-                )}
-
+                ))}
             </div>
 
         </section>

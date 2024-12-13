@@ -35,13 +35,16 @@ const createUser = async (req, res) => {
         userRole,
         userPosition,
         userStatus,
+        userCreatorId,
+        userCreatorBlkLt,
+        userCreatorPosition,
         userVisibility,
     } = req.body
 
     try {
 
         // Create the user account using the User model static method
-        const user = await User.signup(userBlkLt, userPassword, userEmail, userMobileNo, userRole, userPosition, userStatus, userVisibility);
+        const user = await User.signup(userBlkLt, userPassword, userEmail, userMobileNo, userRole, userPosition, userStatus, userCreatorId, userCreatorBlkLt, userCreatorPosition, userVisibility);
 
         // Create a token
         const token = createToken(user._id)
@@ -94,13 +97,11 @@ const loginUser = async (req, res) => {
 
 // Bulk create users
 const bulkCreateUsers = async (req, res) => {
-    const { startBlock, endBlock, startLot, endLot, defaultPassword, defaultStatus, defaultVisibility } = req.body;
+    const { startBlock, endBlock, startLot, endLot, defaultPassword, defaultStatus, userCreatorId, userCreatorBlkLt, userCreatorPosition, defaultVisibility } = req.body;
 
     try {
 
-        console.log(defaultStatus);
-
-        const createUsers = await User.bulkSignup(startBlock, endBlock, startLot, endLot, defaultPassword, defaultStatus, defaultVisibility);
+        const createUsers = await User.bulkSignup(startBlock, endBlock, startLot, endLot, defaultPassword, defaultStatus, userCreatorId, userCreatorBlkLt, userCreatorPosition, defaultVisibility);
         
         res.status(200).json(createUsers);
     } catch (error) {
@@ -516,6 +517,62 @@ const getUser = async (req, res) => {
     }
 }
 
+const getCreatedUsers = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate if creator ID is provided
+        if (!id) {
+            return res.status(400).json({ error: "Creator ID is required" });
+        }
+
+        // Find all users created by the specified creator
+        const users = await User.find({ 
+            userCreatorId: id,
+            userVisibility: "Unarchived"
+        })
+        .sort({ createdAt: -1 })
+        .lean();
+
+        return res.status(200).json(users);
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+const getOfficers = async (req, res) => {
+    try {
+        const officers = await User.find({ 
+            userRole: "Admin",
+            userPosition: "Unit Owner" 
+        })
+        .sort({ createdAt: -1 })
+        .lean()
+
+        res.status(200).json(officers)
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch officers" })
+    }
+}
+
+// GET all officers
+const getAllOfficers = async (req, res) => {
+    try {
+        const officers = await User.find({ 
+            userRole: "Admin",
+            userPosition: { 
+                $in: ["Unit Owner", "Auditor", "Treasurer", "Secretary", "Vice President", "President"]
+            },
+            userVisibility: "Unarchived"
+        })
+        .sort({ createdAt: -1 })
+        .lean();
+
+        res.status(200).json(officers);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch officers" });
+    }
+}
 
 
 
@@ -564,4 +621,6 @@ module.exports = {
     getUsers, 
     getArchivedUsers, 
     getUnitOwners, 
+    getCreatedUsers,
+    getAllOfficers,
 }

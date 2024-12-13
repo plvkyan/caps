@@ -156,9 +156,11 @@ const amenityFormSchema = z.object({
     amenityQuantityMin: z.coerce.number().min(1),
     amenityQuantityMax: z.coerce.number().min(1),
     amenityReminder: z.string().optional(),
-    amenityCreator: z.string().optional(),
-    amenityVisibility: z.string().optional(),
+    amenityCreatorId: z.string(),
+    amenityCreatorBlkLt: z.string(),
+    amenityCreatorPosition: z.string(),
     amenityImages: z.any().optional(),
+    amenityVisibility: z.string().optional(),
 })
 
 
@@ -187,7 +189,9 @@ export default function AmenityForm() {
             amenityQuantityMin: 1,
             amenityQuantityMax: 1,
             amenityReminder: "",
-            amenityCreator: user.userBlkLt,
+            amenityCreatorId: user._id,
+            amenityCreatorBlkLt: user.userBlkLt,
+            amenityCreatorPosition: user.userPosition,
             amenityVisibility: "Unarchived",
         },
     });
@@ -252,6 +256,8 @@ export default function AmenityForm() {
             values.amenityStock = values.amenityStockMax;
             // Set the images state value to the images array
             values.amenityImages = images;
+            
+            console.log(values)
 
             // Post the data to the server
             const response = await createAmenity(values);

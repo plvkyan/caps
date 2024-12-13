@@ -145,6 +145,10 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import { BillType } from "@/types/bill-type";
 import { getUnarchivedBillPresets } from "@/data/bills-api";
+import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
+import { BILL_TYPE_OPTIONS } from "@/data/bill-type-options";
+import { BILL_STATUS_ADMIN_OPTIONS } from "@/data/bill-status-admin-options";
+import { BILL_STATUS_UNIT_OWNER_OPTIONS } from "@/data/bill-status-unit-owner-options";
 
 
 
@@ -157,6 +161,7 @@ interface UserBillData {
 interface UserBillTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    currUser: any
 }
 
 
@@ -166,6 +171,7 @@ interface UserBillTableProps<TData, TValue> {
 export default function UserBillTable<TData extends UserBillData, TValue>({
     columns,
     data,
+    currUser
 }: UserBillTableProps<TData, TValue>) {
 
 
@@ -712,7 +718,7 @@ export default function UserBillTable<TData extends UserBillData, TValue>({
                                 <CalendarRange className="mr-2 h-4 w-4" />
                                 {date?.from && date?.to && isFiltered
                                     ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
-                                    : "Due Date Range"}
+                                    : "Due date range"}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-fit">
@@ -729,7 +735,8 @@ export default function UserBillTable<TData extends UserBillData, TValue>({
 
                     <DataTableViewOptions table={table} label="Toggle" />
 
-                    {/* <DataTableFacetedFilter column={table.getColumn("billType")} title="Status" options={RESERVATION_DATA} /> */}
+                    <DataTableFacetedFilter column={table.getColumn("billStatus")} title="Status" options={currUser.userRole === "Admin" && currUser.userPosition !== "Unit Owner" ? BILL_STATUS_ADMIN_OPTIONS : BILL_STATUS_UNIT_OWNER_OPTIONS} />
+                    <DataTableFacetedFilter column={table.getColumn("billType")} title="Type" options={BILL_TYPE_OPTIONS} />
 
                     {isFiltered && (
                         <Button

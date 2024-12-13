@@ -34,6 +34,8 @@ const {
     unarchiveMultipleBills,
     getAllBillPresets,
     getArchivedBillPresets,
+    getCreatedBills,
+    getCreatedBillPresets,
 
 } = require('../controllers/billController')
 
@@ -64,6 +66,7 @@ router.get('/user/:id', getUserBills)
 // GET a single bill
 router.get('/single/:id', getBill)
 
+router.get('/created-by/:id', getCreatedBills)
 
 
 
@@ -120,7 +123,7 @@ router.get('/presets/unarchived', getUnarchivedBillPresets)
 // GET all archived bill presets
 router.get('/presets/archived', getArchivedBillPresets)
 
-
+router.get('/presets/created-by/:id', getCreatedBillPresets)
 
 
 

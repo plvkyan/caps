@@ -6,6 +6,8 @@
 import {
     ChevronLeft,
     CirclePlus,
+    Eye,
+    EyeOff,
     Info,
     TriangleAlert
 } from "lucide-react";
@@ -101,7 +103,7 @@ import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
 // Hooks Imports
 // Authentication Hook Import
-// import { useAuthContext } from "@/hooks/useAuthContext";
+import { useAuthContext } from "@/hooks/useAuthContext";
 
 
 
@@ -137,9 +139,12 @@ const userBulkFormSchema = z.object({
     endBlock: z.coerce.number().min(1, "Starting block is required."),
     startLot: z.coerce.number().min(1, "Starting block is required."),
     endLot: z.coerce.number().min(1, "Starting block is required."),
-    defaultPassword: z.string().min(1, "Password is required."),
+    defaultPassword: z.string().min(3, { message: "Password must be at least 3 characters long." }),
     defaultConfirmPassword: z.string().min(1, "Confirm password is required."),
     defaultStatus: z.string().optional(),
+    userCreatorId: z.string(),
+    userCreatorBlkLt: z.string(),
+    userCreatorPosition: z.string(),
     defaultVisibility: z.string().optional(),
 })
     .refine(
@@ -160,9 +165,9 @@ export default function UserBulkForm() {
 
     // Contexts
     // Authentication Context
-    // const { user } = useAuthContext();
+    const { user } = useAuthContext();
     const navigate = useNavigate();
-    
+
 
 
     // Form
@@ -171,9 +176,11 @@ export default function UserBulkForm() {
         defaultValues: {
             defaultPassword: "",
             defaultConfirmPassword: "",
+            userCreatorId: user._id,
+            userCreatorBlkLt: user.userBlkLt,
+            userCreatorPosition: user.userPosition,
         },
     });
-
 
 
 
@@ -184,6 +191,12 @@ export default function UserBulkForm() {
     const [loading, setLoading] = useState(false);
     // State for dialog open
     const [open, setOpen] = useState(false);
+    // Password strength state
+    const [passwordStrength, setPasswordStrength] = useState("None");
+    // Show password state
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+    // Show confirm password state
+    const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
 
 
@@ -193,7 +206,50 @@ export default function UserBulkForm() {
         document.title = "Bulk Create User | GCTMS";
     }, []);
 
+    // Password strength effecet
+    useEffect(() => {
+        if (userForm.watch().defaultPassword) {
+            setPasswordStrength(evaluatePasswordStrength(userForm.watch().defaultPassword));
+        }
 
+        if (userForm.watch().defaultPassword === "") {
+            setPasswordStrength("None");
+        }
+    }, [userForm.watch().defaultPassword]);
+
+    const evaluatePasswordStrength = (password) => {
+        let score = 0;
+
+        if (!password) return 'None';
+
+        // Check password length
+        if (password.length > 8) score += 1;
+        // Contains lowercase
+        if (/[a-z]/.test(password)) score += 1;
+        // Contains uppercase
+        if (/[A-Z]/.test(password)) score += 1;
+        // Contains numbers
+        if (/\d/.test(password)) score += 1;
+        // Contains special characters
+        if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+        switch (score) {
+            case 0:
+                return 'Weak';
+            case 1:
+                return 'Weak';
+            case 2:
+                return 'Weak';
+            case 3:
+                return 'Fair';
+            case 4:
+                return 'Good';
+            case 5:
+                return 'Strong';
+            default:
+                return 'None';
+        }
+    }
 
 
 
@@ -227,6 +283,9 @@ export default function UserBulkForm() {
                 values.endLot,
                 values.defaultPassword,
                 values.defaultStatus,
+                values.userCreatorId,
+                values.userCreatorBlkLt,
+                values.userCreatorPosition,
                 values.defaultVisibility,
             );
 
@@ -365,7 +424,7 @@ export default function UserBulkForm() {
 
                                         {/* Header Description */}
                                         <p className="font-light text-muted-foreground">
-                                            Create multiple users at once with less hassle.
+                                            Create multiple unit owner users at once with less hassle.
                                         </p>
 
                                     </div>
@@ -604,10 +663,20 @@ export default function UserBulkForm() {
                                             name="defaultPassword"
                                             render={({ field }) => {
                                                 return (
-                                                    <FormItem className="flex flex-col gap-2">
-                                                        <FormLabel className="font-normal">
+                                                    <FormItem className="relative flex flex-col gap-2">
+                                                        <FormLabel className="flex gap-1 font-normal">
                                                             Password
                                                             <span className="text-destructive"> * </span>
+                                                            <TooltipProvider>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <Info className="h-4 w-4 text-muted-foreground" />
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p className="text-sm"> A strong password strength is recommended, but not required. </p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
@@ -615,10 +684,24 @@ export default function UserBulkForm() {
                                                                 id="defaultPassword"
                                                                 placeholder="Enter password"
                                                                 required
-                                                                type="password"
+                                                                type={showPassword ? "text" : "password"}
                                                                 {...field}
                                                             />
                                                         </FormControl>
+
+                                                        <Button
+                                                            className="absolute w-7 h-7 top-[23px] right-0.5 bg-background hover:bg-background"
+                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            type="button"
+                                                        >
+                                                            {showPassword ? <Eye className="absolute text-muted-foreground w-4 h-4 right-3 top-3" /> : <EyeOff className="absolute text-muted-foreground w-4 h-4 right-3 top-3" />}
+                                                        </Button>
+
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs text-muted-foreground font-light">Password strength: </span>
+                                                            <span className={`text-xs font-semibold ${passwordStrength === 'None' ? 'text-muted-foreground' : passwordStrength === 'Weak' ? 'text-destructive' : passwordStrength === 'Fair' ? 'text-warning' : passwordStrength === "Good" ? 'text-foreground' : passwordStrength === "Strong" ? 'text-primary' : 'text-foreground'}`}>{passwordStrength}</span>
+                                                        </div>
+
                                                         <FormMessage />
                                                     </FormItem>
                                                 )
@@ -631,7 +714,7 @@ export default function UserBulkForm() {
                                             name="defaultConfirmPassword"
                                             render={({ field }) => {
                                                 return (
-                                                    <FormItem className="flex flex-col gap-2">
+                                                    <FormItem className="relative flex flex-col gap-2">
                                                         <FormLabel className="font-normal">
                                                             Confirm password
                                                             <span className="text-destructive"> * </span>
@@ -642,10 +725,19 @@ export default function UserBulkForm() {
                                                                 id="defaultConfirmPassword"
                                                                 placeholder="Enter password again"
                                                                 required
-                                                                type="password"
+                                                                type={showConfirmPassword ? "text" : "password"}
                                                                 {...field}
                                                             />
                                                         </FormControl>
+
+                                                        <Button
+                                                            className="absolute w-7 h-7 top-[23px] right-0.5 bg-background hover:bg-background"
+                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                            type="button"
+                                                        >
+                                                            {showConfirmPassword ? <Eye className="absolute text-muted-foreground w-4 h-4 right-3 top-3" /> : <EyeOff className="absolute text-muted-foreground w-4 h-4 right-3 top-3" />}
+                                                        </Button>
+
                                                         <FormMessage />
                                                     </FormItem>
                                                 )

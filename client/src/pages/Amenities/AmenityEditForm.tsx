@@ -154,7 +154,9 @@ const amenityFormSchema = z.object({
     amenityQuantityMin: z.coerce.number().min(1),
     amenityQuantityMax: z.coerce.number().min(1),
     amenityReminder: z.string().optional(),
-    amenityCreator: z.string().optional(),
+    amenityCreatorId: z.string(),
+    amenityCreatorBlkLt: z.string(),
+    amenityCreatorPosition: z.string(),
     amenityVisibility: z.string().optional(),
     amenityImages: z.any().optional(),
 })

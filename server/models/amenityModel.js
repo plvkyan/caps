@@ -54,9 +54,17 @@ const amenitySchema = new Schema({
         type: String,
         required: false
     },
-    amenityCreator: {
+    amenityCreatorId: {
         type: String,
         required: true
+    },
+    amenityCreatorBlkLt: {
+        type: String,
+        required: true,
+    },
+    amenityCreatorPosition: {
+        type: String,
+        required: true,
     },
     amenityImages: [
         {
@@ -83,7 +91,6 @@ const amenitySchema = new Schema({
 
 
 
-
 // 
 function amenityDataValidation(
     amenityName,
@@ -95,7 +102,9 @@ function amenityDataValidation(
     amenityQuantityMin,
     amenityQuantityMax,
     amenityReminder,
-    amenityCreator,
+    amenityCreatorId,
+    amenityCreatorBlkLt,
+    amenityCreatorPosition,
     amenityImages,
     amenityVisibility
 ) {
@@ -190,7 +199,9 @@ amenitySchema.statics.createAmenity = async function (
     amenityQuantityMin,
     amenityQuantityMax,
     amenityReminder,
-    amenityCreator,
+    amenityCreatorId,
+    amenityCreatorBlkLt,
+    amenityCreatorPosition,
     amenityImages,
     amenityVisibility
 ) {
@@ -216,7 +227,9 @@ amenitySchema.statics.createAmenity = async function (
         amenityQuantityMin,
         amenityQuantityMax,
         amenityReminder,
-        amenityCreator,
+        amenityCreatorId,
+        amenityCreatorBlkLt,
+        amenityCreatorPosition,
         amenityImages,
         amenityVisibility
     );
@@ -251,7 +264,9 @@ amenitySchema.statics.createAmenity = async function (
         amenityQuantityMin,
         amenityQuantityMax,
         amenityReminder,
-        amenityCreator,
+        amenityCreatorId,
+        amenityCreatorBlkLt,
+        amenityCreatorPosition,
         amenityImages,
         amenityVisibility
     })
@@ -276,7 +291,9 @@ amenitySchema.statics.editAmenity = async function (
     amenityQuantityMin,
     amenityQuantityMax,
     amenityReminder,
-    amenityCreator,
+    amenityCreatorId,
+    amenityCreatorBlkLt,
+    amenityCreatorPosition,
     newAmenityImages,
     amenityVisibility
 ) {
@@ -311,7 +328,9 @@ amenitySchema.statics.editAmenity = async function (
         amenityQuantityMin,
         amenityQuantityMax,
         amenityReminder,
-        amenityCreator,
+        amenityCreatorId,
+        amenityCreatorBlkLt,
+        amenityCreatorPosition,
         newAmenityImages,
         amenityVisibility
     );
@@ -500,7 +519,9 @@ amenitySchema.statics.editAmenity = async function (
         amenityQuantityMin,
         amenityQuantityMax,
         amenityReminder,
-        amenityCreator,
+        amenityCreatorId,
+        amenityCreatorBlkLt,
+        amenityCreatorPosition,
         amenityImages: newAmenityImages,
         amenityVisibility
     });

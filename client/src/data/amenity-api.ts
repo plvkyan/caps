@@ -12,7 +12,7 @@ const apiAmenitiesUrl = apiBaseUrl + '/amenities';
 // POST functions
 // Create amenity functions
 export const createAmenity = async (amenityData: any) => {
-    return (await fetch(apiAmenitiesUrl, {
+    return (await fetch(apiAmenitiesUrl + '/', {
         body: JSON.stringify(amenityData),
         headers: {
             'Content-Type': 'application/json'
@@ -100,4 +100,8 @@ export const getArchivedAmenities = async () => {
 // Fetch a single amenity
 export const getSingleAmenity = async (id: string) => {
     return (await fetch(apiAmenitiesUrl + '/' + id));
+}
+
+export const getCreatedAmenities = async (creatorId: string) => {
+    return (await fetch(apiAmenitiesUrl + '/created-by/' + creatorId));
 }

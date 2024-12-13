@@ -7,6 +7,8 @@
 // Lucide React Icons Imports
 import {
     ArchiveX,
+    CalendarRange,
+    Share,
     X
 } from "lucide-react";
 
@@ -18,6 +20,13 @@ import { Button } from "@/components/ui/button";
 
 // shadcn Input Component Import
 import { Input } from "@/components/ui/input";
+
+// shadcn Popover Component Imports
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 
 import { toast } from "sonner";
 
@@ -73,6 +82,14 @@ import { useNavigate } from "react-router-dom";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 // import { BILL_STATUSES } from "@/types/bill-type";
 import { unarchiveMultipleBills } from "@/data/bills-api";
+import { DateRange } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { useAuthContext } from "@/hooks/useAuthContext";
+import { DataTableFacetedFilter } from "@/components/custom/DataTableFacetedFilter";
+import { BILL_STATUS_ADMIN_OPTIONS } from "@/data/bill-status-admin-options";
+import { BILL_TYPE_OPTIONS } from "@/data/bill-type-options";
+import { BILL_STATUS_UNIT_OWNER_OPTIONS } from "@/data/bill-status-unit-owner-options";
 
 
 
@@ -122,6 +139,8 @@ export default function ArchiveBillTable<TData extends BillData, TValue>({
 
 
     // Hooks
+    const { user } = useAuthContext();
+
     // useNavigate Hook
     const navigate = useNavigate();
 
@@ -138,6 +157,8 @@ export default function ArchiveBillTable<TData extends BillData, TValue>({
     const [rowSelection, setRowSelection] = useState({});
 
     const [loading, setLoading] = useState<boolean>(false);
+
+    const [date, setDate] = useState<DateRange | undefined>({ from: undefined, to: undefined })
 
 
 
@@ -211,14 +232,26 @@ export default function ArchiveBillTable<TData extends BillData, TValue>({
                     <p className="text-sm text-muted-foreground"> Bills inaccessible from unit owners. </p>
                 </div>
 
-                <Button
-                    disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                    onClick={() => handleUnarchiveButton()}
-                    variant="outline"
-                >
-                    {loading ? <LoadingSpinner className="h-4 w-4" /> : <ArchiveX className="h-4 w-4" />}
-                    Unarchive
-                </Button>
+                <div className="flex gap-2">
+
+                    <Button
+                        variant="outline"
+                    // onClick={() => setShowExportDialog(true)}
+                    >
+                        <Share className="h-7 w-7" />
+                        Export
+                    </Button>
+
+                    <Button
+                        disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+                        onClick={() => handleUnarchiveButton()}
+                        variant="outline"
+                    >
+                        {loading ? <LoadingSpinner className="h-4 w-4" /> : <ArchiveX className="h-4 w-4" />}
+                        Unarchive
+                    </Button>
+
+                </div>
 
             </div>
 
@@ -230,8 +263,35 @@ export default function ArchiveBillTable<TData extends BillData, TValue>({
                     placeholder="Search..."
                 />
 
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            className="font-normal"
+                            id="date"
+                            variant="outline"
+                        >
+                            <CalendarRange className="mr-2 h-4 w-4" />
+                            {date?.from && date?.to && isFiltered
+                                ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
+                                : "Due date range"}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-fit">
+                        <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={date?.from}
+                            selected={date}
+                            onSelect={setDate}
+                            numberOfMonths={2}
+                        />
+                    </PopoverContent>
+                </Popover>
+
                 <DataTableViewOptions table={table} label="Toggle" />
 
+                <DataTableFacetedFilter column={table.getColumn("billStatus")} title="Status" options={user.userRole === "Admin" && user.userPosition !== "Unit Owner" ? BILL_STATUS_ADMIN_OPTIONS : BILL_STATUS_UNIT_OWNER_OPTIONS} />
+                <DataTableFacetedFilter column={table.getColumn("billType")} title="Type" options={BILL_TYPE_OPTIONS} />
                 {/* <DataTableFacetedFilter column={table.getColumn("billStatus")} title="Type" options={BILL_STATUSES} /> */}
 
                 {isFiltered && (

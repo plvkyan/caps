@@ -92,15 +92,56 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
     },
     {
         accessorKey: "billType",
+        accessorFn: (row) => {
+
+            if (row.billType === "One-time") {
+                return "One-time";
+            }
+
+            if (row.billType === "Recurring") {
+                const recurringType = row.billRecurringDate;
+                return recurringType;
+            }
+
+        },
         header: ({ column }) => {
             return (
                 <DataTableColumnHeader column={column} title="Type" />
             )
         },
         cell: ({ row }) => {
-            return (
-                <span> {row.original.billType} </span>
-            )
+            const type = row.original.billType;
+
+            if (type === "One-time") {
+                return (
+                    <div>
+                        <span> {type} </span>
+                    </div>
+                )
+            }
+
+            if (type === "Recurring") {
+
+                const recurringType = row.original.billRecurringDate;
+
+                return (
+                    <div>
+                        {
+                            recurringType === "3d" ? <span> Every three (3) days </span> :
+                                recurringType === "1w" ? <span> Every week </span> :
+                                    recurringType === "2w" ? <span> Every two (2) weeks </span> :
+                                        recurringType === "1m" ? <span> Every month </span> :
+                                            recurringType === "2m" ? <span> Every two (2) months </span> :
+                                                recurringType === "3m" ? <span> Every three (3) months </span> :
+                                                    recurringType === "6m" ? <span> Every six (6) months </span> :
+                                                        recurringType === "1y" ? <span> Every year </span> : <span> {type} </span>
+                        }
+                    </div>
+                )
+            }
+        },
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id));
         }
     },
     {
@@ -110,7 +151,7 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Amount" />
+                <DataTableColumnHeader column={column} title="Amount" className="justify-end" />
             )
         },
         cell: ({ row }) => {
@@ -118,7 +159,9 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
             const amount = row.original.billAmount;
 
             return (
-                <span> {PHPesos.format(amount)} </span>
+                <div className="flex justify-end">
+                    <span> {PHPesos.format(amount)} </span>
+                </div>
             )
         },
     },
@@ -126,9 +169,25 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
         accessorKey: "billStatus",
         accessorFn: (row) => {
 
-            const status = row.billPayors.find(payor => payor.payorId === userFunction());
+            if (row.billCreatorId === userFunction()) {
+                const payors = row.billPayors;
+                const paidCount = payors.filter(payor => payor.billStatus === "Paid").length;
 
-            return status?.billStatus;
+                if (paidCount === payors.length) {
+                    return "Paid";
+                }
+
+                if (paidCount === 0) {
+                    return "Pending";
+                }
+
+                if (paidCount > 0 && paidCount < payors.length) {
+                    return "Partially paid";
+                }
+            } else if (row.billCreatorId !== userFunction()) {
+                return row.billPayors.find(payor => payor.payorId === userFunction())?.billStatus;
+            }
+
         },
         header: ({ column }) => {
             return (
@@ -137,8 +196,20 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
         },
         cell: ({ row }) => {
 
+            // All bill payors
+            const payors = row.original.billPayors;
 
-            const status = row.original.billPayors.find(payor => payor.payorId === userFunction());
+            // Count the number of payors with a paid status
+            const payorPaidCount = payors.filter(payor => payor.billStatus === "Paid").length;
+
+            if (row.original.billCreatorId === userFunction()) {
+                return (
+                    <div>
+                        <span> {payorPaidCount} out of {payors.length} paid </span>
+                    </div>
+                )
+            } else if (row.original.billCreatorId !== userFunction()) {
+                const status = payors.find(payor => payor.payorId === userFunction());
 
                 return (
                     <div>
@@ -152,8 +223,18 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
                         </Badge>
                     </div>
                 )
+            }
 
         },
+        filterFn: (row, id, value) => {
+
+            if (row.original.billCreatorId !== userFunction()) {
+                return value.includes(row.original.billPayors.find(payor => payor.payorId === userFunction())?.billStatus);
+            } else if (row.original.billCreatorId === userFunction()) {
+                return value.includes(row.getValue(id));
+            }
+
+        }
     },
     {
         accessorKey: "billDueDate",
@@ -162,7 +243,7 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Due Date" className="ml-7 justify-center" />
+                <DataTableColumnHeader column={column} title="Due date" />
             )
         },
         cell: ({ row }) => {
@@ -170,18 +251,16 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
             const origDate = row.original.billDueDate;
             const formattedDate = format(origDate, "PP")
 
-            return <div className="font-regular text-center"> {formattedDate} </div>
+            return <div className="font-regular"> {formattedDate} </div>
         },
-        filterFn:
-            (row, id, value) => {
+        filterFn: (row, id, value) => {
+            console.log(id);
+            const date = new Date(row.original.billDueDate);
 
-                console.log(id);
-                const date = new Date(row.original.billDueDate);
+            const { from: start, to: end } = value as { from: Date, to: Date };
 
-                const { from: start, to: end } = value as { from: Date, to: Date };
-
-                return date >= start && date <= end;
-            }
+            return date >= start && date <= end;
+        }
     },
     {
         accessorKey: "createdAt",
@@ -190,7 +269,7 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
         },
         header: ({ column }) => {
             return (
-                <DataTableColumnHeader column={column} title="Created At" />
+                <DataTableColumnHeader column={column} title="Created at" />
             )
         },
         cell: ({ row }) => {
@@ -198,7 +277,7 @@ export const UserBillTableColumns: ColumnDef<BillType>[] = [
             const origDate = row.original.createdAt;
             const formattedDate = format(origDate, "PP")
 
-            return <div className="font-regular ml-1"> {formattedDate} </div>
+            return <div className="font-regular"> {formattedDate} </div>
         }
     }
 ]

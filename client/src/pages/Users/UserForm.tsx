@@ -87,6 +87,9 @@ import {
 // Loading spinner component Import
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 
+// Phone input component Import
+import { PhoneInput } from "@/components/ui/phone-input";
+
 // Theme toggle component import
 import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
@@ -120,17 +123,20 @@ import { isValidPhoneNumber } from "react-phone-number-input";
 
 // Data Imports
 // User API Imports
-import { createUser, getAllUsers } from "@/data/user-api";
-import { PhoneInput } from "@/components/ui/phone-input";
+import {
+    createUser,
+    getAllUsers
+} from "@/data/user-api";
 
 
 
-
-
+const passwordValidation = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-__+.]){1,}).{8,}$/;
 
 const userFormSchema = z.object({
     userBlkLt: z.string().min(1, "Block and Lot is required."),
-    userPassword: z.string().min(1, "Password is required."),
+    userPassword: z.string()
+        .min(8, { message: "Password must be at least 8 characters long." })
+        .regex(passwordValidation, "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character."),
     userConfirmPassword: z.string().min(1, "Confirm password is required."),
     userEmail: z.string().optional(),
     userMobileNo: z
@@ -140,6 +146,9 @@ const userFormSchema = z.object({
     userRole: z.string().min(1, "User role is required."),
     userPosition: z.string().min(1, "User position is required."),
     userStatus: z.string().optional(),
+    userCreatorId: z.string(),
+    userCreatorBlkLt: z.string(),
+    userCreatorPosition: z.string(),
     userVisibility: z.string().optional(),
 })
     .refine(
@@ -158,6 +167,7 @@ const userFormSchema = z.object({
 export default function UserForm() {
 
 
+
     // Contexts
     // Authentication Context
     const { user } = useAuthContext();
@@ -173,9 +183,11 @@ export default function UserForm() {
             userConfirmPassword: "",
             userRole: "Unit Owner",
             userPosition: "Unit Owner",
+            userCreatorId: user._id,
+            userCreatorBlkLt: user.userBlkLt,
+            userCreatorPosition: user.userPosition,
         },
     });
-
 
 
 
@@ -184,8 +196,11 @@ export default function UserForm() {
     const [error, setError] = useState<any>(null);
     // State for loading state
     const [loading, setLoading] = useState(false);
-
+    // Password strength state
+    const [passwordStrength, setPasswordStrength] = useState("None");
+    // Show confirm password state
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    // Show password state
     const [showPassword, setShowPassword] = useState(false);
 
 
@@ -200,8 +215,54 @@ export default function UserForm() {
     useEffect(() => {
         if (userForm.watch("userRole") === "Admin") {
             userForm.setValue("userPosition", "Admin");
+        } else if (userForm.watch("userRole") === "Unit Owner") {
+            userForm.setValue("userPosition", "Unit Owner");
         }
     }, [userForm.watch("userRole")]);
+
+    useEffect(() => {
+        if (userForm.watch().userPassword) {
+            setPasswordStrength(evaluatePasswordStrength(userForm.watch().userPassword));
+        }
+
+        if (userForm.watch().userPassword === "") {
+            setPasswordStrength("None");
+        }
+    }, [userForm.watch().userPassword]);
+
+    const evaluatePasswordStrength = (password) => {
+        let score = 0;
+
+        if (!password) return 'None';
+
+        // Check password length
+        if (password.length > 8) score += 1;
+        // Contains lowercase
+        if (/[a-z]/.test(password)) score += 1;
+        // Contains uppercase
+        if (/[A-Z]/.test(password)) score += 1;
+        // Contains numbers
+        if (/\d/.test(password)) score += 1;
+        // Contains special characters
+        if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+        switch (score) {
+            case 0:
+                return 'Weak';
+            case 1:
+                return 'Weak';
+            case 2:
+                return 'Weak';
+            case 3:
+                return 'Fair';
+            case 4:
+                return 'Good';
+            case 5:
+                return 'Strong';
+            default:
+                return 'None';
+        }
+    }
 
 
 
@@ -221,6 +282,9 @@ export default function UserForm() {
                 values.userRole,
                 values.userPosition,
                 values.userStatus,
+                values.userCreatorId,
+                values.userCreatorBlkLt,
+                values.userCreatorPosition,
                 values.userVisibility,
             );
 
@@ -426,8 +490,7 @@ export default function UserForm() {
                             {/* Form Fields */}
                             <div className="h-full w-full flex items-center justify-center py-8">
 
-                                <div className="grid grid-cols-1 md:grid-cols-2  rounded-md sm:border">
-
+                                <div className="grid grid-cols-1 max-w-[756px] md:grid-cols-2  rounded-md sm:border">
 
                                     <div className="flex flex-col gap-4 pb-6 sm:p-8 sm:pb-0 md:pb-8">
 
@@ -485,6 +548,7 @@ export default function UserForm() {
                                                                 {...field}
                                                             />
                                                         </FormControl>
+
                                                         <Button
                                                             className="absolute w-7 h-7 top-[23px] right-0.5 bg-background hover:bg-background"
                                                             onClick={() => setShowPassword(!showPassword)}
@@ -492,6 +556,12 @@ export default function UserForm() {
                                                         >
                                                             {showPassword ? <Eye className="absolute text-muted-foreground w-4 h-4 right-3 top-3" /> : <EyeOff className="absolute text-muted-foreground w-4 h-4 right-3 top-3" />}
                                                         </Button>
+
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs text-muted-foreground font-light">Password strength: </span>
+                                                            <span className={`text-xs font-semibold ${passwordStrength === 'None' ? 'text-muted-foreground' : passwordStrength === 'Weak' ? 'text-destructive' : passwordStrength === 'Fair' ? 'text-warning' : passwordStrength === "Good" ? 'text-foreground' : passwordStrength === "Strong" ? 'text-primary' : 'text-foreground'}`}>{passwordStrength}</span>
+                                                        </div>
+
                                                         <FormMessage />
                                                     </FormItem>
                                                 )
@@ -513,7 +583,7 @@ export default function UserForm() {
                                                             <Input
                                                                 autoComplete="confirm-password"
                                                                 id="userConfirmPassword"
-                                                                placeholder="Enter Password Again"
+                                                                placeholder="Enter password again"
                                                                 required
                                                                 type={showConfirmPassword ? "text" : "password"}
                                                                 {...field}
@@ -557,7 +627,7 @@ export default function UserForm() {
                                                         <FormControl>
                                                             <Input
                                                                 id="userEmail"
-                                                                placeholder="Enter Email"
+                                                                placeholder="Enter email"
                                                                 type="text"
                                                                 {...field}
                                                             />
@@ -584,7 +654,7 @@ export default function UserForm() {
                                                                         <Info className="h-4 w-4 text-muted-foreground" />
                                                                     </TooltipTrigger>
                                                                     <TooltipContent>
-                                                                        <p className="text-sm"> Used for notifications. </p>
+                                                                        <p className="text-sm"> Used for recordkeeping, there are no SMS notifications in the system. </p>
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             </TooltipProvider>
@@ -664,82 +734,87 @@ export default function UserForm() {
                                         />
 
                                         {/* User position input */}
-                                        <FormField
-                                            control={userForm.control}
-                                            name="userPosition"
-                                            render={({ field }) => {
-                                                return (
-                                                    <FormItem className="flex flex-col gap-2">
-                                                        <FormLabel className="flex gap-1 font-normal">
-                                                            User position
-                                                            <span className="text-destructive"> * </span>
-                                                            <TooltipProvider>
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Info className="h-4 w-4 text-muted-foreground" />
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p className="text-sm">
-                                                                            {userForm.watch("userRole") === "Unit Owner" ? "A user with 'Unit Owner' role can only have the 'Unit Owner' position." : "A user with 'Admin' role can have any position except 'Unit Owner.'"}
-                                                                        </p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            </TooltipProvider>
-                                                        </FormLabel>
-                                                        <Select
-                                                            defaultValue={field.value}
-                                                            disabled={userForm.watch("userRole") === "Unit Owner"}
-                                                            onValueChange={field.onChange}
-                                                            value={
-                                                                userForm.watch("userRole") === "Unit Owner" ? "Unit Owner" : field.value
-                                                            }
-                                                        >
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Select the user's position in the HOA"></SelectValue>
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem disabled={userForm.watch("userRole") === "Admin"} value="Unit Owner"> Unit Owner </SelectItem>
-                                                                <SelectItem
-                                                                    value="Admin">
-                                                                    Admin
-                                                                </SelectItem>
-                                                                <SelectItem
-                                                                    disabled={isPositionTaken("Auditor")}
-                                                                    value="Auditor"
-                                                                >
-                                                                    Auditor
-                                                                </SelectItem>
-                                                                <SelectItem
-                                                                    disabled={isPositionTaken("Treasurer")}
-                                                                    value="Treasurer">
-                                                                    Treasurer
-                                                                </SelectItem>
-                                                                <SelectItem
-                                                                    disabled={isPositionTaken("Secretary")}
-                                                                    value="Secretary"
-                                                                >
-                                                                    Secretary
-                                                                </SelectItem>
-                                                                <SelectItem
-                                                                    disabled={isPositionTaken("Vice President")}
-                                                                    value="Vice President"
-                                                                >
-                                                                    Vice President
-                                                                </SelectItem>
-                                                                <SelectItem
-                                                                    disabled={isPositionTaken("President")}
-                                                                    value="President"
-                                                                >
-                                                                    President
-                                                                </SelectItem>   </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )
-                                            }}
-                                        />
+
+                                        {userForm.watch("userRole") === "Admin" && (
+
+                                            <FormField
+                                                control={userForm.control}
+                                                name="userPosition"
+                                                render={({ field }) => {
+                                                    return (
+                                                        <FormItem className="flex flex-col gap-2">
+                                                            <FormLabel className="flex gap-1 font-normal">
+                                                                User position
+                                                                <span className="text-destructive"> * </span>
+                                                                <TooltipProvider>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Info className="h-4 w-4 text-muted-foreground" />
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <p className="text-sm">
+                                                                                User positions are unique. If a position is already taken by an unarchived user, it will be disabled.
+                                                                            </p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </TooltipProvider>
+                                                            </FormLabel>
+                                                            <Select
+                                                                defaultValue={field.value}
+                                                                disabled={userForm.watch("userRole") === "Unit Owner"}
+                                                                onValueChange={field.onChange}
+                                                                value={
+                                                                    userForm.watch("userRole") === "Unit Owner" ? "Unit Owner" : field.value
+                                                                }
+                                                            >
+                                                                <FormControl>
+                                                                    <SelectTrigger>
+                                                                        <SelectValue placeholder="Select the user's position in the HOA"></SelectValue>
+                                                                    </SelectTrigger>
+                                                                </FormControl>
+                                                                <SelectContent>
+                                                                    <SelectItem
+                                                                        value="Admin"
+                                                                    >
+                                                                        Admin
+                                                                    </SelectItem>
+                                                                    <SelectItem
+                                                                        disabled={isPositionTaken("Auditor")}
+                                                                        value="Auditor"
+                                                                    >
+                                                                        Auditor
+                                                                    </SelectItem>
+                                                                    <SelectItem
+                                                                        disabled={isPositionTaken("Treasurer")}
+                                                                        value="Treasurer">
+                                                                        Treasurer
+                                                                    </SelectItem>
+                                                                    <SelectItem
+                                                                        disabled={isPositionTaken("Secretary")}
+                                                                        value="Secretary"
+                                                                    >
+                                                                        Secretary
+                                                                    </SelectItem>
+                                                                    <SelectItem
+                                                                        disabled={isPositionTaken("Vice President")}
+                                                                        value="Vice President"
+                                                                    >
+                                                                        Vice President
+                                                                    </SelectItem>
+                                                                    <SelectItem
+                                                                        disabled={isPositionTaken("President")}
+                                                                        value="President"
+                                                                    >
+                                                                        President
+                                                                    </SelectItem>   </SelectContent>
+                                                            </Select>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+
+                                        )}
 
                                         {/* User membership status input */}
                                         <FormField

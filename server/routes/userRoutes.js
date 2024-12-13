@@ -18,7 +18,9 @@ const {
     bulkArchiveUsers,
     bulkUnarchiveUsers,
     archiveUser,
-    unarchiveUser
+    unarchiveUser,
+    getCreatedUsers,
+    getAllOfficers
 } = require('../controllers/userController')
 
 
@@ -67,8 +69,10 @@ router.get('/archived', getArchivedUsers)
 // GET a single user
 router.get('/single/:id', getUser)
 
+// GET users created by an admin
+router.get('/unarchived/created-by/:id', getCreatedUsers) 
 
-
+router.get('/officers/', getAllOfficers)
 
 
 

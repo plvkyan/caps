@@ -14,18 +14,20 @@ const mongoose = require('mongoose')
 // CREATE new amenity
 const createAmenity = async (req, res) => {
 
-    const { amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility } = req.body
+    const { amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreatorId, amenityCreatorBlkLt, amenityCreatorPosition, amenityImages, amenityVisibility } = req.body
 
     try {
 
-        
+        console.log(req.body);
+
+
         const exists = await Amenity.findOne({ amenityName })
-        
+
         if (exists) {
             throw Error('Amenity already exists')
         }
-        
-        const amenityData = await Amenity.createAmenity( amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility )
+
+        const amenityData = await Amenity.createAmenity(amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreatorId, amenityCreatorBlkLt, amenityCreatorPosition, amenityImages, amenityVisibility)
         // Add amenity to database
         // const amenity = await Amenity.create({ amenityName, amenityType, amenityCreator, amenityDescription, amenityAddress, amenityStockMax, amenityStock, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityVisibility })
         res.status(200).json(amenityData)
@@ -72,12 +74,12 @@ const updateAmenity = async (req, res) => {
 
     console.log(req.body);
 
-    const { _id, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility } = req.body
+    const { _id, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreatorId, amenityCreatorBlkLt, amenityCreatorPosition, amenityImages, amenityVisibility } = req.body
 
     try {
 
         const amenity = await Amenity.editAmenity(
-            _id, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreator, amenityImages, amenityVisibility
+            _id, amenityName, amenityType, amenityAddress, amenityDescription, amenityStock, amenityStockMax, amenityQuantityMin, amenityQuantityMax, amenityReminder, amenityCreatorId, amenityCreatorBlkLt, amenityCreatorPosition, amenityImages, amenityVisibility
         )
 
         res.status(200).json(amenity)
@@ -96,7 +98,7 @@ const archiveAmenity = async (req, res) => {
 
         const existingAmenity = await Amenity.findById(id)
 
-        
+
         if (!existingAmenity) {
             return res.status(404).json({ error: 'Amenity not found' })
         }
@@ -106,8 +108,8 @@ const archiveAmenity = async (req, res) => {
         }
 
         const amenity = await Amenity.findOneAndUpdate(
-            { _id: id }, 
-            { amenityVisibility: "Archived" }, 
+            { _id: id },
+            { amenityVisibility: "Archived" },
             { new: true }
         )
 
@@ -166,7 +168,7 @@ const unarchiveAmenity = async (req, res) => {
 
     try {
         const existingAmenity = await Amenity.findById(id)
-        
+
         if (!existingAmenity) {
             return res.status(404).json({ error: 'Amenity not found' })
         }
@@ -176,8 +178,8 @@ const unarchiveAmenity = async (req, res) => {
         }
 
         const amenity = await Amenity.findOneAndUpdate(
-            { _id: id }, 
-            { amenityVisibility: "Unarchived" }, 
+            { _id: id },
+            { amenityVisibility: "Unarchived" },
             { new: true }
         )
 
@@ -275,6 +277,31 @@ const getSpecificAmenity = async (req, res) => {
     res.status(200).json(amenity);
 }
 
+const getCreatedAmenities = async (req, res) => {
+
+    try {
+        const { id } = req.params;
+
+        // Validate if creator ID is provided
+        if (!id) {
+            return res.status(400).json({ error: "Creator ID is required" });
+        }
+
+        // Find all users created by the specified creator
+        const amenities = await Amenity.find({ 
+            amenityCreatorId: id,
+            amenityVisibility: "Unarchived"
+        })
+        .sort({ createdAt: -1 })
+        .lean();
+
+        return res.status(200).json(amenities);
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+
+}
+
 
 
 
@@ -290,7 +317,7 @@ module.exports = {
 
     // DELETE controllers
     deleteAmenity,
-   
+
 
 
     // PATCH controllers
@@ -306,4 +333,5 @@ module.exports = {
     getAmenities,
     getArchivedAmenities,
     getSpecificAmenity,
+    getCreatedAmenities
 }

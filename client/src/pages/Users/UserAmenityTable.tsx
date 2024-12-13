@@ -6,8 +6,8 @@
 
 // Lucide React Icons Imports
 import {
-    ArchiveX,
-    X
+    CalendarRange,
+    X,
 } from "lucide-react";
 
 
@@ -16,10 +16,15 @@ import {
 // shadcn Button Component Import
 import { Button } from "@/components/ui/button";
 
-// shadcn Input Component Import
-import { Input } from "@/components/ui/input";
+// shadcn Calendar Component Import
+import { Calendar } from "@/components/ui/calendar";
 
-import { toast } from "sonner";
+// shadcn Popover Component Imports
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger
+} from "@/components/ui/popover";
 
 // shadcn Table Imports
 import {
@@ -31,7 +36,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-
+import { toast } from "sonner";
 
 // Custom Component Imports
 // Custom Data Table Pagination Import
@@ -62,15 +67,21 @@ import {
 
 
 // Utility Imports
+// date-fns format Import
+import { format } from "date-fns";
+
+
+
 // React Import
 import {
+    useEffect,
     useState
 } from "react";
 
 // React Router Navigate Hook Import
 import { useNavigate } from "react-router-dom";
-import { unarchiveManyAmenities } from "@/data/amenity-api";
-import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
+import { DateRange } from "react-day-picker";
+import { Input } from "@/components/ui/input";
 
 
 
@@ -85,7 +96,7 @@ interface AmenityData {
     _id: string;
 }
 
-interface ArchiveAmenityTableProps<TData extends AmenityData, TValue> {
+interface UserAmenityTableProps<TData extends AmenityData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
 }
@@ -112,10 +123,10 @@ const AMENITY_DATA = [
 
 
 
-export default function ArchiveAmenitytable<TData extends AmenityData, TValue>({
+export default function UserAmenityTable<TData extends AmenityData, TValue>({
     columns,
     data,
-}: ArchiveAmenityTableProps<TData, TValue>) {
+}: UserAmenityTableProps<TData, TValue>) {
 
 
 
@@ -135,7 +146,9 @@ export default function ArchiveAmenitytable<TData extends AmenityData, TValue>({
     // Selected Rows State
     const [rowSelection, setRowSelection] = useState({});
 
-    const [loading, setLoading] = useState<boolean>(false);
+    // Custom States
+    // Date Range State
+    const [date, setDate] = useState<DateRange | undefined>({ from: undefined, to: undefined })
 
 
 
@@ -165,27 +178,29 @@ export default function ArchiveAmenitytable<TData extends AmenityData, TValue>({
 
 
 
-    // Functions
-    // Handle Archive Button Function
-    const handleUnarchiveButton = async () => {
-        try {
-            setLoading(true)
-            const selectedRowIds = table.getSelectedRowModel().rows.map(row => (row.original as AmenityData)._id);
-            const response = await unarchiveManyAmenities(selectedRowIds);
-
-            if (response.ok) {
-                sessionStorage.setItem("amenityUnarchiveSuccessful", "true");
-                window.location.reload();
-            } else {
-                throw new Error("Error unarchiving amenities");
-            }
-        } catch (error) {
-            toast.error((error as Error).message, { closeButton: true });
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        if (sessionStorage.getItem("amenityArchiveSuccessful")) {
+            toast.success("Amenities archived successfully", { closeButton: true, duration: 10000 });
+            sessionStorage.removeItem("amenityArchiveSuccessful");
         }
-    };
+    }, []);
 
+    // Update the table filter when date range changes
+    useEffect(() => {
+
+        if (date?.from && date?.to) {
+            table.getColumn('createdAt')?.setFilterValue({
+                from: date.from,
+                to: date.to,
+            });
+        } else {
+            table.getColumn('createdAt')?.setFilterValue(undefined);
+        }
+
+    }, [date, table]);
+
+
+    // Functions
     // Redirect to Amenity Details Function
     const navToAmenityDetails = (id: String) => {
         const amenityDetailsPath = "/amenities/" + id;
@@ -194,27 +209,11 @@ export default function ArchiveAmenitytable<TData extends AmenityData, TValue>({
 
 
 
+
+
     return (
 
-        <>
-
-            <div className="flex items-center justify-between">
-
-                <div className="flex flex-col">
-                    <h1 className="font-medium"> Archived amenities </h1>
-                    <p className="text-sm text-muted-foreground"> Amenities inaccessible from unit owners. </p>
-                </div>
-
-                <Button
-                    disabled={!table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-                    onClick={() => handleUnarchiveButton()}
-                    variant="outline"
-                >
-                    {loading ? <LoadingSpinner className="h-4 w-4" /> : <ArchiveX className="h-4 w-4" />}
-                    Unarchive
-                </Button>
-
-            </div>
+        <div className="flex flex-col gap-4">
 
             <div className="flex gap-2">
 
@@ -224,8 +223,32 @@ export default function ArchiveAmenitytable<TData extends AmenityData, TValue>({
                     placeholder="Search..."
                 />
 
-                <DataTableViewOptions table={table} label="Toggle" />
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            className="font-normal"
+                            id="date"
+                            variant="outline"
+                        >
+                            <CalendarRange className="mr-2 h-4 w-4" />
+                            {date?.from && date?.to && isFiltered
+                                ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
+                                : "Creation date range"}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-fit">
+                        <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={date?.from}
+                            selected={date}
+                            onSelect={setDate}
+                            numberOfMonths={2}
+                        />
+                    </PopoverContent>
+                </Popover>
 
+                <DataTableViewOptions table={table} label="Toggle" />
                 <DataTableFacetedFilter column={table.getColumn("amenityType")} title="Type" options={AMENITY_DATA} />
 
                 {isFiltered && (
@@ -313,7 +336,7 @@ export default function ArchiveAmenitytable<TData extends AmenityData, TValue>({
 
             <BottomDataTablePagination table={table} />
 
-        </>
+        </ div>
 
 
 

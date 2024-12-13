@@ -14,6 +14,7 @@ const {
    getAmenities,
    getArchivedAmenities,
    getSpecificAmenity,
+   getCreatedAmenities,
    updateAmenity,
    archiveAmenity,
    archiveMultipleAmenities,
@@ -78,6 +79,8 @@ router.get('/all/archived', getArchivedAmenities);
 
 // GET a specific amenity
 router.get('/:id', getSpecificAmenity);
+
+router.get('/created-by/:id', getCreatedAmenities);
 
 
 

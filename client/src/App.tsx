@@ -119,11 +119,12 @@ import UserBulkForm from '@/pages/Users/UserBulkForm';
 // Custom Component Imports
 // Private Route Import for securing routes and requiring authentication
 import PrivateRoute from '@/PrivateRoute.tsx';
-import UserDetails from './pages/Users/UserDetails';
-import BillDetails from './pages/Bills/BillDetails';
+import UserDetails from '@/pages/Users/UserDetails';
+import BillDetails from '@/pages/Bills/BillDetails';
 import { useEffect } from 'react';
-import { getSingleUser } from './data/user-api';
-import PrivateRouteAdmin from './pages/PrivateRouteAdmin';
+import { getSingleUser } from '@/data/user-api';
+import PrivateRouteAdmin from '@/pages/PrivateRouteAdmin';
+import Election from '@/pages/Election';
 
 
 
@@ -199,6 +200,8 @@ function App() {
                         <Route path="/dashboard" element={<PrivateRoute component={DashboardPage} />} />
                         {/* Settings page */}
                         <Route path="/settings" element={<PrivateRoute component={Settings} />} />
+                        {/* Election page */}
+                        <Route path="/election" element={<PrivateRoute component={Election} />} />
 
 
 

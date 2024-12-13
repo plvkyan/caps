@@ -279,11 +279,10 @@ export default function ReservationPage() {
             let unpaidCount = 0;
 
             bills.forEach(bill => {
-                if (new Date(bill.createdAt) >= startDate) {
-                    totalCount++;
-                }
+                if (new Date(bill.createdAt) < startDate) return;
 
                 bill.billPayors.forEach(payor => {
+                    totalCount++;
                     if (payor.billStatus === "Paid") {
                         paidCount++;
                     } else {
@@ -461,10 +460,12 @@ export default function ReservationPage() {
 
             // Create daily data points
             const dailyData: ChartDataType[] = [];
-            let currentDate = new Date(previousStartDate);
+            let currentDate = new Date(currentStartDate);
+            let previousDate = new Date(previousStartDate);
 
             while (currentDate <= now) {
-                const dateStr = currentDate.toISOString().split('T')[0];
+                const currDateStr = currentDate.toISOString().split('T')[0];
+                const prevDateStr = previousDate.toISOString().split('T')[0];
                 let currentRevenue = 0;
                 let previousRevenue = 0;
 
@@ -474,7 +475,15 @@ export default function ReservationPage() {
                             const paidDate = new Date(payor.billPaidDate);
                             const paidDateStr = paidDate.toISOString().split('T')[0];
 
-                            if (paidDateStr === dateStr) {
+                            if (paidDateStr === prevDateStr) {
+                                if (paidDate >= currentStartDate) {
+                                    currentRevenue += bill.billAmount;
+                                } else if (paidDate >= previousStartDate && paidDate < currentStartDate) {
+                                    previousRevenue += bill.billAmount;
+                                }
+                            }
+
+                            if (paidDateStr === currDateStr) {
                                 if (paidDate >= currentStartDate) {
                                     currentRevenue += bill.billAmount;
                                 } else if (paidDate >= previousStartDate && paidDate < currentStartDate) {
@@ -486,12 +495,13 @@ export default function ReservationPage() {
                 });
 
                 dailyData.push({
-                    date: dateStr,
+                    date: currDateStr,
                     currentRevenue,
                     previousRevenue
                 });
 
                 currentDate.setDate(currentDate.getDate() + 1);
+                previousDate.setDate(previousDate.getDate() + 1);
             }
 
             setRevenueChartData(dailyData);
@@ -776,8 +786,8 @@ export default function ReservationPage() {
                                                     dataKey="date"
                                                     tickLine={false}
                                                     axisLine={false}
-                                                    tickMargin={8}
-                                                    minTickGap={32}
+                                                    tickMargin={10}
+                                                    minTickGap={12}
                                                     tickFormatter={(value) => {
                                                         const date = new Date(value)
                                                         return date.toLocaleDateString("en-US", {
@@ -812,7 +822,7 @@ export default function ReservationPage() {
                                                     type="bump"
                                                     fill="url(#fillCurrentRevenue)"
                                                     stroke="var(--color-currentRevenue)"
-                                                    stackId="a"
+                                                    stackId="b"
                                                 />
                                                 <ChartLegend content={<ChartLegendContent />} />
                                             </AreaChart>

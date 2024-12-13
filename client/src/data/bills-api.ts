@@ -97,6 +97,13 @@ export const getUnarchivedBillPresets = async () => {
     return await fetch(apiBillsUrl + '/presets/unarchived');
 }
 
+export const getCreatedBills = async (id: string) => {
+    return await fetch(apiBillsUrl + '/created-by/' + id);
+}
+
+export const getCreatedBillPresets = async (id: string) => {
+    return await fetch(apiBillsUrl + '/presets/created-by/' + id);
+}
 
 
 

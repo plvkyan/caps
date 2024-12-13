@@ -28,9 +28,6 @@ import {
 // shadcn Input Component Import
 import { Input } from "@/components/ui/input";
 
-// shadcn Link Component Import
-import { Link } from "react-router-dom";
-
 // shadcn Tooltip Component Import
 import {
     TooltipProvider,
@@ -50,7 +47,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useLogin } from "@/hooks/useLogin"
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Info } from "lucide-react";
 
 
 
@@ -83,9 +80,6 @@ const Login = () => {
 
     // Call when form is submitted
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
-
-        console.log(values)
-
         await login(values.userBlkLt, values.userPassword)
     }
 
@@ -129,9 +123,32 @@ const Login = () => {
 
                                                 <FormItem>
 
-                                                    <div className="grid gap-3">
+                                                    <div className="grid gap-2">
 
-                                                        <FormLabel> Block and Lot </FormLabel>
+                                                        <div className="flex items-center gap-2">
+
+                                                            <FormLabel className="flex gap-2">
+                                                                Block and Lot
+                                                                <span className="text-destructive"> * </span>
+                                                            </FormLabel>
+
+                                                            <TooltipProvider>
+
+                                                                <Tooltip>
+
+                                                                    <TooltipTrigger className="inline-block">
+                                                                        <Info className="w-4 h-4 text-muted-foreground" />
+                                                                    </TooltipTrigger>
+
+                                                                    <TooltipContent side="right">
+                                                                        <p> Don't have an account? Members of the HOA have to contact the GCHOAI officers for an account.  </p>
+                                                                    </TooltipContent>
+
+                                                                </Tooltip>
+
+                                                            </TooltipProvider>
+
+                                                        </div>
 
                                                         <FormControl>
 
@@ -168,7 +185,7 @@ const Login = () => {
 
                                                     <div className="relative grid">
 
-                                                        <div className="flex items-center pb-2">
+                                                        <div className="flex items-center gap-2 pb-2">
 
                                                             <FormLabel> Password </FormLabel>
 
@@ -176,17 +193,14 @@ const Login = () => {
 
                                                                 <Tooltip>
 
-                                                                    <TooltipTrigger className="ml-auto inline-block">
-                                                                        <Link to="#" className="text-sm underline">
-                                                                            Forgot your password?
-                                                                        </Link>
+                                                                    <TooltipTrigger className="inline-block">
+
+                                                                        <Info className="w-4 h-4 text-muted-foreground" />
                                                                     </TooltipTrigger>
 
                                                                     <TooltipContent side="right">
-                                                                        <p> Please contact the GCHOAI Officers to reset your account. </p>
+                                                                        <p> Forgot your password? Please contact the GCHOAI Officers to reset your password. </p>
                                                                     </TooltipContent>
-
-
 
                                                                 </Tooltip>
 
@@ -207,7 +221,7 @@ const Login = () => {
                                                         </FormControl>
 
                                                         <Button
-                                                            className="absolute w-7 h-7 top-[33px] right-0.5 bg-background hover:bg-background"
+                                                            className="absolute w-7 h-7 top-[25px] right-0.5 bg-background hover:bg-background"
                                                             onClick={() => setShowPassword(!showPassword)}
                                                             type="button"
                                                         >
@@ -225,7 +239,7 @@ const Login = () => {
                                     />
 
                                     <Button
-                                        className="w-full"
+                                        className="w-full mt-4"
                                         disabled={isLoading}
                                     >
                                         Login
@@ -236,31 +250,9 @@ const Login = () => {
 
                                 <div className="mt-4 text-center text-sm flex flex-col gap-3">
 
-                                    <TooltipProvider>
+                                    <FormMessage />
 
-                                        <Tooltip>
-
-                                            <TooltipTrigger>
-                                                <Link to="#" className="text-sm underline">
-                                                    Don&apos;t have an account?
-                                                </Link>
-                                            </TooltipTrigger>
-
-                                            <TooltipContent side="bottom">
-                                                <p> You need to be a unit owner in Grand Cedar Homes to get one. </p>
-                                            </TooltipContent>
-
-                                        </Tooltip>
-
-                                    </TooltipProvider>
-
-                                    <div className="">
-
-                                        <FormMessage />
-
-                                        {error && <div className="text-destructive"> {error} </div>}
-
-                                    </div>
+                                    {error && <div className="text-destructive"> {error}. </div>}
 
                                 </div>
 

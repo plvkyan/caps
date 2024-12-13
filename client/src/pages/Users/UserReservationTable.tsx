@@ -205,7 +205,6 @@ export default function UserReservationTable<TData extends ReservationData, TVal
 
                 {/* Search bar */}
                 <Input
-                    className="w-[250px] lg:w-[350px]"
                     onChange={e => table.setGlobalFilter(String(e.target.value))}
                     placeholder="Search..."
                     value={globalFilter}
@@ -225,7 +224,7 @@ export default function UserReservationTable<TData extends ReservationData, TVal
                                 <CalendarRange className="mr-2 h-4 w-4" />
                                 {date?.from && date?.to && isFiltered
                                     ? `${format(date.from, "MMM d, yyyy")} - ${format(date.to, "MMM d, yyyy")}`
-                                    : "Reservation Date Range"}
+                                    : "Reservation date range"}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-fit">

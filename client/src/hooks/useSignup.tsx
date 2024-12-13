@@ -33,7 +33,7 @@ export const useSignup = () => {
 
     // Functions
     // Signup Function
-    const signup = async (userBlkLt: String, userPassword: String, userEmail: String, userMobileNo: String, userRole: String, userPosition: String, userStatus: String, userVisibility: String) => {
+    const signup = async (userBlkLt: String, userPassword: String, userEmail: String, userMobileNo: String, userRole: String, userPosition: String, userStatus: String, userCreatorId: String, userCreatorBlkLt: String, userCreatorPosition: String, userVisibility: String) => {
         
         // Set Loading to true
         setIsLoading(true);
@@ -42,7 +42,7 @@ export const useSignup = () => {
 
         try {
             // Create User
-            const response = await createUser(userBlkLt, userPassword, userEmail, userMobileNo, userRole, userPosition, userStatus, userVisibility);
+            const response = await createUser(userBlkLt, userPassword, userEmail, userMobileNo, userRole, userPosition, userStatus, userCreatorId, userCreatorBlkLt, userCreatorPosition, userVisibility);
             // Get JSON
             const json = await response.json();
 

@@ -138,6 +138,9 @@ const userFormSchema = z.object({
     userRole: z.string().min(1, "User role is required."),
     userPosition: z.string().min(1, "User position is required."),
     userStatus: z.string().optional(),
+    userCreatorId: z.string(),
+    userCreatorBlkLt: z.string(),
+    userCreatorPosition: z.string(),
     userVisibility: z.string().optional(),
 })
     .refine(
@@ -171,6 +174,9 @@ export default function ElectForm() {
             userConfirmPassword: "",
             userRole: "Unit Owner",
             userPosition: "Unit Owner",
+            userCreatorId: user._id,
+            userCreatorBlkLt: user.userBlkLt,
+            userCreatorPosition: user.userPosition,
         },
     });
 
@@ -217,6 +223,9 @@ export default function ElectForm() {
                 values.userRole,
                 values.userPosition,
                 values.userStatus,
+                values.userCreatorId,
+                values.userCreatorBlkLt,
+                values.userCreatorPosition,
                 values.userVisibility,
             );
 
