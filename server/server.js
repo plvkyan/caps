@@ -20,8 +20,10 @@ const billRoutes = require('./routes/billRoutes');
 
 // Import middlewares
 // const checkOngoingReservation = require('./middlewares/checkOngoingReservation');
-// const checkOutstanding = require('./middlewares/checkOutstanding');
+const checkOutstanding = require('./middlewares/checkOutstanding');
 const checkArchive = require('./middlewares/checkArchive');
+const archiveOverdueUsers = require('./middlewares/archiveOverdueUsers');
+const unarchiveOutstandingUsers = require('./middlewares/unarchiveOutstandingUsers');
 const checkOverDueBills = require('./middlewares/checkOverDueBills');
 const checkOngoingReservation = require('./middlewares/checkOngoingReservation');
 const checkPendingReservations = require('./middlewares/checkPendingReservations');
@@ -51,10 +53,13 @@ app.use(express.urlencoded({ limit: '30mb', extended: true }));
 
 // Custom middleware
 // app.use(checkOngoingReservation);
+app.use(checkOutstanding);
 app.use(checkArchive);
+app.use(archiveOverdueUsers);
 app.use(checkOverDueBills);
 app.use(checkOngoingReservation);
 app.use(checkPendingReservations);
+app.use(unarchiveOutstandingUsers);
 
 // Webhook endpoint for PayMongo
 // app.post('/api/webhook', express.raw({type: 'application/json'}), (req, res) => {
