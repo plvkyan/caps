@@ -801,12 +801,7 @@ export default function UserForm() {
                                                                     >
                                                                         Vice President
                                                                     </SelectItem>
-                                                                    <SelectItem
-                                                                        disabled={isPositionTaken("President")}
-                                                                        value="President"
-                                                                    >
-                                                                        President
-                                                                    </SelectItem>   </SelectContent>
+                                                                </SelectContent>
                                                             </Select>
                                                             <FormMessage />
                                                         </FormItem>

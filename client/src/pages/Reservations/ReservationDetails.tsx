@@ -10,14 +10,14 @@ import {
     ChevronRight,
     CircleCheck,
     CircleX,
-    CloudUpload,
+    // CloudUpload,
     EllipsisVertical,
     ImageOff,
     Info,
     SendHorizontal,
     // Trash2,
-    Upload,
-    X
+    // Upload,
+    // X
 } from "lucide-react";
 
 // shadcn Components Imports
@@ -170,7 +170,7 @@ import {
     setReservationReturned,
     setReservationVoid,
     unarchiveReservation,
-    updateReservationImages,
+    // updateReservationImages,
 } from "@/data/reservation-api.ts";
 
 // User API calls Imports
@@ -181,9 +181,9 @@ import { useNavigate } from "react-router-dom";
 
 
 // Reservation Images Schema 
-const reservationImagesSchema = z.object({
-    reservationImages: z.any(),
-});
+// const reservationImagesSchema = z.object({
+//     reservationImages: z.any(),
+// });
 
 // Reservation Comments Schema
 const reservationCommentsSchema = z.object({
@@ -209,9 +209,9 @@ export default function ReservationDetails() {
 
     // Forms
     // Reservation Images Form
-    const reservationImagesForm = useForm<z.infer<typeof reservationImagesSchema>>({
-        resolver: zodResolver(reservationImagesSchema),
-    });
+    // const reservationImagesForm = useForm<z.infer<typeof reservationImagesSchema>>({
+    //     resolver: zodResolver(reservationImagesSchema),
+    // });
 
     // Reservation Comments Form
     const reservationCommentsForm = useForm<z.infer<typeof reservationCommentsSchema>>({
@@ -232,17 +232,17 @@ export default function ReservationDetails() {
     // Current image index for image preview
     const [currentIndex, setCurrentIndex] = useState(0);
     // Images state
-    const [images, setImages] = useState<any>([]);
+    // const [images, setImages] = useState<any>([]);
     // Loading state
-    const [loading, setLoading] = useState<boolean>(false);
+    // const [loading, setLoading] = useState<boolean>(false);
     // Reservation state
     const [reservation, setReservation] = useState<ReservationType>();
     // Reservee state
     const [reservee, setReservee] = useState<any>();
     // Rotating index for image preview state
-    const [rotatingIndex, setRotatingIndex] = useState(0);
+    // const [rotatingIndex, setRotatingIndex] = useState(0);
 
-
+    
 
     // Use Effects
     // Page title effect
@@ -313,7 +313,7 @@ export default function ReservationDetails() {
                 if (response.ok) {
                     const data = await response.json();
                     setReservation(data);
-                    setImages(data.reservationImages || []);
+                    // setImages(data.reservationImages || []);
                     console.log(data);
                     // toast.success("Reservation details fetched successfully.");
                 } else {
@@ -382,39 +382,39 @@ export default function ReservationDetails() {
 
     // Functions
     // Handle images submit function
-    const handleImagesSubmit = async (values: z.infer<typeof reservationImagesSchema>) => {
-        try {
-            setLoading(true);
+    // const handleImagesSubmit = async (values: z.infer<typeof reservationImagesSchema>) => {
+    //     try {
+    //         setLoading(true);
 
-            if (images[0] === null || images[0] === undefined) {
-                setImages([]);
-            }
+    //         if (images[0] === null || images[0] === undefined) {
+    //             setImages([]);
+    //         }
 
-            // Set the images state value to the images array
-            values.reservationImages = images;
+    //         // Set the images state value to the images array
+    //         values.reservationImages = images;
 
-            // Post the data to the server
-            const response = await updateReservationImages(reservation?._id, images);
+    //         // Post the data to the server
+    //         const response = await updateReservationImages(reservation?._id, images);
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Error creating new equipment reservation.');
-            }
+    //         if (!response.ok) {
+    //             const data = await response.json();
+    //             throw new Error(data.error || 'Error creating new equipment reservation.');
+    //         }
 
-            // Clear the form and reset states
-            sessionStorage.setItem("reservationImagesUploaded", "true");
-            reservationImagesForm.reset();
-            setImages([]);
-            window.location.reload();
-        } catch (error: any) {
-            toast.error("Error creating new equipment amenity.", {
-                description: error.message,
-                closeButton: true,
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+    //         // Clear the form and reset states
+    //         sessionStorage.setItem("reservationImagesUploaded", "true");
+    //         reservationImagesForm.reset();
+    //         setImages([]);
+    //         window.location.reload();
+    //     } catch (error: any) {
+    //         toast.error("Error creating new equipment amenity.", {
+    //             description: error.message,
+    //             closeButton: true,
+    //         });
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     // Handle comments submit function
     const handleCommentsSubmit = async (values: z.infer<typeof reservationCommentsSchema>) => {
@@ -444,45 +444,28 @@ export default function ReservationDetails() {
 
 
     // Handle images function
-    const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
-
-        // Convert the Filelist to an array of files
-        const imageFiles = Array.from(e.target.files || []);
-
-        console.log(imageFiles)
-
-        // Check if the total number of images exceeds the limit
-        if (images.length + imageFiles.length > 6) {
-            return toast.error("The total number of images cannot exceed 6.");
-        }
-
-        // Convert each file to base64 and add to the images state
-        imageFiles.forEach(file => {
-            setFileToBase(file)
-        });
-    }
 
 
     // Handle image file conversion to base64
-    const setFileToBase = (file: File) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
+    // const setFileToBase = (file: File) => {
+    //     const reader = new FileReader();
+    //     reader.readAsDataURL(file);
 
-        reader.onloadend = () => {
-            setImages((prevImages) => [...prevImages, reader.result]);
-        }
-    }
+    //     reader.onloadend = () => {
+    //         setImages((prevImages) => [...prevImages, reader.result]);
+    //     }
+    // }
 
-    // Handle removing images function
-    const handleRemoveImage = (index: number) => {
-        setImages((prevImages) => {
-            const updatedImages = prevImages.filter((_, i) => i !== index);
-            if (rotatingIndex >= updatedImages.length) {
-                setRotatingIndex(Math.max(0, updatedImages.length = 1));
-            }
-            return updatedImages;
-        })
-    };
+    // // Handle removing images function
+    // const handleRemoveImage = (index: number) => {
+    //     setImages((prevImages) => {
+    //         const updatedImages = prevImages.filter((_, i) => i !== index);
+    //         if (rotatingIndex >= updatedImages.length) {
+    //             setRotatingIndex(Math.max(0, updatedImages.length = 1));
+    //         }
+    //         return updatedImages;
+    //     })
+    // };
 
     const handleApproveReservation = async () => {
         if (!reservation?._id) {
@@ -1367,7 +1350,7 @@ export default function ReservationDetails() {
 
                             <div className="grid auto-rows-max items-start gap-6">
 
-                                <Card className="flex flex-col gap-2 overflow-hidden">
+                                {/* <Card className="flex flex-col gap-2 overflow-hidden">
 
                                     <CardContent className="px-6 py-5">
 
@@ -1532,7 +1515,7 @@ export default function ReservationDetails() {
 
                                     </CardContent>
 
-                                </Card>
+                                </Card> */}
 
                                 <Card>
 

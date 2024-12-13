@@ -53,6 +53,53 @@ const checkOverdueBills = async (req, res, next) => {
             }
         }
 
+        // Find users with bills more than 3 months overdue
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+        const usersWithOldBills = await Bill.distinct('billPayors.payorBlkLt', {
+            'billDueDate': { $lte: threeMonthsAgo },
+            'billPayors.billStatus': 'Overdue'
+        });
+
+        // Archive these users
+        if (usersWithOldBills.length > 0) {
+            await User.updateMany(
+                { userBlkLt: { $in: usersWithOldBills } },
+                { 
+                    $set: { 
+                        userVisibility: 'Archived',
+                        archiveDate: new Date()
+                    }
+                }
+            );
+        }
+
+        // Find archived users
+        const archivedUsers = await User.find({ userVisibility: 'Archived' });
+
+        // Check each archived user for bills more than 3 months overdue
+        for (const user of archivedUsers) {
+            const hasOldBills = await Bill.exists({
+                'billPayors.payorBlkLt': user.userBlkLt,
+                'billDueDate': { $lte: threeMonthsAgo },
+                'billPayors.billStatus': 'Overdue'
+            });
+
+            // If user has no old overdue bills, unarchive them
+            if (!hasOldBills) {
+                await User.updateOne(
+                    { userBlkLt: user.userBlkLt },
+                    { 
+                        $set: { 
+                            userVisibility: 'Unarchived',
+                        },
+                        $unset: { archiveDate: "" }
+                    }
+                );
+            }
+        }
+
         next()
     } catch (error) {
         res.status(500).json({ error: error.message })

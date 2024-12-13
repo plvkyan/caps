@@ -609,24 +609,6 @@ export default function Settings() {
 
                         </div>
 
-                        {user && user.userPosition === "President" && (
-                            <div className="flex flex-col gap-2 p-4 my-6 bg-destructive/10 rounded-md border border-destructive/100">
-
-                                <Label className="font-semibold">
-                                    Elect new officers
-                                </Label>
-
-                                <p className="text-xs font-light">
-                                    This will archive all the current officers' accounts and create a new set of officer accounts. This is irreversible. You will be logged out after successfully transferring the privileges.
-                                </p>
-
-                                <Button variant="destructive" size="sm" className="w-fit px-4 mt-2">
-                                    Elect new officers
-                                </Button>
-
-                            </div>
-                        )}
-
                         {(editPassword || editEmail) && (
                             <div className="flex gap-4">
                                 <Button
