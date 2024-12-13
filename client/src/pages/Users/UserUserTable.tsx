@@ -395,6 +395,10 @@ export default function UserUserTable<TData, TValue>({
                                         return null;
                                     }
 
+                                    if (header.id === "select") {
+                                        return null;
+                                    }
+
                                     return (
                                         <TableHead key={header.id}>
                                             {header.isPlaceholder
@@ -426,13 +430,7 @@ export default function UserUserTable<TData, TValue>({
                                             }
 
                                             if (cell.column.id === "select") {
-                                                return (
-                                                    <TableCell
-                                                        key={cell.id}
-                                                    >
-                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                    </TableCell>
-                                                )
+                                                return null;
                                             } else return (
                                                 <TableCell
                                                     className="cursor-pointer"

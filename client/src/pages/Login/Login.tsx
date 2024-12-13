@@ -129,7 +129,6 @@ const Login = () => {
 
                                                             <FormLabel className="flex gap-2">
                                                                 Block and Lot
-                                                                <span className="text-destructive"> * </span>
                                                             </FormLabel>
 
                                                             <TooltipProvider>

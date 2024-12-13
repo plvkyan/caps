@@ -462,7 +462,7 @@ export default function BillTable<TData extends BillData, TValue>({
             filteredBills.forEach(bill => addBillRow(ws, bill));
         }
 
-        if (includeBillPresetInfo) {
+        if (includeBillPresetInfo && user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
             const ws = wb.addWorksheet("Bill Presets - " + format(new Date(), "MMM d, yyyy"));
             ws.columns = getBillPresetColumns();
             billPresets.forEach(preset => {
@@ -482,7 +482,7 @@ export default function BillTable<TData extends BillData, TValue>({
             })
         }
 
-        if (includePayorInfo) {
+        if (includePayorInfo && user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
             filteredBills.forEach(bill => {
 
                 const worksheetName = (billTitle: string) => {
@@ -524,11 +524,11 @@ export default function BillTable<TData extends BillData, TValue>({
             await addBillCsvFiles(zip, filteredBills);
         }
 
-        if (includeBillPresetInfo) {
+        if (includeBillPresetInfo && user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
             await addBillPresetCsvFiles(zip, billPresets);
         }
 
-        if (includePayorInfo) {
+        if (includePayorInfo && user.userRole === "Admin" && user.userPosition !== "Unit Owner") {
             await addPayorCsvFiles(zip, filteredBills);
         }
 

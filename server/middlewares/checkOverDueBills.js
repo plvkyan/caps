@@ -34,6 +34,25 @@ const checkOverdueBills = async (req, res, next) => {
             }
         }
 
+        // Find all users with delinquent status
+        const delinquentUsers = await User.find({ userStatus: 'Delinquent' });
+
+        // Check each delinquent user for overdue bills
+        for (const user of delinquentUsers) {
+            const hasOverdueBills = await Bill.exists({
+                'billPayors.payorBlkLt': user.userBlkLt,
+                'billPayors.billStatus': 'Overdue'
+            });
+
+            // If user has no overdue bills, update status to Outstanding
+            if (!hasOverdueBills) {
+                await User.updateOne(
+                    { userBlkLt: user.userBlkLt },
+                    { $set: { userStatus: 'Outstanding' } }
+                );
+            }
+        }
+
         next()
     } catch (error) {
         res.status(500).json({ error: error.message })

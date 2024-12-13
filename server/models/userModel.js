@@ -81,6 +81,10 @@ const userSchema = new Schema({
         type: Date,
         required: false,
     },
+    archiveDate: {
+        type: Date,
+        required: false
+    }
 }, { timestamps: true })
 
 

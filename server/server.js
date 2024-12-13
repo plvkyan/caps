@@ -21,6 +21,7 @@ const billRoutes = require('./routes/billRoutes');
 // Import middlewares
 // const checkOngoingReservation = require('./middlewares/checkOngoingReservation');
 // const checkOutstanding = require('./middlewares/checkOutstanding');
+const checkArchive = require('./middlewares/checkArchive');
 const checkOverDueBills = require('./middlewares/checkOverDueBills');
 const checkOngoingReservation = require('./middlewares/checkOngoingReservation');
 const checkPendingReservations = require('./middlewares/checkPendingReservations');
@@ -50,6 +51,7 @@ app.use(express.urlencoded({ limit: '30mb', extended: true }));
 
 // Custom middleware
 // app.use(checkOngoingReservation);
+app.use(checkArchive);
 app.use(checkOverDueBills);
 app.use(checkOngoingReservation);
 app.use(checkPendingReservations);

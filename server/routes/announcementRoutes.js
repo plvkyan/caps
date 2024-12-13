@@ -11,7 +11,8 @@ const {
     getAnnouncement,
     getAnnouncements,
     getArchivedAnnouncements,
-    updateAnnouncement
+    updateAnnouncement,
+    getUserAnnouncements
 
 } = require('../controllers/announcementController')
 
@@ -43,6 +44,8 @@ router.delete('/:id', deleteAnnouncement)
 
 // UPDATE an announcement
 router.patch('/:id', updateAnnouncement)
+
+router.get('/user/:id', getUserAnnouncements)
 
 
 

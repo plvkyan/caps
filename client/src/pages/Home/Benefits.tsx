@@ -38,10 +38,10 @@ const pricingList: PricingProps[] = [
         popular: 0,
         price: 0,
         description:
-        "With traditional transactions with the HOA, you have to personally go to their office or have them come to you. More often than not, it's the former.",
+            "With traditional transactions with the HOA, you have to personally go to their office or have them come to you. More often than not, it's the former.",
         buttonText: "Contact Us",
         benefitList: [
-        "Face-to-face transactions",
+            "Face-to-face transactions",
         ],
     },
     {
@@ -50,14 +50,14 @@ const pricingList: PricingProps[] = [
         popular: 1,
         price: 5,
         description:
-        "By creating an account, most transactions can be done within the palm of your hands, without ever leaving the comfort of your home.",
+            "By creating an account, most transactions can be done within the palm of your hands, without ever leaving the comfort of your home.",
         buttonText: "Login",
         benefitList: [
-        "Convenient online transactions",
-        "Transaction history",
-        "Convenient online reservations",
-        "Reservation history",
-        "Announcements",
+            "Convenient online transactions",
+            "Transaction history",
+            "Convenient online reservations",
+            "Reservation history",
+            "Announcements",
         ],
     },
 ];
@@ -70,7 +70,7 @@ export const Benefits = () => {
         <section
             id="pricing"
             className="container py-24 sm:py-32"
-            >
+        >
 
             <h2 className="text-3xl md:text-4xl font-bold text-center">
                 What are the
@@ -88,58 +88,58 @@ export const Benefits = () => {
             <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
 
                 {pricingList.map((pricing: PricingProps) => (
-                <Card
-                    key={pricing.title}
-                    className={
-                    pricing.popular === PopularPlanType.YES
-                        ? "drop-shadow-xl shadow-black/10 dark:shadow-white/10"
-                        : ""
-                    }
-                >
-                    <CardHeader>
-                            
-                        <CardTitle className="flex item-center justify-between">
-                            {pricing.title}
-                            {pricing.popular === PopularPlanType.YES ? (
-                            <Badge
-                                variant="secondary"
-                                className="text-sm text-primary"
-                            >
-                                More beneficial
-                            </Badge>
-                            ) : null}
-                        </CardTitle>
+                    <Card
+                        key={pricing.title}
+                        className={
+                            pricing.popular === PopularPlanType.YES
+                                ? "drop-shadow-xl shadow-black/10 dark:shadow-white/10"
+                                : ""
+                        }
+                    >
+                        <CardHeader>
 
-                        <div>
-                        </div>
+                            <CardTitle className="flex item-center justify-between">
+                                {pricing.title}
+                                {pricing.popular === PopularPlanType.YES ? (
+                                    <Badge
+                                        variant="secondary"
+                                        className="text-sm text-primary"
+                                    >
+                                        More beneficial
+                                    </Badge>
+                                ) : null}
+                            </CardTitle>
 
-                        <CardDescription> {pricing.description} </CardDescription>
+                            <div>
+                            </div>
 
-                    </CardHeader>
+                            <CardDescription> {pricing.description} </CardDescription>
 
-                    <CardContent>
-                        <Button className="w-full"> <a href={pricing.link}> {pricing.buttonText} </a> </Button>
-                    </CardContent>
+                        </CardHeader>
 
-                    <hr className="w-4/5 m-auto mb-4" />
+                        <CardContent>
+                            <a href={pricing.link}><Button className="w-full">  {pricing.buttonText}  </Button></a>
+                        </CardContent>
 
-                    <CardFooter className="flex">
+                        <hr className="w-4/5 m-auto mb-4" />
 
-                        <div className="space-y-4">
-                            {pricing.benefitList.map((benefit: string) => (
-                            <span
-                                key={benefit}
-                                className="flex"
-                            >
-                                <Check className="text-green-500" />{" "}
-                                <h3 className="ml-2"> {benefit} </h3>
-                            </span>
-                            ))}
-                        </div>
+                        <CardFooter className="flex">
 
-                    </CardFooter>
-                    
-                </Card>
+                            <div className="space-y-4">
+                                {pricing.benefitList.map((benefit: string) => (
+                                    <span
+                                        key={benefit}
+                                        className="flex"
+                                    >
+                                        <Check className="text-green-500" />{" "}
+                                        <h3 className="ml-2"> {benefit} </h3>
+                                    </span>
+                                ))}
+                            </div>
+
+                        </CardFooter>
+
+                    </Card>
                 ))}
 
             </div>

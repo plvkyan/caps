@@ -13,9 +13,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { buttonVariants } from "@/components/ui/button";
-import { LogoIcon } from "./Icons";
-import {  Menu } from "lucide-react";
-import { ModeToggle } from "../../components/custom/mode-toggle";
+import { Menu } from "lucide-react";
 
 
 import { UserDropdown } from "@/components/custom/UserDropDown";
@@ -63,6 +61,8 @@ export const Navbar = () => {
 
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
+    // const theme = localStorage.getItem("vite-ui-theme");
+
 
 
     return (
@@ -71,23 +71,36 @@ export const Navbar = () => {
 
             <NavigationMenu className="mx-auto">
 
-                <NavigationMenuList className="container h-14 px-4 w-screen flex justify-between ">
+                <NavigationMenuList className="container h-14 px-4 w-screen flex justify-between">
 
                     <NavigationMenuItem className="font-bold flex">
                         <a
                             rel="noreferrer noopener"
                             href="/home"
-                            className="ml-2 font-bold text-xl flex"
+                            className="ml-20 font-bold text-xl flex"
                         >
-                            <LogoIcon />
+                            {/* {theme && theme === "dark" && (
+                                <img
+                                    alt=""
+                                    className="max-h-[30px] md:max-h-[30px] w-auto"
+                                    src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798270/grand-cedar-homes-new-logo-dark-mode_sucwgk.png"
+                                />
+                            )}
+
+                            {theme && theme === "light" && (
+                                <img
+                                    alt=""
+                                    className="max-h-[50px] md:max-h-[30px] w-auto"
+                                    src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798254/grand-cedar-homes-new-logo-light-mode_fgdxbd.png"
+                                />
+                            )} */}
+
                             Grand Cedar Homes
                         </a>
                     </NavigationMenuItem>
 
                     {/* mobile */}
                     <span className="flex md:hidden">
-
-                        <ModeToggle />
 
                         <Sheet
                             open={isOpen}
@@ -157,24 +170,23 @@ export const Navbar = () => {
 
 
 
-                    <div className="flex hidden gap-5 md:flex">
 
-                        <ThemeToggle />
-
-                        {user &&
-                            (
-
+                    {user &&
+                        (
+                            <div className="flex hidden gap-5 md:flex">
+                                <ThemeToggle />
                                 <UserDropdown />
-                            )
-                        }
+                            </div>
+                        )
+                    }
 
-                    </div>
 
 
 
                     {!user &&
                         (
                             <div className="hidden md:flex gap-2">
+                                <ThemeToggle />
                                 <a
                                     href="/login"
                                     className={`border ${buttonVariants({ variant: "default" })}`}

@@ -94,7 +94,11 @@ const billSchema = new Schema({
         type: String,
         required: true,
         default: "Unarchived"
-    }
+    },
+    archiveDate: {
+        type: Date,
+        required: false,
+    },
 
 }, { timestamps: true });
 

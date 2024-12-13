@@ -87,6 +87,10 @@ const amenitySchema = new Schema({
         required: true,
         default: "Unarchived"
     },
+    archiveDate: {
+        type: Date,
+        required: false,
+    }
 }, { timestamps: true });
 
 

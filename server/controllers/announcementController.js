@@ -115,6 +115,17 @@ const updateAnnouncement = async (req, res) => {
     res.status(200).json(announcement)
 }
 
+const getUserAnnouncements = async (req, res) => {
+    const { id } = req.params
+
+    const initAnnouncements = await Announcement.find({}).sort({ createdAt: -1 })
+
+    const announcements = initAnnouncements.filter(function (announcement) {
+        return announcement.authorId === id;
+    });
+
+    res.status(200).json(announcements)
+}
 
 
 
@@ -124,5 +135,6 @@ module.exports = {
     getAnnouncement,
     getAnnouncements,
     getArchivedAnnouncements,
-    updateAnnouncement
+    updateAnnouncement,
+    getUserAnnouncements
 }

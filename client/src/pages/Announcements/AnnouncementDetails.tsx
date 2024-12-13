@@ -76,6 +76,7 @@ const AnnouncementDetails = ({ announcement }) => {
     let ann = announcement;
 
     ann.stat = "Archived";
+    ann.archiveDate = new Date();
 
     const response = await fetch(
       import.meta.env.VITE_API_URL + "/announcements/" + announcement._id,
@@ -116,6 +117,10 @@ const AnnouncementDetails = ({ announcement }) => {
   // Unarchive Announcement Function
   const setUnarchive = async () => {
     let ann = announcement;
+
+    if (ann.stat == "Archived" && ann.archiveDate) {
+      ann.archiveDate = null;
+    }
 
     ann.stat = "Unarchived";
 

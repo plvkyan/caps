@@ -1,27 +1,92 @@
-// import { useEffect } from "react";
-import { Link } from "react-router-dom";
 
-export default function ErrorArchivedAccount() {
-    // useEffect(() => {
-    //     const timer = setTimeout(() => {
-    //         window.location.replace('/bills');
-    //     }, 50000);
 
-    //     return () => clearTimeout(timer);
-    // }, []);
+// Imports
+
+// shadcn Component Imports
+// shadcn Button Component Import
+import { Button } from '@/components/ui/button';
+
+// shadcn Separator Component Import
+import { Separator } from '@/components/ui/separator';
+
+// Hooks
+// useAuthContext Hook Import
+import { useAuthContext } from '@/hooks/useAuthContext';
+
+
+
+// Utility Imports
+// React Import
+import React from 'react';
+
+// react-router-dom useNavigate Import
+import { useNavigate } from 'react-router-dom';
+
+
+
+
+
+const ErrorArchivedAccount: React.FC = () => {
+
+
+
+    // Hooks
+    // useAuthContext Hook
+    const { user } = useAuthContext();
+
+    // useNavigate Hook
+    const navigate = useNavigate();
+
+    const theme = localStorage.getItem("vite-ui-theme");
+
+
+
+    // Functions
+    // Navigate back to a page function
+    const navigateBack = () => {
+        if (user) {
+            navigate('/dashboard');
+        } else {
+            navigate('/home');
+        }
+    }
 
     return (
-        <div className="flex flex-col text-center items-center bg-white h-screen w-full justify-center gap-4">
-            <h1 className="text-black text-5xl font-bold">Your account is archived.</h1>
-            <p className="text-black">
-                Accounts are archived after 3 months of delinquency.
-                <br /> Please pay your bills in person to reactivate your account.
-            </p>
-            <Link to="/home">
-                <button className="outline text-black font-semibold py-2 px-4 rounded-lg w-[250px]">
-                    Back to home
-                </button>
-            </Link>
+        <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-center justify-center h-[100svh] md:h-[90svh] min-w-vw ">
+
+            {theme && theme === "dark" && (
+                <img
+                    alt=""
+                    className="max-h-[50px] md:max-h-[100px] w-auto"
+                    onClick={navigateBack}
+                    src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798270/grand-cedar-homes-new-logo-dark-mode_sucwgk.png"
+                />
+            )}
+
+            {theme && theme === "light" && (
+                <img
+                    alt=""
+                    className="max-h-[50px] md:max-h-[100px] w-auto"
+                    onClick={navigateBack}
+                    src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798254/grand-cedar-homes-new-logo-light-mode_fgdxbd.png"
+                />
+            )}
+
+            <Separator orientation="vertical" className={"hidden md:block max-h-48"} />
+            <Separator orientation="horizontal" className={"block md:hidden max-w-48"} />
+
+            <div className="flex flex-col gap-2 items-center md:items-start text-center text-wrap">
+                <h1 className={"text-4xl md:text-5xl"}> Archived </h1>
+                <p className="text-xs md:text-base text-wrap text-muted-foreground"> Your account is archived. You don't have access to the system.  </p>
+                <Button className="my-6 md:my-4 text-xs md:text-base font-normal" onClick={navigateBack} size="sm" variant="outline"> Let's go back </Button>
+            </div>
+
         </div>
     );
-}
+};
+
+
+
+
+
+export default ErrorArchivedAccount;

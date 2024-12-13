@@ -37,6 +37,8 @@ const Error404: React.FC = () => {
     // useNavigate Hook
     const navigate = useNavigate();
 
+    const theme = localStorage.getItem("vite-ui-theme");
+
 
 
     // Functions
@@ -52,15 +54,26 @@ const Error404: React.FC = () => {
     return (
         <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-center justify-center h-[100svh] md:h-[90svh] min-w-vw ">
 
-            <img
-                alt=""
-                className="max-h-[50px] md:max-h-[100px] w-auto"
-                onClick={navigateBack}
-                src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798270/grand-cedar-homes-new-logo-dark-mode_sucwgk.png"
-            />
+            {theme && theme === "dark" && (
+                <img
+                    alt=""
+                    className="max-h-[50px] md:max-h-[100px] w-auto"
+                    onClick={navigateBack}
+                    src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798270/grand-cedar-homes-new-logo-dark-mode_sucwgk.png"
+                />
+            )}
 
-            <Separator orientation="vertical" className={"hidden md:block max-h-48"}/>
-            <Separator orientation="horizontal" className={"block md:hidden max-w-48"}/>
+            {theme && theme === "light" && (
+                <img
+                    alt=""
+                    className="max-h-[50px] md:max-h-[100px] w-auto"
+                    onClick={navigateBack}
+                    src="https://res.cloudinary.com/dmodbgukj/image/upload/v1730798254/grand-cedar-homes-new-logo-light-mode_fgdxbd.png"
+                />
+            )}
+
+            <Separator orientation="vertical" className={"hidden md:block max-h-48"} />
+            <Separator orientation="horizontal" className={"block md:hidden max-w-48"} />
 
             <div className="flex flex-col gap-2 items-center md:items-start text-center text-wrap">
                 <h1 className={"text-4xl md:text-6xl"}> 404</h1>

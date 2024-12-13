@@ -275,6 +275,11 @@ export default function UserAmenityTable<TData extends AmenityData, TValue>({
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
+
+                                    if (header.id === "select") {
+                                        return null;
+                                    }
+                                    
                                     return (
                                         <TableHead key={header.id}>
                                             {header.isPlaceholder
@@ -301,13 +306,7 @@ export default function UserAmenityTable<TData extends AmenityData, TValue>({
                                     {row.getVisibleCells().map((cell) => {
 
                                         if (cell.column.id === "select") {
-                                            return (
-                                                <TableCell
-                                                    key={cell.id}
-                                                >
-                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                </TableCell>
-                                            )
+                                            return null;
                                         } else return (
                                             <TableCell
                                                 className="cursor-pointer"

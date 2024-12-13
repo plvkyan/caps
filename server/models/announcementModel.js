@@ -4,6 +4,10 @@ const Schema = mongoose.Schema
 
 const announcementSchema = new Schema({
 
+    authorId: {
+        type: String,
+        required: false,
+    },
     blkLt: {
         type: String,
         required: false,
@@ -31,6 +35,10 @@ const announcementSchema = new Schema({
         type: String,
         required: true,
         default: "Unarchived"
+    }, 
+    archiveDate: {
+        type: Date,
+        required: false,
     }
 
 }, {timestamps: true });

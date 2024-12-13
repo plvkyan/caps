@@ -33,7 +33,7 @@ export const HeroCards = () => {
                         alt=""
 
                         />
-                        <AvatarFallback> KL </AvatarFallback>
+                        <AvatarFallback> BL </AvatarFallback>
                     </Avatar>
 
                     <div className="flex flex-col flex-1">
@@ -55,7 +55,7 @@ export const HeroCards = () => {
                 <CardHeader className="mt-8 flex justify-center items-center pb-2">
 
                     <Avatar className="absolute grayscale-[0%] -top-12 rounded-full w-24 h-24 aspect-square object-cover"> 
-                        <AvatarFallback> BN </AvatarFallback>
+                        <AvatarFallback> BL </AvatarFallback>
 
                     </Avatar>
 
@@ -119,7 +119,7 @@ export const HeroCards = () => {
                 </CardHeader>
 
                 <CardContent>
-                    <Button className="w-full"> Log In Now </Button>
+                    <a href="/login"> <Button className="w-full"> Log In Now </Button> </a>
                 </CardContent>
 
                 <hr className="w-4/5 m-auto mb-4" />

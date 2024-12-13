@@ -85,6 +85,7 @@ const optionSchema = zod.object({
 
 const formSchema = zod.object({
 
+    authorId: zod.string().optional(),
     blkLt: zod.string(
     ).optional(),
     blkLtPosition: zod.string(
@@ -131,6 +132,7 @@ const AnnouncementForm = () => {
     // Handle Submit Function for POSTING an announcement
     const handleSubmit = async (values: zod.infer<typeof formSchema>) => {
 
+        values.authorId = (user.userId);
         values.blkLt = (user.userBlkLt);
         values.blkLtPosition = (user.userPosition);
 
@@ -146,7 +148,12 @@ const AnnouncementForm = () => {
 
         // Conditional statement if announcement creation is successful
         if (response.ok) {
-
+            form.reset({
+                blkLt: "",
+                blkLtPosition: "",
+                content: "",
+                badges: [],
+            });
             console.log('New announcement created:', json);
             dispatch({ type: 'CREATE_ANNOUNCEMENT', payload: json })
         }

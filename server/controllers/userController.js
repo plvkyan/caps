@@ -240,7 +240,7 @@ const bulkArchiveUsers = async (req, res) => {
         // Update multiple users
         const result = await User.updateMany(
             { _id: { $in: userIds } },
-            { $set: { userVisibility: "Archived" } }
+            { $set: { userVisibility: "Archived", archiveDate: new Date() } }
         );
 
         if (result.modifiedCount === 0) {
@@ -288,7 +288,8 @@ const bulkUnarchiveUsers = async (req, res) => {
         // Check for existing unarchived users with same block/lot numbers
         const existingUnarchived = await User.find({
             userBlkLt: { $in: blkLtNumbers },
-            userVisibility: "Unarchived"
+            userVisibility: "Unarchived",
+            archiveDate: null,
         });
 
         if (existingUnarchived.length > 0) {
@@ -357,7 +358,8 @@ const unarchiveUser = async (req, res) => {
         // Check for existing unarchived user with same block/lot number
         const existingUnarchived = await User.findOne({
             userBlkLt: userToUnarchive.userBlkLt,
-            userVisibility: "Unarchived"
+            userVisibility: "Unarchived",
+            archiveDate: null,
         });
 
         if (existingUnarchived) {
@@ -427,7 +429,7 @@ const archiveUser = async (req, res) => {
         // Update user visibility
         const updatedUser = await User.findByIdAndUpdate(
             id,
-            { userVisibility: "Archived" },
+            { userVisibility: "Archived", archiveDate: new Date() },
             { new: true }
         );
 

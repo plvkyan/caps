@@ -334,7 +334,7 @@ export default function ArchivePage() {
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent align="center">
-                                    <p> Wait nakalimutan ko ilalagay ko, gagi. </p>
+                                    <p> Permanent deletion will occur every fiscal year. </p>
                                 </TooltipContent>
                             </Tooltip>
                         </h1>

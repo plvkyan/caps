@@ -183,6 +183,10 @@ const reservationSchema = new Schema({
     interactionDate: {
         type: Date,
         required: false
+    },
+    archiveDate: {
+        type: Date,
+        required: false
     }
 
 
